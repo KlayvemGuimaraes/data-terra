@@ -1,4 +1,4 @@
-# GreenSite DC
+# Data Terra 
 
 Protótipo estático para o hackathon: inteligência territorial para avaliar
 regiões candidatas a data centers de IA no Brasil.
