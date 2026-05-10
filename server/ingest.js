@@ -3,6 +3,11 @@ const path = require('path');
 const xlsx = require('xlsx');
 const axios = require('axios');
 const db = require('./db');
+const {
+    SIGA_DAILY_RESOURCE_ID,
+    fetchDatastoreRecords,
+    normalizeSigaEnergyRecord,
+} = require('./aneel-energy');
 
 async function ingestCables() {
     console.log('Ingesting fiber cables...');
@@ -100,69 +105,73 @@ async function ingestWater() {
 async function ingestEnergy() {
     console.log('Fetching real energy data from ANEEL Datastore...');
     try {
-        // Resource ID for "Siga - Empreendimentos de Geração" (diário)
-        const resourceId = '2f65a1b0-19b8-4360-8238-b34ab4693d55';
-        const url = `https://dadosabertos.aneel.gov.br/api/3/action/datastore_search?resource_id=${resourceId}&limit=5000`;
-        
-        const res = await axios.get(url);
-        const records = res.data.result.records;
+        const records = await fetchDatastoreRecords({
+            resourceId: SIGA_DAILY_RESOURCE_ID,
+            get: (url) => axios.get(url),
+        });
 
         console.log(`Fetched ${records.length} records from ANEEL.`);
 
         const insert = db.prepare(`
-            INSERT OR REPLACE INTO energy_plants (id, name, type, capacity_mw, owner, city, state, lat, lng)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT OR REPLACE INTO energy_plants (
+                id,
+                name,
+                type,
+                generation_type,
+                phase,
+                fuel_origin,
+                fuel_source,
+                grant_type,
+                capacity_mw,
+                fiscalized_capacity_mw,
+                physical_guarantee_mw,
+                qualified_generation,
+                owner,
+                city,
+                state,
+                lat,
+                lng,
+                operation_date,
+                validity_start_date,
+                validity_end_date,
+                sub_basin,
+                source_record_date,
+                ceg_code
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `);
 
-        // Load city coordinates reference for geocoding if lat/lng is missing or weird
-        // (ANEEL data usually has coordinates but let's be safe)
-        const municipiosPath = path.join(__dirname, 'references', 'municipios.json');
-        const municipiosRaw = fs.readFileSync(municipiosPath, 'utf8');
-        const municipios = JSON.parse(municipiosRaw.replace(/^\uFEFF/, ''));
-        
-        const getUfCode = (uf) => {
-            const ufs = { 'RO': 11, 'AC': 12, 'AM': 13, 'RR': 14, 'PA': 15, 'AP': 16, 'TO': 17, 'MA': 21, 'PI': 22, 'CE': 23, 'RN': 24, 'PB': 25, 'PE': 26, 'AL': 27, 'SE': 28, 'BA': 29, 'MG': 31, 'ES': 32, 'RJ': 33, 'SP': 35, 'PR': 41, 'SC': 42, 'RS': 43, 'MS': 50, 'MT': 51, 'GO': 52, 'DF': 53 };
-            return ufs[uf.toUpperCase()];
-        };
-
         let count = 0;
+        db.prepare('DELETE FROM energy_plants').run();
         db.transaction(() => {
             records.forEach(r => {
-                // ANEEL Columns (Real Names)
-                const name = r.NomEmpreendimento;
-                const source = (r.NomFonteCombustivel || '').toLowerCase();
-                const capacityKw = parseFloat((r.MdaPotenciaOutorgadaKw || '0').replace(',', '.'));
-                const state = r.SigUFPrincipal;
-                
-                // Coordinates
-                const lat = parseFloat((r.NumCoordNEmpreendimento || '0').replace(',', '.'));
-                const lng = parseFloat((r.NumCoordEEmpreendimento || '0').replace(',', '.'));
-
-                // Extract City from "City - UF"
-                const cityParts = (r.DscMuninicpios || '').split(' - ');
-                const city = cityParts[0] || '';
-
-                // Map type
-                let type = 'Outros';
-                if (source.includes('vento')) type = 'Eólica';
-                else if (source.includes('sol') || source.includes('fotovoltaica')) type = 'Solar';
-                else if (source.includes('hidráulico') || source.includes('hídrica')) type = 'Hidro';
-                else if (source.includes('cana') || source.includes('biogás') || source.includes('florestais') || source.includes('licor')) type = 'Biomassa';
-
-                // Skip if not renewable for this prototype focus
-                if (type === 'Outros') return;
-                if (lat === 0 || lng === 0) return;
+                const plant = normalizeSigaEnergyRecord(r);
+                if (!plant) return;
 
                 insert.run(
-                    r._id.toString(),
-                    name,
-                    type,
-                    (capacityKw / 1000).toFixed(2), // Convert to MW
-                    r.DscPropriRegimePariticipacao || '',
-                    city,
-                    state,
-                    lat,
-                    lng
+                    plant.id,
+                    plant.name,
+                    plant.type,
+                    plant.generationType,
+                    plant.phase,
+                    plant.fuelOrigin,
+                    plant.fuelSource,
+                    plant.grantType,
+                    plant.capacityMw,
+                    plant.fiscalizedCapacityMw,
+                    plant.physicalGuaranteeMw,
+                    plant.qualifiedGeneration,
+                    plant.owner,
+                    plant.city,
+                    plant.state,
+                    plant.lat,
+                    plant.lng,
+                    plant.operationDate,
+                    plant.validityStartDate,
+                    plant.validityEndDate,
+                    plant.subBasin,
+                    plant.sourceRecordDate,
+                    plant.cegCode
                 );
                 count++;
             });
