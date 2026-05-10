@@ -23,16 +23,22 @@ test("loads helper models before the main app script", () => {
   const limitsScriptIndex = html.indexOf("./view-limits.js");
   const renewableScriptIndex = html.indexOf("./renewable-breakdown.js");
   const siteScriptIndex = html.indexOf("./site-analysis.js");
+  const regionSearchScriptIndex = html.indexOf("./region-search.js");
+  const apiClientScriptIndex = html.indexOf("./api-client.js");
   const appScriptIndex = html.indexOf("./app.js");
 
   assert.ok(riskScriptIndex > 0);
   assert.ok(limitsScriptIndex > riskScriptIndex);
   assert.ok(renewableScriptIndex > limitsScriptIndex);
   assert.ok(siteScriptIndex > renewableScriptIndex);
+  assert.ok(regionSearchScriptIndex > siteScriptIndex);
+  assert.ok(apiClientScriptIndex > regionSearchScriptIndex);
   assert.ok(appScriptIndex > riskScriptIndex);
   assert.ok(appScriptIndex > limitsScriptIndex);
   assert.ok(appScriptIndex > renewableScriptIndex);
   assert.ok(appScriptIndex > siteScriptIndex);
+  assert.ok(appScriptIndex > regionSearchScriptIndex);
+  assert.ok(appScriptIndex > apiClientScriptIndex);
 });
 
 test("every panel tab button has a matching tab panel", () => {
@@ -58,4 +64,14 @@ test("declares controls and result areas for local site simulation", () => {
   assert.match(html, /id="siteRadius"/);
   assert.match(html, /id="calculateSite"/);
   assert.match(html, /id="siteAnalysis"/);
+});
+
+test("region search uses a writable autocomplete after the state select", () => {
+  const html = fs.readFileSync(path.join(rootDir, "index.html"), "utf8");
+
+  assert.match(html, /id="stateSelect"/);
+  assert.match(html, /id="regionSearch"/);
+  assert.match(html, /list="regionOptions"/);
+  assert.match(html, /id="regionOptions"/);
+  assert.doesNotMatch(html, /id="regionSelect"/);
 });

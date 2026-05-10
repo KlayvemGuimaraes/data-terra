@@ -180,8 +180,17 @@
             <h2>Triagem de região</h2>
             <label class="select-label" for="stateSelect">Estado</label>
             <select id="stateSelect"></select>
-            <label class="select-label" for="regionSelect">Região candidata</label>
-            <select id="regionSelect"></select>
+            <label class="select-label" for="regionSearch">Região candidata ou município</label>
+            <input
+              id="regionSearch"
+              class="search-input"
+              type="search"
+              list="regionOptions"
+              autocomplete="off"
+              placeholder="Digite um município"
+            />
+            <datalist id="regionOptions"></datalist>
+            <p id="regionSearchNote" class="field-note"></p>
             <button id="focusRegion" class="primary-button" type="button">
               Analisar região
             </button>
@@ -287,6 +296,8 @@
     <script src="./view-limits.js"></script>
     <script src="./renewable-breakdown.js"></script>
     <script src="./site-analysis.js"></script>
+    <script src="./region-search.js"></script>
+    <script src="./api-client.js"></script>
     <script src="./app.js"></script>
   </body>
 </html>

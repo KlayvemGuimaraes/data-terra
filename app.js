@@ -33,12 +33,14 @@ let siteConfig = {
 };
 let allRegionsData = [];
 let regionsData = [];
+let regionSearchOptions = [];
 let simulatedSite = null;
 let siteAnalysis = null;
 let currentData = {
     cables: [],
     water: [],
-    energy: []
+    energy: [],
+    municipalities: []
 };
 
 let subFilters = {
@@ -134,13 +136,14 @@ function activatePanelTabByTarget(target) {
 // Data Fetching
 async function fetchData() {
     try {
-        const [cables, water, energy] = await Promise.all([
-            fetch('/api/cables').then(res => res.json()),
-            fetch('/api/water').then(res => res.json()),
-            fetch('/api/energy').then(res => res.json())
+        const [cables, water, energy, municipalities] = await Promise.all([
+            ApiClient.fetchJson('/api/cables'),
+            ApiClient.fetchJson('/api/water'),
+            ApiClient.fetchJson('/api/energy'),
+            ApiClient.fetchOptionalJson('/api/municipalities', [])
         ]);
 
-        currentData = { cables, water, energy };
+        currentData = { cables, water, energy, municipalities };
 
         renderCables();
         renderWater();
@@ -384,7 +387,7 @@ function selectRegion(id) {
     map.flyTo([region.lat, region.lng], 8);
     renderDetails();
     renderRanking();
-    document.querySelector("#regionSelect").value = id;
+    setRegionSearchValue(region);
 }
 
 function setSimulatedSite(latlng, options = {}) {
@@ -833,10 +836,39 @@ function renderWuiPresetDescription() {
 }
 
 function renderSelect() {
-    const selectableRegions = ViewLimits.limitSelectableRegions(regionsData, getScore, selectedState, selectedRegion);
-    document.querySelector("#regionSelect").innerHTML = selectableRegions
-        .map(r => `<option value="${r.id}">${r.name} - ${r.state}</option>`)
+    regionSearchOptions = RegionSearch.buildRegionSearchOptions(
+        regionsData,
+        currentData.municipalities,
+        selectedState,
+    );
+
+    document.querySelector("#regionOptions").innerHTML = regionSearchOptions
+        .map(option => `
+            <option value="${escapeHtml(option.label)}">${escapeHtml(option.description)}</option>
+        `)
         .join("");
+
+    if (selectedRegion) setRegionSearchValue(selectedRegion);
+
+    const candidateCount = regionSearchOptions.filter(option => option.source === "candidate").length;
+    const municipalityCount = regionSearchOptions.length - candidateCount;
+    document.querySelector("#regionSearchNote").textContent =
+        `${candidateCount} regiões candidatas e ${municipalityCount} municípios disponíveis neste recorte.`;
+}
+
+function setRegionSearchValue(region) {
+    const input = document.querySelector("#regionSearch");
+    if (!input || !region) return;
+    input.value = `${region.name} - ${region.state}`;
+}
+
+function escapeHtml(value) {
+    return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
 function renderStateSelect() {
@@ -951,8 +983,78 @@ function refreshTerritorialAnalysis() {
     renderSiteAnalysis();
 }
 
+function selectRegionSearchOption() {
+    const input = document.querySelector("#regionSearch");
+    const note = document.querySelector("#regionSearchNote");
+    const option = RegionSearch.findRegionOption(regionSearchOptions, input.value);
+
+    if (!option) {
+        note.textContent = "Nenhuma região ou município encontrado para este estado.";
+        return;
+    }
+
+    input.value = option.label;
+
+    if (option.source === "candidate") {
+        selectRegion(option.id);
+        note.textContent = "Região candidata selecionada com score territorial completo.";
+        return;
+    }
+
+    selectedRegion = null;
+    setSimulatedSite(
+        { lat: option.lat, lng: option.lng, state: option.state },
+        { activateResults: true },
+    );
+    map.flyTo([option.lat, option.lng], 8);
+    renderRegions();
+    renderRisk();
+    renderRanking();
+    renderMunicipalityDetails(option);
+    activatePanelTabByTarget("controls-site");
+    note.textContent = "Município selecionado para simulação local. Ajuste o raio para ver recursos e impacto.";
+}
+
+function renderMunicipalityDetails(option) {
+    const status = siteAnalysis ? getClass(siteAnalysis.overallScore) : { label: "Simulação local", className: "medium" };
+
+    document.querySelector("#selectedName").textContent = `${option.name} / ${option.state}`;
+    document.querySelector("#selectedSummary").textContent =
+        "Município escolhido pelo autocomplete. A análise principal passa a ser o raio de consumo do data center.";
+    document.querySelector("#selectedScore").textContent = siteAnalysis ? siteAnalysis.overallScore : 0;
+
+    const statusEl = document.querySelector("#selectedClass");
+    statusEl.textContent = siteAnalysis ? status.label : "Simulação local";
+    statusEl.className = `status-pill ${status.className}`;
+
+    document.querySelector("#metrics").innerHTML = `
+        <p class="field-note">
+            Este município não tem necessariamente score territorial completo. Use a aba Local para ver energia,
+            água, conectividade e impacto dentro do raio configurado.
+        </p>
+    `;
+    document.querySelector("#recommendation").textContent =
+        "Valide o ponto pelo raio de consumo, disponibilidade renovável, segurança hídrica, fibra e licenciamento local.";
+    document.querySelector("#conditions").innerHTML = [
+        "Conferir outorga e disponibilidade hídrica local",
+        "Validar conexão elétrica e fibra",
+        "Checar licenciamento municipal e ambiental",
+    ].map((condition) => `<span class="condition">${condition}</span>`).join("");
+    renderRenewableMix({ name: option.name, state: option.state });
+}
+
 document.querySelector("#focusRegion").addEventListener("click", () => {
-    selectRegion(document.querySelector("#regionSelect").value);
+    selectRegionSearchOption();
+});
+
+document.querySelector("#regionSearch").addEventListener("change", () => {
+    selectRegionSearchOption();
+});
+
+document.querySelector("#regionSearch").addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    selectRegionSearchOption();
 });
 
 document.querySelector("#stateSelect").addEventListener("change", (e) => {
