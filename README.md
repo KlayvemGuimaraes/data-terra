@@ -55,7 +55,7 @@ O score vai de 0 a 100. Quanto maior, melhor a aptidão preliminar.
 - `0-59`: alto risco.
 
 O score combina energia renovável, infraestrutura elétrica, segurança hídrica,
-risco socioambiental estimado, conectividade e segurança regulatória preliminar.
+conectividade e segurança regulatória preliminar.
 
 ## Como funciona o impacto hídrico
 
@@ -87,7 +87,6 @@ Dados reais usados:
 
 Indicadores estimados:
 
-- população como indicador indireto de pressão territorial;
 - capacidade renovável como sinal inicial de infraestrutura elétrica;
 - segurança regulatória como leitura preliminar;
 - WUI por UF como estimativa inicial de impacto hídrico.

@@ -19,7 +19,6 @@ test("declares a Leaflet layer for every layer checkbox", () => {
 
 test("loads helper models before the main app script", () => {
   const html = fs.readFileSync(path.join(rootDir, "index.html"), "utf8");
-  const riskScriptIndex = html.indexOf("./risk-model.js");
   const limitsScriptIndex = html.indexOf("./view-limits.js");
   const renewableScriptIndex = html.indexOf("./renewable-breakdown.js");
   const siteScriptIndex = html.indexOf("./site-analysis.js");
@@ -27,18 +26,28 @@ test("loads helper models before the main app script", () => {
   const apiClientScriptIndex = html.indexOf("./api-client.js");
   const appScriptIndex = html.indexOf("./app.js");
 
-  assert.ok(riskScriptIndex > 0);
-  assert.ok(limitsScriptIndex > riskScriptIndex);
+  assert.ok(limitsScriptIndex > 0);
   assert.ok(renewableScriptIndex > limitsScriptIndex);
   assert.ok(siteScriptIndex > renewableScriptIndex);
   assert.ok(regionSearchScriptIndex > siteScriptIndex);
   assert.ok(apiClientScriptIndex > regionSearchScriptIndex);
-  assert.ok(appScriptIndex > riskScriptIndex);
   assert.ok(appScriptIndex > limitsScriptIndex);
   assert.ok(appScriptIndex > renewableScriptIndex);
   assert.ok(appScriptIndex > siteScriptIndex);
   assert.ok(appScriptIndex > regionSearchScriptIndex);
   assert.ok(appScriptIndex > apiClientScriptIndex);
+});
+
+test("does not expose socioenvironmental risk as a score criterion or map layer", () => {
+  const html = fs.readFileSync(path.join(rootDir, "index.html"), "utf8");
+  const app = fs.readFileSync(path.join(rootDir, "app.js"), "utf8");
+
+  assert.doesNotMatch(html, /data-layer="risk"/);
+  assert.doesNotMatch(html, /risk-model\.js/);
+  assert.doesNotMatch(html, /Risco socioambiental/);
+  assert.doesNotMatch(app, /environment:/);
+  assert.doesNotMatch(app, /renderRisk/);
+  assert.doesNotMatch(app, /RiskModel/);
 });
 
 test("every panel tab button has a matching tab panel", () => {
@@ -62,7 +71,9 @@ test("declares controls and result areas for local site simulation", () => {
   assert.match(html, /data-tab-target="result-site"/);
   assert.match(html, /data-tab-panel="result-site"/);
   assert.match(html, /id="siteRadius"/);
-  assert.match(html, /id="calculateSite"/);
+  assert.match(html, /id="useSelectedRegionAsSite"/);
+  assert.match(html, /Usar região selecionada como local/);
+  assert.doesNotMatch(html, /id="calculateSite"/);
   assert.match(html, /id="siteAnalysis"/);
 });
 
@@ -112,6 +123,16 @@ test("main interface sections expose hoverable information hints", () => {
   const html = fs.readFileSync(path.join(rootDir, "index.html"), "utf8");
   const expectedHints = [
     "controls-layers",
+    "layer-energy",
+    "layer-solar",
+    "layer-wind",
+    "layer-hydro",
+    "layer-biomass",
+    "layer-fiber",
+    "layer-water",
+    "layer-water-supply",
+    "layer-sewage",
+    "layer-population",
     "controls-weights",
     "controls-wui",
     "controls-site",
@@ -127,7 +148,7 @@ test("main interface sections expose hoverable information hints", () => {
   expectedHints.forEach((hintKey) => {
     assert.match(html, new RegExp(`data-info-key="${hintKey}"`));
   });
-  assert.ok((html.match(/class="info-hint"/g) || []).length >= expectedHints.length);
+  assert.ok((html.match(/class="[^"]*\binfo-hint\b[^"]*"/g) || []).length >= expectedHints.length);
 });
 
 test("summary view explains score interpretation, examples and estimated criteria limits", () => {
@@ -138,6 +159,7 @@ test("summary view explains score interpretation, examples and estimated criteri
   assert.match(html, /data-example="good-site"/);
   assert.match(html, /data-example="bad-site"/);
   assert.match(html, /Critérios estimados/);
+  assert.doesNotMatch(html, /risco socioambiental/i);
 });
 
 test("information tooltips are positioned against the viewport to avoid clipping", () => {
@@ -146,6 +168,7 @@ test("information tooltips are positioned against the viewport to avoid clipping
 
   assert.match(app, /function initInfoHints/);
   assert.match(app, /getBoundingClientRect/);
+  assert.match(app, /stopPropagation/);
   assert.match(css, /\.info-tooltip\s*{[^}]*position:\s*fixed/s);
   assert.match(css, /--tooltip-left/);
 });

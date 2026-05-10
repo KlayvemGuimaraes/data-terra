@@ -39,4 +39,6 @@ test("review manual exists as HTML and PDF with evaluator-focused content", () =
   assert.match(manualHtml, /Escolher local/);
   assert.match(manualHtml, /Como interpretar o score/);
   assert.match(manualHtml, /Limitações e próximos passos/);
+  assert.doesNotMatch(manualHtml, /risco socioambiental/i);
+  assert.doesNotMatch(manualHtml, /risco ambiental estimado/i);
 });

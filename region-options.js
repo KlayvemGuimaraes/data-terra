@@ -258,7 +258,6 @@
             renewables: renewablesScore,
             grid: gridScore,
             water: serviceCoverageScore,
-            environment: clamp(Math.round(86 - populationScore * 0.18 + (serviceCoverageScore >= 78 ? 4 : 0)), 62, 88),
             connectivity: connectivityScore,
             licensing: clamp(Math.round(58 + serviceCoverageScore * 0.25), 60, 82),
         };
@@ -348,7 +347,6 @@
                             fiber?.hasData
                                 ? "Conectividade usa proximidade das rotas de fibra; quanto mais perto do cabo, maior o indicador."
                                 : "Conectividade e mercado usam população como indicador indireto até integrar rotas terrestres de fibra.",
-                            "Risco socioambiental é preliminar e deve ser substituído por dados ambientais locais.",
                         ],
                     },
                 };
@@ -410,7 +408,6 @@
                     renewables: Math.max(60, renewableScore, capacityScore),
                     grid: gridScore,
                     water: 50,
-                    environment: 72,
                     connectivity: fiber?.hasData ? fiber.score : 52,
                     licensing: 70,
                 },
@@ -426,7 +423,7 @@
                         "Candidato criado por concentração de usinas renováveis sem dado local de saneamento.",
                         fiber?.hasData
                             ? "Conectividade usa proximidade das rotas de fibra; quanto mais perto do cabo, maior o indicador."
-                            : "Água, conectividade e risco permanecem indicadores estimados conservadores até integrar bases locais.",
+                            : "Água e conectividade permanecem indicadores estimados conservadores até integrar bases locais.",
                     ],
                 },
             };

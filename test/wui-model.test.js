@@ -37,7 +37,6 @@ test("applies WUI suitability to the region water score without mutating input s
     renewables: 80,
     grid: 70,
     water: 90,
-    environment: 75,
     connectivity: 60,
     licensing: 70,
   };

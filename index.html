@@ -15,7 +15,7 @@
         </a>
         <p class="topbar-copy">
           Avalie onde instalar um data center: escolha o local, defina o raio e
-          veja recursos disponíveis, impacto hídrico e risco ambiental estimado.
+          veja recursos disponíveis, impacto hídrico e conectividade.
         </p>
         <div class="topbar-actions">
           <a class="manual-link" href="./docs/manual-dataterra.pdf" target="_blank" rel="noreferrer">
@@ -37,9 +37,9 @@
           <div class="panel-section tab-panel is-active" data-tab-panel="controls-layers">
             <h2>
               Camadas
-              <button class="info-hint" type="button" data-info-key="controls-layers" aria-label="Informação sobre camadas" title="Mostra ou oculta os dados geográficos do mapa, como energia renovável, fibra, água e risco.">
+              <button class="info-hint" type="button" data-info-key="controls-layers" aria-label="Informação sobre camadas" title="Mostra ou oculta os dados geográficos do mapa, como energia renovável, fibra, água e esgoto.">
                 i
-                <span class="info-tooltip" role="tooltip">Mostra ou oculta os dados geográficos do mapa, como energia renovável, fibra, água e risco.</span>
+                <span class="info-tooltip" role="tooltip">Mostra ou oculta os dados geográficos do mapa, como energia renovável, fibra, água e esgoto.</span>
               </button>
             </h2>
             
@@ -47,23 +47,43 @@
             <label class="check-row">
               <input type="checkbox" data-layer="energy" checked />
               <span class="layer-title">Energia renovável</span>
+              <button class="info-hint inline-info" type="button" data-info-key="layer-energy" aria-label="Informação sobre energia renovável" title="No mapa, aparece como quadrados coloridos. Cada quadrado agrupa usinas renováveis próximas.">
+                i
+                <span class="info-tooltip" role="tooltip">No mapa, aparece como quadrados coloridos. Cada quadrado agrupa usinas renováveis próximas.</span>
+              </button>
             </label>
             <div class="sub-filters" data-parent="energy">
               <label class="check-row sub">
                 <input type="checkbox" data-sub="type" value="Solar" checked />
                 <span>Solar</span>
+                <button class="info-hint inline-info" type="button" data-info-key="layer-solar" aria-label="Informação sobre energia solar" title="No mapa, quadrados amarelos indicam áreas com geração solar agregada.">
+                  i
+                  <span class="info-tooltip" role="tooltip">No mapa, quadrados amarelos indicam áreas com geração solar agregada.</span>
+                </button>
               </label>
               <label class="check-row sub">
                 <input type="checkbox" data-sub="type" value="Eólica" checked />
                 <span>Eólica</span>
+                <button class="info-hint inline-info" type="button" data-info-key="layer-wind" aria-label="Informação sobre energia eólica" title="No mapa, quadrados verdes indicam áreas com geração eólica agregada.">
+                  i
+                  <span class="info-tooltip" role="tooltip">No mapa, quadrados verdes indicam áreas com geração eólica agregada.</span>
+                </button>
               </label>
               <label class="check-row sub">
                 <input type="checkbox" data-sub="type" value="Hidro" checked />
                 <span>Hidro</span>
+                <button class="info-hint inline-info" type="button" data-info-key="layer-hydro" aria-label="Informação sobre energia hídrica" title="No mapa, quadrados azuis indicam áreas com geração hidrelétrica agregada.">
+                  i
+                  <span class="info-tooltip" role="tooltip">No mapa, quadrados azuis indicam áreas com geração hidrelétrica agregada.</span>
+                </button>
               </label>
               <label class="check-row sub">
                 <input type="checkbox" data-sub="type" value="Biomassa" checked />
                 <span>Biomassa</span>
+                <button class="info-hint inline-info" type="button" data-info-key="layer-biomass" aria-label="Informação sobre biomassa" title="No mapa, quadrados laranja indicam áreas com geração por biomassa agregada.">
+                  i
+                  <span class="info-tooltip" role="tooltip">No mapa, quadrados laranja indicam áreas com geração por biomassa agregada.</span>
+                </button>
               </label>
               <div class="energy-legend" aria-label="Legenda de energia renovável">
                 <span><i class="energy-swatch solar"></i>Solar</span>
@@ -82,6 +102,10 @@
             <label class="check-row">
               <input type="checkbox" data-layer="cables" checked />
               <span class="layer-title">Cabos de Fibra</span>
+              <button class="info-hint inline-info" type="button" data-info-key="layer-fiber" aria-label="Informação sobre cabos de fibra" title="No mapa, aparece como linhas azuis. Elas indicam rotas de fibra; quanto mais perto do local, melhor a conectividade.">
+                i
+                <span class="info-tooltip" role="tooltip">No mapa, aparece como linhas azuis. Elas indicam rotas de fibra; quanto mais perto do local, melhor a conectividade.</span>
+              </button>
             </label>
             <div class="sub-filters fiber-layer-note" data-parent="cables">
               <span><i class="fiber-proximity-dot"></i>Proximidade da fibra: quanto mais perto, melhor</span>
@@ -91,26 +115,37 @@
             <label class="check-row">
               <input type="checkbox" data-layer="water" checked />
               <span class="layer-title">Segurança hídrica</span>
+              <button class="info-hint inline-info" type="button" data-info-key="layer-water" aria-label="Informação sobre segurança hídrica" title="No mapa, aparece como pontos azuis. Cada ponto representa um registro de água ou esgoto de um município.">
+                i
+                <span class="info-tooltip" role="tooltip">No mapa, aparece como pontos azuis. Cada ponto representa um registro de água ou esgoto de um município.</span>
+              </button>
             </label>
             <div class="sub-filters" data-parent="water">
               <label class="check-row sub">
                 <input type="checkbox" data-sub="service" value="Água" checked />
                 <span>Abastecimento</span>
+                <button class="info-hint inline-info" type="button" data-info-key="layer-water-supply" aria-label="Informação sobre abastecimento" title="No mapa, mantém pontos azuis de municípios com bons sinais de abastecimento de água.">
+                  i
+                  <span class="info-tooltip" role="tooltip">No mapa, mantém pontos azuis de municípios com bons sinais de abastecimento de água.</span>
+                </button>
               </label>
               <label class="check-row sub">
                 <input type="checkbox" data-sub="service" value="Esgoto" checked />
                 <span>Esgotamento</span>
+                <button class="info-hint inline-info" type="button" data-info-key="layer-sewage" aria-label="Informação sobre esgotamento" title="No mapa, mantém pontos azuis de municípios com registro de esgotamento sanitário.">
+                  i
+                  <span class="info-tooltip" role="tooltip">No mapa, mantém pontos azuis de municípios com registro de esgotamento sanitário.</span>
+                </button>
               </label>
               <label class="check-row sub">
                 <input type="checkbox" data-sub="pop" value="100000" />
                 <span>Grandes Centros (>100k)</span>
+                <button class="info-hint inline-info" type="button" data-info-key="layer-population" aria-label="Informação sobre grandes centros" title="No mapa, limita os pontos azuis a municípios com mais de 100 mil habitantes.">
+                  i
+                  <span class="info-tooltip" role="tooltip">No mapa, limita os pontos azuis a municípios com mais de 100 mil habitantes.</span>
+                </button>
               </label>
             </div>
-
-            <label class="check-row">
-              <input type="checkbox" data-layer="risk" checked />
-              <span class="layer-title">Risco socioambiental estimado</span>
-            </label>
           </div>
 
           <div class="panel-section tab-panel" data-tab-panel="controls-weights" hidden>
@@ -204,11 +239,8 @@
 
             <div id="siteContext" class="site-context"></div>
 
-            <button id="useSelectedRegionAsSite" class="ghost-button full-button" type="button">
-              Usar região selecionada
-            </button>
-            <button id="calculateSite" class="primary-button" type="button">
-              Calcular impacto local
+            <button id="useSelectedRegionAsSite" class="primary-button site-action-button" type="button">
+              Usar região selecionada como local
             </button>
           </div>
 
@@ -328,8 +360,8 @@
                 </div>
               </div>
               <p class="assumption-note">
-                <strong>Critérios estimados:</strong> infraestrutura elétrica, conectividade, segurança regulatória
-                e risco socioambiental são leituras preliminares. Eles orientam a triagem, mas não substituem
+                <strong>Critérios estimados:</strong> infraestrutura elétrica, conectividade e segurança regulatória
+                são leituras preliminares. Eles orientam a triagem, mas não substituem
                 laudos, outorgas, análise de rede ou licenciamento.
               </p>
             </div>
@@ -424,7 +456,6 @@
     <script src="./energy-grid.js"></script>
     <script src="./region-options.js"></script>
     <script src="./wui-model.js"></script>
-    <script src="./risk-model.js"></script>
     <script src="./view-limits.js"></script>
     <script src="./renewable-breakdown.js"></script>
     <script src="./site-analysis.js"></script>

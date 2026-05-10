@@ -10,7 +10,6 @@
         renewables: 5,
         grid: 4,
         water: 5,
-        environment: 4,
         connectivity: 3,
         licensing: 4,
     };
@@ -387,7 +386,6 @@
             renewables,
             grid: clamp(Math.round(renewables * 0.7 + connectivity * 0.3), 0, 100),
             water: scoreWater(water, impact),
-            environment: impact.suitabilityScore,
             connectivity,
             licensing: water.points > 0 ? 76 : 58,
         };

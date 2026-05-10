@@ -230,6 +230,13 @@ input {
   line-height: 1;
 }
 
+.info-hint.inline-info {
+  width: 15px;
+  height: 15px;
+  margin-left: 0;
+  font-size: 9px;
+}
+
 .info-hint:focus-visible {
   outline: 2px solid #2f7dff;
   outline-offset: 2px;
@@ -327,6 +334,10 @@ input {
   margin-top: 12px;
   color: var(--ink);
   font-size: 14px;
+}
+
+.check-row .info-hint {
+  margin-left: 2px;
 }
 
 .check-row.sub {
@@ -550,6 +561,14 @@ select,
 .full-button {
   width: 100%;
   margin-top: 10px;
+}
+
+.site-action-button {
+  min-height: 48px;
+  margin-top: 12px;
+  padding: 0 14px;
+  font-size: 14px;
+  font-weight: 820;
 }
 
 .map-area {
@@ -1016,14 +1035,17 @@ select,
 }
 
 .fiber-band.high {
+  color: #fff;
   background: var(--high);
 }
 
 .fiber-band.medium {
+  color: #fff;
   background: var(--medium);
 }
 
 .fiber-band.low {
+  color: #fff;
   background: var(--low);
 }
 

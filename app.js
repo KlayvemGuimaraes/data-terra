@@ -1,22 +1,19 @@
 let map;
 let energyRenderer;
-let riskRenderer;
 let regionRenderer;
 let layers = {
     cables: L.layerGroup(),
     water: L.layerGroup(),
     energy: L.layerGroup(),
-    risk: L.layerGroup(),
     regions: L.layerGroup(),
     site: L.layerGroup()
 };
 
-let activeLayers = new Set(["energy", "cables", "water", "risk"]);
+let activeLayers = new Set(["energy", "cables", "water"]);
 let weights = {
     renewables: 5,
     grid: 4,
     water: 5,
-    environment: 4,
     connectivity: 3,
     licensing: 4,
 };
@@ -52,7 +49,6 @@ const metricLabels = {
     renewables: "Energia renovável",
     grid: "Infraestrutura elétrica",
     water: "Segurança hídrica (WUI)",
-    environment: "Baixo risco socioambiental estimado",
     connectivity: "Conectividade e mercado",
     licensing: "Segurança regulatória",
 };
@@ -81,15 +77,12 @@ function initMap() {
 
     map.createPane("energyGridPane");
     map.getPane("energyGridPane").style.zIndex = 380;
-    map.createPane("riskPane");
-    map.getPane("riskPane").style.zIndex = 360;
     map.createPane("regionPane");
     map.getPane("regionPane").style.zIndex = 430;
     map.createPane("sitePane");
     map.getPane("sitePane").style.zIndex = 470;
 
     energyRenderer = L.canvas({ pane: "energyGridPane", padding: 0.5 });
-    riskRenderer = L.canvas({ pane: "riskPane", padding: 0.5 });
     regionRenderer = L.canvas({ pane: "regionPane", padding: 0.5 });
     Object.values(layers).forEach(layer => layer.addTo(map));
     map.on("zoomend", () => {
@@ -144,6 +137,11 @@ function initInfoHints() {
         hint.addEventListener("mouseenter", positionTooltip);
         hint.addEventListener("focus", positionTooltip);
         hint.addEventListener("touchstart", positionTooltip, { passive: true });
+        hint.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            positionTooltip();
+        });
     });
 }
 
@@ -188,7 +186,6 @@ async function fetchData() {
         regionsData = RegionOptions.filterRegionsByState(allRegionsData, selectedState);
 
         renderRegions();
-        renderRisk();
         renderRanking();
         renderWeights();
         renderWuiControls();
@@ -349,28 +346,6 @@ function getRegionMarkerColor(className) {
     return colors[className] || "#0c6b58";
 }
 
-function renderRisk() {
-    layers.risk.clearLayers();
-    regionsData.forEach(region => {
-        const assessment = getWuiAssessment(region);
-        if (assessment.impactScore < 26) return;
-
-        const risk = RiskModel.classifyRiskImpact(assessment.impactScore);
-        const style = RiskModel.getRiskOverlayStyle(assessment.impactScore);
-
-        L.circleMarker([region.lat, region.lng], {
-            ...style,
-            renderer: riskRenderer,
-            pane: "riskPane",
-            interactive: true,
-        }).bindPopup(`
-            <strong>${risk.label}</strong><br>
-            Impacto WUI: ${assessment.impactScore}/100<br>
-            Estresse: ${assessment.stress.label}
-        `).addTo(layers.risk);
-    });
-}
-
 // Logic helpers (same as original but adapted)
 function getScore(region) {
     const totalWeight = Object.values(weights).reduce((sum, value) => sum + value, 0);
@@ -417,7 +392,6 @@ function selectRegion(id) {
         { activateResults: false, skipTabChange: true },
     );
     renderRegions();
-    renderRisk();
     map.flyTo([region.lat, region.lng], 8);
     renderDetails();
     renderRanking();
@@ -864,10 +838,9 @@ function renderMethodology(region, assessment) {
             <p>${dataBasis.join(" • ") || "Sem fonte declarada"}</p>
         </div>
         <div class="methodology-block">
-            <h3>Como calculamos o risco ambiental</h3>
+            <h3>Como calculamos o impacto hídrico</h3>
             <ul>
                 <li><strong>Impacto hídrico:</strong> combina consumo de água do data center, carga de TI e estresse hídrico Aqueduct da UF.</li>
-                <li><strong>Pressão territorial:</strong> municípios mais populosos recebem mais pressão no indicador socioambiental estimado.</li>
                 <li><strong>Mitigação local:</strong> presença de água e esgoto melhora a leitura preliminar de segurança hídrica.</li>
             </ul>
         </div>
@@ -995,7 +968,6 @@ function applyStateFilter(state) {
     regionsData = RegionOptions.filterRegionsByState(allRegionsData, state);
     selectedRegion = null;
     renderRegions();
-    renderRisk();
     renderRanking();
     renderSelect();
 
@@ -1016,7 +988,7 @@ document.querySelector("#weights").addEventListener("input", (e) => {
 });
 
 document.querySelector("#resetWeights").addEventListener("click", () => {
-    weights = { renewables: 5, grid: 4, water: 5, environment: 4, connectivity: 3, licensing: 4 };
+    weights = { renewables: 5, grid: 4, water: 5, connectivity: 3, licensing: 4 };
     renderWeights();
     renderRegions();
     renderRanking();
@@ -1074,20 +1046,8 @@ document.querySelector("#useSelectedRegionAsSite").addEventListener("click", () 
     map.flyTo([selectedRegion.lat, selectedRegion.lng], 8);
 });
 
-document.querySelector("#calculateSite").addEventListener("click", () => {
-    if (!simulatedSite && selectedRegion) {
-        setSimulatedSite(
-            { lat: selectedRegion.lat, lng: selectedRegion.lng, state: selectedRegion.state },
-            { activateResults: false },
-        );
-    }
-    renderSiteAnalysis();
-    activatePanelTabByTarget("result-site");
-});
-
 function refreshTerritorialAnalysis() {
     renderRegions();
-    renderRisk();
     renderRanking();
     renderDetails();
     renderSiteAnalysis();
@@ -1118,7 +1078,6 @@ function selectRegionSearchOption() {
     );
     map.flyTo([option.lat, option.lng], 8);
     renderRegions();
-    renderRisk();
     renderRanking();
     renderMunicipalityDetails(option);
     activatePanelTabByTarget("controls-site");
