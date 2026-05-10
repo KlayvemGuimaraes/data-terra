@@ -1,0 +1,53 @@
+Defesa de viabilidade tecnica do projeto DataTerra
+
+O DataTerra e tecnicamente viavel porque ja opera como um prototipo funcional
+de inteligencia territorial, combinando uma aplicacao web simples, um servidor
+Node.js, uma base SQLite local e modelos de analise em JavaScript com testes
+automatizados. A solucao nao depende de uma arquitetura experimental: usa
+componentes conhecidos, executaveis localmente e adequados para evoluir de MVP
+para produto de triagem territorial.
+
+O projeto tambem e viavel do ponto de vista de dados. A aplicacao ja integra
+fontes reais para cabos de fibra, saneamento municipal e geracao renovavel da
+ANEEL, alem de usar municipios como referencia geografica. Esses dados sao
+normalizados em uma base relacional simples e expostos por endpoints HTTP. Isso
+reduz a dependencia de arquivos soltos no frontend e permite repetir a ingestao
+quando as fontes forem atualizadas.
+
+O modelo analitico tem uma fronteira tecnica clara. A camada de regiao monta
+candidatos a partir de municipios com saneamento e de concentracoes de energia
+renovavel. A camada local calcula recursos dentro de um raio configuravel,
+incluindo capacidade renovavel, agua/esgoto, impacto hidrico estimado e
+proximidade de cabos de fibra. A proximidade da fibra agora e tratada como
+indicador objetivo: quanto menor a distancia ate uma rota valida, maior o score
+de conectividade. Isso melhora o criterio de conectividade sem esconder as
+premissas do usuario.
+
+A implementacao atual tambem demonstra escalabilidade incremental. O frontend
+usa Leaflet para mapa, renderizacao por camadas e filtros, enquanto os modelos
+de score ficam separados em arquivos testaveis. Essa separacao permite trocar
+ou enriquecer fontes de dados sem reescrever a interface. Por exemplo, novas
+bases de subestacoes, linhas de transmissao, outorgas hidricas ou bacias
+hidrograficas podem entrar como novas tabelas e alimentar os modelos existentes.
+
+A confiabilidade tecnica e sustentada por testes automatizados com o test
+runner nativo do Node.js. Existem testes para grid de energia, regioes
+candidatas, busca de regioes, composicao renovavel, risco, analise local,
+contratos de UI, limites de visualizacao e WUI. Isso reduz o risco de regressao
+ao evoluir os criterios de score e garante que alteracoes no modelo continuem
+refletidas na interface.
+
+Os principais riscos tecnicos sao conhecidos e controlaveis. A qualidade da
+analise depende da atualizacao das fontes publicas e da precisao geografica dos
+dados. O score ainda e uma triagem preliminar, nao um parecer tecnico final.
+Esses riscos nao inviabilizam o projeto; eles indicam o caminho natural de
+evolucao: versionar bases ingeridas, adicionar metadados de fonte, ampliar
+validacoes geoespaciais, integrar dados eletricos e hidricos mais granulares e
+criar rotinas de auditoria para cada score.
+
+Por esses motivos, o DataTerra e tecnicamente defensavel como plataforma de
+triagem inicial para localizacao de data centers. Ele ja prova que e possivel
+cruzar infraestrutura digital, energia renovavel, saneamento, risco hidrico e
+criterios territoriais em uma experiencia interativa. A arquitetura atual e
+simples, testavel e extensivel, o que permite evoluir o MVP com baixo risco
+tecnico e com ganhos progressivos de precisao.
