@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GreenSite DC | Inteligencia territorial para data centers</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Protótipo inspirado na PID</p>
+          <h1>GreenSite DC</h1>
+        </div>
+        <p class="topbar-copy">
+          Inteligência territorial para avaliar onde data centers de IA podem
+          crescer com energia limpa, segurança hídrica e menor risco ambiental.
+        </p>
+      </header>
+
+      <section class="workspace">
+        <aside class="panel panel-left" aria-label="Controles de análise">
+          <div class="panel-section">
+            <h2>Camadas</h2>
+            <label class="check-row">
+              <input type="checkbox" data-layer="energy" checked />
+              <span>Energia renovável</span>
+            </label>
+            <label class="check-row">
+              <input type="checkbox" data-layer="grid" checked />
+              <span>Infraestrutura elétrica</span>
+            </label>
+            <label class="check-row">
+              <input type="checkbox" data-layer="water" checked />
+              <span>Segurança hídrica</span>
+            </label>
+            <label class="check-row">
+              <input type="checkbox" data-layer="risk" checked />
+              <span>Risco socioambiental</span>
+            </label>
+          </div>
+
+          <div class="panel-section">
+            <div class="section-heading">
+              <h2>Prioridades</h2>
+              <button id="resetWeights" class="ghost-button" type="button">
+                Resetar
+              </button>
+            </div>
+            <div id="weights"></div>
+          </div>
+
+          <div class="panel-section">
+            <h2>Validar local</h2>
+            <label class="select-label" for="regionSelect">Região candidata</label>
+            <select id="regionSelect"></select>
+            <button id="focusRegion" class="primary-button" type="button">
+              Analisar região
+            </button>
+          </div>
+        </aside>
+
+        <section class="map-area" aria-label="Mapa de aptidão territorial">
+          <div class="map-toolbar">
+            <div>
+              <p class="eyebrow">Brasil</p>
+              <h2>Hotspots para data centers verdes</h2>
+            </div>
+            <div class="legend" aria-label="Legenda">
+              <span><i class="dot high"></i> Alta aptidão</span>
+              <span><i class="dot medium"></i> Condicionada</span>
+              <span><i class="dot low"></i> Alto risco</span>
+            </div>
+          </div>
+
+          <div class="map-canvas">
+            <div class="brazil-shape" aria-hidden="true"></div>
+            <div id="markers" class="markers"></div>
+            <div class="map-note">
+              <strong>Leitura territorial:</strong>
+              os pontos combinam energia, rede, água, risco e conectividade.
+            </div>
+          </div>
+        </section>
+
+        <aside class="panel panel-right" aria-label="Resultado da análise">
+          <div class="panel-section selected-region">
+            <p class="eyebrow">Região selecionada</p>
+            <h2 id="selectedName">-</h2>
+            <p id="selectedSummary" class="muted"></p>
+            <div class="score-block">
+              <div>
+                <span id="selectedScore" class="score-value">0</span>
+                <span class="score-total">/100</span>
+              </div>
+              <span id="selectedClass" class="status-pill"></span>
+            </div>
+          </div>
+
+          <div class="panel-section">
+            <h2>Indicadores</h2>
+            <div id="metrics" class="metrics"></div>
+          </div>
+
+          <div class="panel-section">
+            <h2>Recomendação</h2>
+            <p id="recommendation" class="recommendation"></p>
+            <div id="conditions" class="conditions"></div>
+          </div>
+
+          <div class="panel-section">
+            <h2>Ranking</h2>
+            <ol id="ranking" class="ranking"></ol>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
