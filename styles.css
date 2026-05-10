@@ -134,10 +134,30 @@ input {
   font-size: 14px;
 }
 
+.check-row.sub {
+  margin-top: 6px;
+  margin-left: 24px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.layer-title {
+  font-weight: 700;
+}
+
+.sub-filters {
+  margin-bottom: 8px;
+}
+
 .check-row input {
   width: 16px;
   height: 16px;
   accent-color: var(--accent);
+}
+
+.check-row.sub input {
+  width: 14px;
+  height: 14px;
 }
 
 .weight-control {
@@ -276,98 +296,54 @@ select {
   flex: 1;
   min-height: 560px;
   overflow: hidden;
-  background:
-    linear-gradient(rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.4)),
-    radial-gradient(circle at 20% 20%, rgba(41, 112, 168, 0.2), transparent 22%),
-    #dbe9e3;
+  background: #0f172a;
 }
 
-.map-canvas::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  opacity: 0.28;
-  background-image:
-    linear-gradient(rgba(8, 77, 65, 0.12) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(8, 77, 65, 0.12) 1px, transparent 1px);
-  background-size: 44px 44px;
+#map {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
 }
 
-.brazil-shape {
-  position: absolute;
-  left: 22%;
-  top: 8%;
-  width: 56%;
-  height: 82%;
-  background: rgba(255, 255, 255, 0.56);
-  border: 1px solid rgba(8, 77, 65, 0.22);
-  clip-path: polygon(
-    46% 0%,
-    61% 6%,
-    70% 16%,
-    82% 21%,
-    94% 36%,
-    86% 48%,
-    90% 61%,
-    76% 70%,
-    68% 84%,
-    53% 96%,
-    39% 88%,
-    26% 91%,
-    18% 79%,
-    7% 70%,
-    14% 58%,
-    7% 46%,
-    14% 33%,
-    28% 27%,
-    31% 12%
-  );
+/* Custom Leaflet Styles */
+.leaflet-container {
+  background: #0f172a !important;
 }
 
-.markers {
-  position: absolute;
-  inset: 0;
+.custom-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.marker {
+.marker-pin {
+  width: 30px;
+  height: 30px;
+  border-radius: 50% 50% 50% 0;
+  background: var(--accent);
   position: absolute;
-  transform: translate(-50%, -50%);
-  min-width: 34px;
-  height: 34px;
+  transform: rotate(-45deg);
+  left: 50%;
+  top: 50%;
+  margin: -15px 0 0 -15px;
+  border: 2px solid #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.marker-pin.high { background: var(--high); }
+.marker-pin.medium { background: var(--medium); }
+.marker-pin.low { background: var(--low); }
+
+.marker-value {
+  position: absolute;
+  width: 30px;
+  height: 30px;
   display: grid;
   place-items: center;
   color: #fff;
-  border: 3px solid rgba(255, 255, 255, 0.88);
-  border-radius: 50%;
-  box-shadow: 0 10px 22px rgba(23, 35, 29, 0.22);
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 860;
-  font-variant-numeric: tabular-nums;
-}
-
-.marker::after {
-  content: attr(data-label);
-  position: absolute;
-  left: var(--label-left, 50%);
-  top: var(--label-top, 38px);
-  transform: translateX(var(--label-shift, -50%));
-  white-space: nowrap;
-  padding: 4px 7px;
-  color: var(--ink);
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid var(--line);
-  border-radius: 5px;
   font-size: 11px;
-  font-weight: 760;
-}
-
-.marker.selected {
-  outline: 4px solid rgba(12, 107, 88, 0.22);
-}
-
-.marker.layer-muted {
-  opacity: 0.42;
+  font-weight: 860;
+  z-index: 2;
 }
 
 .map-note {

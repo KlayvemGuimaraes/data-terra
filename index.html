@@ -4,13 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GreenSite DC | Inteligencia territorial para data centers</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <main class="app-shell">
       <header class="topbar">
         <div>
-          <p class="eyebrow">Protótipo inspirado na PID</p>
+          <p class="eyebrow">Protótipo com Dados Reais</p>
           <h1>GreenSite DC</h1>
         </div>
         <p class="topbar-copy">
@@ -23,21 +24,59 @@
         <aside class="panel panel-left" aria-label="Controles de análise">
           <div class="panel-section">
             <h2>Camadas</h2>
+            
+            <!-- Energy Filters -->
             <label class="check-row">
               <input type="checkbox" data-layer="energy" checked />
-              <span>Energia renovável</span>
+              <span class="layer-title">Energia renovável</span>
             </label>
+            <div class="sub-filters" data-parent="energy">
+              <label class="check-row sub">
+                <input type="checkbox" data-sub="type" value="Solar" checked />
+                <span>Solar</span>
+              </label>
+              <label class="check-row sub">
+                <input type="checkbox" data-sub="type" value="Eólica" checked />
+                <span>Eólica</span>
+              </label>
+              <label class="check-row sub">
+                <input type="checkbox" data-sub="type" value="Hidro" checked />
+                <span>Hidro</span>
+              </label>
+              <label class="check-row sub">
+                <input type="checkbox" data-sub="type" value="Biomassa" checked />
+                <span>Biomassa</span>
+              </label>
+            </div>
+
             <label class="check-row">
-              <input type="checkbox" data-layer="grid" checked />
-              <span>Infraestrutura elétrica</span>
+              <input type="checkbox" data-layer="cables" checked />
+              <span class="layer-title">Cabos de Fibra</span>
             </label>
+
+            <!-- Water Filters -->
             <label class="check-row">
               <input type="checkbox" data-layer="water" checked />
-              <span>Segurança hídrica</span>
+              <span class="layer-title">Segurança hídrica</span>
             </label>
+            <div class="sub-filters" data-parent="water">
+              <label class="check-row sub">
+                <input type="checkbox" data-sub="service" value="Água" checked />
+                <span>Abastecimento</span>
+              </label>
+              <label class="check-row sub">
+                <input type="checkbox" data-sub="service" value="Esgoto" checked />
+                <span>Esgotamento</span>
+              </label>
+              <label class="check-row sub">
+                <input type="checkbox" data-sub="pop" value="100000" />
+                <span>Grandes Centros (>100k)</span>
+              </label>
+            </div>
+
             <label class="check-row">
               <input type="checkbox" data-layer="risk" checked />
-              <span>Risco socioambiental</span>
+              <span class="layer-title">Risco socioambiental</span>
             </label>
           </div>
 
@@ -75,8 +114,7 @@
           </div>
 
           <div class="map-canvas">
-            <div class="brazil-shape" aria-hidden="true"></div>
-            <div id="markers" class="markers"></div>
+            <div id="map" style="width: 100%; height: 100%; background: #0f172a;"></div>
             <div class="map-note">
               <strong>Leitura territorial:</strong>
               os pontos combinam energia, rede, água, risco e conectividade.
@@ -117,6 +155,7 @@
       </section>
     </main>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="./app.js"></script>
   </body>
 </html>

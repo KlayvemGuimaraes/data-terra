@@ -1,0 +1,8 @@
+node_modules/
+*.db
+*.db-journal
+.env
+server/references/
+server/check_aneel.js
+server/check_sources.js
+server/inspect_xls.js
