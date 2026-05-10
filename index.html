@@ -11,7 +11,7 @@
     <main class="app-shell">
       <header class="topbar">
         <div>
-          <p class="eyebrow">Protótipo com Dados Reais</p>
+          <p class="eyebrow">Dados reais + proxies declarados</p>
           <h1>GreenSite DC</h1>
         </div>
         <p class="topbar-copy">
@@ -22,7 +22,15 @@
 
       <section class="workspace">
         <aside class="panel panel-left" aria-label="Controles de análise">
-          <div class="panel-section">
+          <nav class="panel-tabs" aria-label="Seções de controle">
+            <button class="tab-button is-active" type="button" data-tab-target="controls-layers">Camadas</button>
+            <button class="tab-button" type="button" data-tab-target="controls-weights">Critérios</button>
+            <button class="tab-button" type="button" data-tab-target="controls-wui">WUI</button>
+            <button class="tab-button" type="button" data-tab-target="controls-site">Local</button>
+            <button class="tab-button" type="button" data-tab-target="controls-region">Região</button>
+          </nav>
+
+          <div class="panel-section tab-panel is-active" data-tab-panel="controls-layers">
             <h2>Camadas</h2>
             
             <!-- Energy Filters -->
@@ -47,6 +55,13 @@
                 <input type="checkbox" data-sub="type" value="Biomassa" checked />
                 <span>Biomassa</span>
               </label>
+              <div class="energy-legend" aria-label="Legenda de energia renovável">
+                <span><i class="energy-swatch solar"></i>Solar</span>
+                <span><i class="energy-swatch wind"></i>Eólica</span>
+                <span><i class="energy-swatch hydro"></i>Hidro</span>
+                <span><i class="energy-swatch biomass"></i>Biomassa</span>
+                <span><i class="energy-swatch mixed"></i>Misto</span>
+              </div>
             </div>
 
             <label class="check-row">
@@ -76,11 +91,11 @@
 
             <label class="check-row">
               <input type="checkbox" data-layer="risk" checked />
-              <span class="layer-title">Risco socioambiental</span>
+              <span class="layer-title">Risco socioambiental (proxy)</span>
             </label>
           </div>
 
-          <div class="panel-section">
+          <div class="panel-section tab-panel" data-tab-panel="controls-weights" hidden>
             <div class="section-heading">
               <h2>Prioridades</h2>
               <button id="resetWeights" class="ghost-button" type="button">
@@ -90,8 +105,81 @@
             <div id="weights"></div>
           </div>
 
-          <div class="panel-section">
-            <h2>Validar local</h2>
+          <div class="panel-section tab-panel" data-tab-panel="controls-wui" hidden>
+            <h2>Simulação WUI</h2>
+            <label class="select-label" for="wuiPreset">Perfil hídrico</label>
+            <select id="wuiPreset"></select>
+            <p id="wuiPresetDescription" class="field-note"></p>
+
+            <label class="select-label" for="waterIntensity">
+              Consumo de água (L/kWh TI)
+            </label>
+            <input
+              id="waterIntensity"
+              class="number-input"
+              type="number"
+              min="0"
+              max="5"
+              step="0.1"
+            />
+
+            <label class="select-label" for="itLoadMw">Carga de TI (MW)</label>
+            <input
+              id="itLoadMw"
+              class="number-input"
+              type="number"
+              min="1"
+              max="500"
+              step="1"
+            />
+            <p class="field-note">
+              Proxy inspirado em TGG WUI, usando estresse hídrico WRI Aqueduct
+              4.0 por UF.
+            </p>
+          </div>
+
+          <div class="panel-section tab-panel" data-tab-panel="controls-site" hidden>
+            <h2>Local do data center</h2>
+            <p class="field-note">
+              Ponto manual no mapa com raio de consumo para energia, água e conectividade.
+            </p>
+
+            <label class="select-label" for="siteRadius">Raio de consumo</label>
+            <div class="range-row">
+              <input
+                id="siteRadius"
+                type="range"
+                min="10"
+                max="300"
+                step="5"
+                value="100"
+              />
+              <input
+                id="siteRadiusInput"
+                class="number-input compact"
+                type="number"
+                min="10"
+                max="300"
+                step="5"
+                value="100"
+              />
+              <span id="siteRadiusValue">100 km</span>
+            </div>
+
+            <div id="siteContext" class="site-context"></div>
+
+            <button id="useSelectedRegionAsSite" class="ghost-button full-button" type="button">
+              Usar região selecionada
+            </button>
+            <button id="calculateSite" class="primary-button" type="button">
+              Calcular impacto local
+            </button>
+          </div>
+
+          <div class="panel-section tab-panel" data-tab-panel="controls-region" hidden>
+            <h2>Triagem de região</h2>
+            <label class="select-label" for="stateSelect">Estado</label>
+            <select id="stateSelect"></select>
             <label class="select-label" for="regionSelect">Região candidata</label>
             <select id="regionSelect"></select>
             <button id="focusRegion" class="primary-button" type="button">
@@ -117,38 +205,74 @@
             <div id="map" style="width: 100%; height: 100%; background: #0f172a;"></div>
             <div class="map-note">
               <strong>Leitura territorial:</strong>
-              os pontos combinam energia, rede, água, risco e conectividade.
+              quadrados agregam energia renovável; pontos mostram regiões candidatas;
+              o círculo marca o raio do data center.
+              <span id="mapCandidateNote"></span>
             </div>
           </div>
         </section>
 
         <aside class="panel panel-right" aria-label="Resultado da análise">
-          <div class="panel-section selected-region">
-            <p class="eyebrow">Região selecionada</p>
-            <h2 id="selectedName">-</h2>
-            <p id="selectedSummary" class="muted"></p>
-            <div class="score-block">
-              <div>
-                <span id="selectedScore" class="score-value">0</span>
-                <span class="score-total">/100</span>
+          <nav class="panel-tabs" aria-label="Seções de resultado">
+            <button class="tab-button is-active" type="button" data-tab-target="result-summary">Resumo</button>
+            <button class="tab-button" type="button" data-tab-target="result-water">Água</button>
+            <button class="tab-button" type="button" data-tab-target="result-site">Local</button>
+            <button class="tab-button" type="button" data-tab-target="result-method">Premissas</button>
+            <button class="tab-button" type="button" data-tab-target="result-ranking">Ranking</button>
+          </nav>
+
+          <div class="tab-panel is-active" data-tab-panel="result-summary">
+            <div class="panel-section selected-region">
+              <p class="eyebrow">Região selecionada</p>
+              <h2 id="selectedName">-</h2>
+              <p id="selectedSummary" class="muted"></p>
+              <div class="score-block">
+                <div>
+                  <span id="selectedScore" class="score-value">0</span>
+                  <span class="score-total">/100</span>
+                </div>
+                <span id="selectedClass" class="status-pill"></span>
               </div>
-              <span id="selectedClass" class="status-pill"></span>
+            </div>
+
+            <div class="panel-section">
+              <h2>Indicadores</h2>
+              <div id="metrics" class="metrics"></div>
+            </div>
+
+            <div class="panel-section">
+              <h2>Composição renovável</h2>
+              <div id="renewableMix" class="renewable-mix"></div>
             </div>
           </div>
 
-          <div class="panel-section">
-            <h2>Indicadores</h2>
-            <div id="metrics" class="metrics"></div>
+          <div class="panel-section tab-panel" data-tab-panel="result-water" hidden>
+            <h2>Impacto hídrico <span class="heading-note">menor é melhor</span></h2>
+            <div id="wuiResult" class="wui-result"></div>
           </div>
 
-          <div class="panel-section">
-            <h2>Recomendação</h2>
-            <p id="recommendation" class="recommendation"></p>
-            <div id="conditions" class="conditions"></div>
+          <div class="panel-section tab-panel" data-tab-panel="result-site" hidden>
+            <p class="eyebrow">Simulação local</p>
+            <h2>Raio de consumo</h2>
+            <div id="siteAnalysis" class="site-analysis"></div>
           </div>
 
-          <div class="panel-section">
+          <div class="tab-panel" data-tab-panel="result-method" hidden>
+            <div class="panel-section">
+              <h2>Fontes e premissas</h2>
+              <div id="methodology" class="methodology"></div>
+            </div>
+
+            <div class="panel-section">
+              <h2>Recomendação</h2>
+              <p id="recommendation" class="recommendation"></p>
+              <div id="conditions" class="conditions"></div>
+            </div>
+          </div>
+
+          <div class="panel-section tab-panel" data-tab-panel="result-ranking" hidden>
             <h2>Ranking</h2>
+            <p id="rankingNote" class="field-note"></p>
             <ol id="ranking" class="ranking"></ol>
           </div>
         </aside>
@@ -156,6 +280,13 @@
     </main>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="./energy-grid.js"></script>
+    <script src="./region-options.js"></script>
+    <script src="./wui-model.js"></script>
+    <script src="./risk-model.js"></script>
+    <script src="./view-limits.js"></script>
+    <script src="./renewable-breakdown.js"></script>
+    <script src="./site-analysis.js"></script>
     <script src="./app.js"></script>
   </body>
 </html>

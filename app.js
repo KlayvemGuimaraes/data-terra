@@ -1,9 +1,14 @@
 let map;
+let energyRenderer;
+let riskRenderer;
+let regionRenderer;
 let layers = {
     cables: L.layerGroup(),
     water: L.layerGroup(),
     energy: L.layerGroup(),
-    regions: L.layerGroup()
+    risk: L.layerGroup(),
+    regions: L.layerGroup(),
+    site: L.layerGroup()
 };
 
 let activeLayers = new Set(["energy", "cables", "water", "risk"]);
@@ -17,7 +22,19 @@ let weights = {
 };
 
 let selectedRegion = null;
+let selectedState = "ALL";
+let wuiConfig = {
+    preset: "standard",
+    waterUseIntensityLPerKwh: WuiModel.WATER_USE_PRESETS.standard.intensity,
+    itLoadMw: 50,
+};
+let siteConfig = {
+    radiusKm: 100,
+};
+let allRegionsData = [];
 let regionsData = [];
+let simulatedSite = null;
+let siteAnalysis = null;
 let currentData = {
     cables: [],
     water: [],
@@ -32,11 +49,19 @@ let subFilters = {
 const metricLabels = {
     renewables: "Energia renovável",
     grid: "Infraestrutura elétrica",
-    water: "Segurança hídrica",
-    environment: "Baixo risco socioambiental",
+    water: "Segurança hídrica (WUI)",
+    environment: "Baixo risco socioambiental (proxy)",
     connectivity: "Conectividade e mercado",
     licensing: "Segurança regulatória",
 };
+
+const energyTypeColors = {
+    Solar: "#facc15",
+    "Eólica": "#22c55e",
+    Hidro: "#38bdf8",
+    Biomassa: "#fb923c",
+};
+const mixedEnergyColor = "#a5f3fc";
 
 // Map Initialization
 function initMap() {
@@ -52,7 +77,58 @@ function initMap() {
         maxZoom: 20
     }).addTo(map);
 
+    map.createPane("energyGridPane");
+    map.getPane("energyGridPane").style.zIndex = 380;
+    map.createPane("riskPane");
+    map.getPane("riskPane").style.zIndex = 360;
+    map.createPane("regionPane");
+    map.getPane("regionPane").style.zIndex = 430;
+    map.createPane("sitePane");
+    map.getPane("sitePane").style.zIndex = 470;
+
+    energyRenderer = L.canvas({ pane: "energyGridPane", padding: 0.5 });
+    riskRenderer = L.canvas({ pane: "riskPane", padding: 0.5 });
+    regionRenderer = L.canvas({ pane: "regionPane", padding: 0.5 });
     Object.values(layers).forEach(layer => layer.addTo(map));
+    map.on("zoomend", () => {
+        if (map.hasLayer(layers.energy)) renderEnergy();
+    });
+    map.on("click", (event) => {
+        setSimulatedSite(event.latlng, { activateResults: true });
+        activatePanelTabByTarget("controls-site");
+    });
+}
+
+function initPanelTabs() {
+    document.querySelectorAll(".panel-tabs").forEach(tabList => {
+        tabList.addEventListener("click", (event) => {
+            const button = event.target.closest("[data-tab-target]");
+            if (!button) return;
+
+            const panel = button.closest(".panel");
+            setActivePanelTab(panel, button.dataset.tabTarget);
+        });
+    });
+}
+
+function setActivePanelTab(panel, target) {
+    if (!panel || !target) return;
+
+    panel.querySelectorAll("[data-tab-target]").forEach(tabButton => {
+        tabButton.classList.toggle("is-active", tabButton.dataset.tabTarget === target);
+    });
+
+    panel.querySelectorAll("[data-tab-panel]").forEach(tabPanel => {
+        const isActive = tabPanel.dataset.tabPanel === target;
+        tabPanel.hidden = !isActive;
+        tabPanel.classList.toggle("is-active", isActive);
+    });
+}
+
+function activatePanelTabByTarget(target) {
+    const button = document.querySelector(`[data-tab-target="${target}"]`);
+    if (!button) return;
+    setActivePanelTab(button.closest(".panel"), target);
 }
 
 // Data Fetching
@@ -70,33 +146,22 @@ async function fetchData() {
         renderWater();
         renderEnergy();
         
-        // Use water points as "Regions" for the ranking example
-        regionsData = water.slice(0, 20).map(w => ({
-            id: w.id,
-            name: w.city,
-            state: w.state,
-            lat: w.lat,
-            lng: w.lng,
-            summary: `Cidade com ${w.population.toLocaleString()} habitantes. Serviço de ${w.service_type} prestado por ${w.provider}.`,
-            scores: {
-                renewables: Math.floor(Math.random() * 40) + 60,
-                grid: Math.floor(Math.random() * 40) + 50,
-                water: Math.min(100, Math.floor(w.population / 10000)),
-                environment: Math.floor(Math.random() * 30) + 70,
-                connectivity: Math.floor(Math.random() * 50) + 40,
-                licensing: 75
-            },
-            tags: [w.service_type, w.state],
-            recommendation: "Aptidão preliminar baseada em dados reais de saneamento e proximidade de infraestrutura.",
-            conditions: ["Validar rede elétrica local", "Confirmar disponibilidade de fibra"]
-        }));
+        allRegionsData = RegionOptions.buildCandidateRegions(water, { energyRows: energy });
+        selectedState = "ALL";
+        regionsData = RegionOptions.filterRegionsByState(allRegionsData, selectedState);
 
         renderRegions();
+        renderRisk();
         renderRanking();
         renderWeights();
+        renderWuiControls();
+        renderSiteControls();
+        renderStateSelect();
         renderSelect();
         
-        if (regionsData.length > 0) selectRegion(regionsData[0].id);
+        const topRegion = getTopRegion();
+        if (topRegion) selectRegion(topRegion.id);
+        if (!topRegion) renderSiteAnalysis();
 
     } catch (error) {
         console.error('Error loading data:', error);
@@ -138,47 +203,161 @@ function renderWater() {
 
 function renderEnergy() {
     layers.energy.clearLayers();
-    const filtered = currentData.energy.filter(e => subFilters.energy.type.includes(e.type));
-
-    filtered.forEach(e => {
-        L.marker([e.lat, e.lng], {
-            icon: L.divIcon({
-                className: 'custom-marker',
-                html: `<div class="marker-pin high"></div><div class="marker-value">⚡</div>`,
-                iconSize: [30, 42],
-                iconAnchor: [15, 42]
-            })
-        }).bindPopup(`<strong>${e.name}</strong><br>Tipo: ${e.type}<br>Capacidade: ${e.capacity_mw}MW`).addTo(layers.energy);
+    const cells = EnergyGrid.buildEnergyGridCells(currentData.energy, {
+        cellSize: getEnergyCellSize(),
+        allowedTypes: subFilters.energy.type,
     });
+
+    cells.forEach(cell => {
+        const color = getEnergyCellColor(cell);
+        const fillOpacity = Math.min(0.76, 0.22 + Math.log10(cell.count + 1) * 0.24);
+
+        L.rectangle(cell.bounds, {
+            renderer: energyRenderer,
+            pane: "energyGridPane",
+            color,
+            weight: 1,
+            opacity: 0.95,
+            fillColor: color,
+            fillOpacity,
+            interactive: true,
+        }).bindPopup(renderEnergyCellPopup(cell)).addTo(layers.energy);
+    });
+}
+
+function getEnergyCellSize() {
+    const zoom = map.getZoom();
+    if (zoom <= 4) return 2;
+    if (zoom <= 6) return 1;
+    if (zoom <= 8) return 0.5;
+    return 0.25;
+}
+
+function getEnergyCellColor(cell) {
+    if (cell.types.length > 1) return mixedEnergyColor;
+    return energyTypeColors[cell.dominantType] || "#e5e7eb";
+}
+
+function renderEnergyCellPopup(cell) {
+    const capacity = cell.capacityMw.toLocaleString("pt-BR", {
+        maximumFractionDigits: 1,
+    });
+    const count = cell.count.toLocaleString("pt-BR");
+
+    return `
+        <strong>Energia renovável agregada</strong><br>
+        ${count} usina${cell.count === 1 ? "" : "s"} nesta área<br>
+        Capacidade somada: ${capacity} MW<br>
+        Tipos: ${cell.types.join(", ")}
+    `;
 }
 
 function renderRegions() {
     layers.regions.clearLayers();
-    regionsData.forEach(region => {
+    const visible = ViewLimits.limitMapRegions(regionsData, getScore, selectedState, selectedRegion);
+    const ordered = [...visible.regions].sort((a, b) => {
+        if (a.id === selectedRegion?.id) return 1;
+        if (b.id === selectedRegion?.id) return -1;
+        return getScore(a) - getScore(b);
+    });
+
+    ordered.forEach(region => {
         const score = getScore(region);
         const status = getClass(score);
-        
-        const marker = L.marker([region.lat, region.lng], {
-            icon: L.divIcon({
-                className: 'custom-marker',
-                html: `<div class="marker-pin ${status.className}"></div><div class="marker-value">${score}</div>`,
-                iconSize: [30, 42],
-                iconAnchor: [15, 42]
-            })
-        });
+        const isSelected = region.id === selectedRegion?.id;
+        const marker = L.circleMarker([region.lat, region.lng], {
+            renderer: regionRenderer,
+            pane: "regionPane",
+            radius: isSelected ? 10 : getRegionMarkerRadius(score),
+            color: isSelected ? "#ffffff" : "#f8fafc",
+            weight: isSelected ? 3 : 1.5,
+            opacity: 0.95,
+            fillColor: getRegionMarkerColor(status.className),
+            fillOpacity: isSelected ? 0.96 : 0.76,
+            interactive: true,
+        }).bindPopup(`
+            <strong>${region.name}/${region.state}</strong><br>
+            Score territorial: ${score}/100<br>
+            ${region.tags.join(" • ")}
+        `);
 
         marker.on('click', () => selectRegion(region.id));
+        if (isSelected) {
+            marker.bindTooltip(String(score), {
+                permanent: true,
+                direction: "center",
+                className: "selected-region-score",
+            });
+        }
         marker.addTo(layers.regions);
+    });
+
+    document.querySelector("#mapCandidateNote").textContent = visible.hiddenCount > 0
+        ? `Mapa: ${visible.regions.length} candidatos prioritários de ${visible.totalCount}.`
+        : `Mapa: ${visible.totalCount} candidatos neste recorte.`;
+}
+
+function getRegionMarkerRadius(score) {
+    if (score >= 80) return 6.5;
+    if (score >= 70) return 5.5;
+    return 4.5;
+}
+
+function getRegionMarkerColor(className) {
+    const colors = {
+        high: "#1f9d63",
+        medium: "#c58a14",
+        low: "#c54532",
+    };
+    return colors[className] || "#0c6b58";
+}
+
+function renderRisk() {
+    layers.risk.clearLayers();
+    regionsData.forEach(region => {
+        const assessment = getWuiAssessment(region);
+        if (assessment.impactScore < 26) return;
+
+        const risk = RiskModel.classifyRiskImpact(assessment.impactScore);
+        const style = RiskModel.getRiskOverlayStyle(assessment.impactScore);
+
+        L.circleMarker([region.lat, region.lng], {
+            ...style,
+            renderer: riskRenderer,
+            pane: "riskPane",
+            interactive: true,
+        }).bindPopup(`
+            <strong>${risk.label}</strong><br>
+            Impacto WUI: ${assessment.impactScore}/100<br>
+            Estresse: ${assessment.stress.label}
+        `).addTo(layers.risk);
     });
 }
 
 // Logic helpers (same as original but adapted)
 function getScore(region) {
     const totalWeight = Object.values(weights).reduce((sum, value) => sum + value, 0);
+    const scores = getEffectiveScores(region);
     const weighted = Object.entries(weights).reduce((sum, [key, weight]) => {
-        return sum + (region.scores[key] || 0) * weight;
+        return sum + (scores[key] || 0) * weight;
     }, 0);
     return Math.round(weighted / totalWeight);
+}
+
+function getWuiInput(region) {
+    return {
+        state: region.state,
+        waterUseIntensityLPerKwh: wuiConfig.waterUseIntensityLPerKwh,
+        itLoadMw: wuiConfig.itLoadMw,
+    };
+}
+
+function getWuiAssessment(region) {
+    return WuiModel.calculateWuiAssessment(getWuiInput(region));
+}
+
+function getEffectiveScores(region) {
+    return WuiModel.applyWuiToScores(region.scores, getWuiInput(region));
 }
 
 function getClass(score) {
@@ -187,21 +366,232 @@ function getClass(score) {
     return { label: "Alto risco", className: "low" };
 }
 
+function getTopRegion() {
+    return [...regionsData].sort((a, b) => getScore(b) - getScore(a))[0];
+}
+
 function selectRegion(id) {
     const region = regionsData.find(r => r.id === id);
     if (!region) return;
     
     selectedRegion = region;
+    setSimulatedSite(
+        { lat: region.lat, lng: region.lng, state: region.state },
+        { activateResults: false, skipTabChange: true },
+    );
+    renderRegions();
+    renderRisk();
     map.flyTo([region.lat, region.lng], 8);
     renderDetails();
     renderRanking();
     document.querySelector("#regionSelect").value = id;
 }
 
+function setSimulatedSite(latlng, options = {}) {
+    if (!latlng || !Number.isFinite(Number(latlng.lat)) || !Number.isFinite(Number(latlng.lng))) return;
+
+    simulatedSite = {
+        lat: Number(latlng.lat),
+        lng: Number(latlng.lng),
+        state: latlng.state,
+    };
+
+    renderSiteMarker();
+    renderSiteControls();
+    renderSiteAnalysis();
+
+    if (options.activateResults) {
+        activatePanelTabByTarget("result-site");
+    }
+}
+
+function renderSiteMarker() {
+    layers.site.clearLayers();
+    if (!simulatedSite) return;
+
+    L.circle([simulatedSite.lat, simulatedSite.lng], {
+        pane: "sitePane",
+        radius: siteConfig.radiusKm * 1000,
+        color: "#0c6b58",
+        weight: 2,
+        opacity: 0.85,
+        fillColor: "#0c6b58",
+        fillOpacity: 0.08,
+        interactive: false,
+    }).addTo(layers.site);
+
+    const marker = L.marker([simulatedSite.lat, simulatedSite.lng], {
+        pane: "sitePane",
+        draggable: true,
+        icon: L.divIcon({
+            className: "site-marker",
+            html: "<span></span>",
+            iconSize: [26, 26],
+            iconAnchor: [13, 13],
+        }),
+    }).addTo(layers.site);
+
+    marker.on("dragend", () => {
+        setSimulatedSite(marker.getLatLng(), { activateResults: true });
+        activatePanelTabByTarget("controls-site");
+    });
+}
+
+function renderSiteControls() {
+    document.querySelector("#siteRadius").value = siteConfig.radiusKm;
+    document.querySelector("#siteRadiusInput").value = siteConfig.radiusKm;
+    document.querySelector("#siteRadiusValue").textContent = `${siteConfig.radiusKm} km`;
+
+    const context = document.querySelector("#siteContext");
+    if (!simulatedSite) {
+        context.innerHTML = `
+            <span><strong>Local:</strong> nenhum ponto definido</span>
+            <span><strong>Raio:</strong> ${siteConfig.radiusKm} km</span>
+        `;
+        return;
+    }
+
+    const nearest = siteAnalysis?.site?.nearestRegion;
+    context.innerHTML = `
+        <span><strong>Coordenadas:</strong> lat ${formatCoordinate(simulatedSite.lat)} / lng ${formatCoordinate(simulatedSite.lng)}</span>
+        <span><strong>UF estimada:</strong> ${siteAnalysis?.site?.state || simulatedSite.state || "NA"}</span>
+        <span><strong>Referência próxima:</strong> ${nearest ? `${nearest.name}/${nearest.state} (${formatKm(nearest.distanceKm)})` : "sem candidato próximo"}</span>
+    `;
+}
+
+function renderSiteAnalysis() {
+    const container = document.querySelector("#siteAnalysis");
+    if (!simulatedSite || currentData.energy.length === 0) {
+        container.innerHTML = `
+            <p class="field-note">Defina um ponto no mapa ou use a região selecionada para calcular os recursos no raio.</p>
+        `;
+        return;
+    }
+
+    siteAnalysis = SiteAnalysis.analyzeSiteResources(currentData, simulatedSite, {
+        radiusKm: siteConfig.radiusKm,
+        regions: allRegionsData,
+        wuiConfig,
+        weights,
+    });
+    const status = getClass(siteAnalysis.overallScore);
+    const coverage = siteAnalysis.load.renewableCoveragePercentage;
+
+    container.innerHTML = `
+        <div class="site-score-card">
+            <div>
+                <span class="wui-label">Aptidão no raio</span>
+                <span class="score-value">${siteAnalysis.overallScore}</span>
+                <span class="score-total">/100</span>
+            </div>
+            <span class="status-pill ${status.className}">${status.label}</span>
+        </div>
+
+        <div class="site-location-grid">
+            <span>Coordenadas</span>
+            <strong>lat ${formatCoordinate(siteAnalysis.site.lat)} / lng ${formatCoordinate(siteAnalysis.site.lng)}</strong>
+            <span>Raio analisado</span>
+            <strong>${siteAnalysis.radiusKm} km</strong>
+            <span>UF usada no WUI</span>
+            <strong>${siteAnalysis.site.state}</strong>
+            <span>Candidato mais próximo</span>
+            <strong>${formatNearestRegion(siteAnalysis.site.nearestRegion)}</strong>
+        </div>
+
+        <h3>Recursos disponíveis no raio</h3>
+        <div class="resource-grid">
+            <div class="resource-card">
+                <span>Energia renovável</span>
+                <strong>${formatMw(siteAnalysis.energy.totalCapacityMw)}</strong>
+                <small>${siteAnalysis.energy.totalPlants} usina${siteAnalysis.energy.totalPlants === 1 ? "" : "s"} · ${formatCoverage(coverage)}</small>
+            </div>
+            <div class="resource-card">
+                <span>Água e esgoto</span>
+                <strong>${siteAnalysis.water.points}</strong>
+                <small>${formatServices(siteAnalysis.water.services)} · ${siteAnalysis.water.municipalities} município${siteAnalysis.water.municipalities === 1 ? "" : "s"}</small>
+            </div>
+            <div class="resource-card">
+                <span>Conectividade</span>
+                <strong>${siteAnalysis.cables.count}</strong>
+                <small>${formatCableDistance(siteAnalysis.cables)}</small>
+            </div>
+        </div>
+
+        <h3>Matriz renovável no raio</h3>
+        <div class="renewable-breakdown-list">
+            ${renderEnergyBreakdownRows(siteAnalysis.energy.types)}
+        </div>
+
+        <h3>Impacto calculado do data center</h3>
+        <div class="impact-grid">
+            <span>Carga de TI</span>
+            <strong>${siteAnalysis.load.itLoadMw.toLocaleString("pt-BR")} MW</strong>
+            <span>Energia anual estimada</span>
+            <strong>${siteAnalysis.load.annualEnergyGwh.toLocaleString("pt-BR")} GWh/ano</strong>
+            <span>Consumo de água estimado</span>
+            <strong>${siteAnalysis.impact.annualWaterMegaliters.toLocaleString("pt-BR")} ML/ano</strong>
+            <span>Impacto WUI</span>
+            <strong>${siteAnalysis.impact.impactScore}/100 · ${siteAnalysis.impact.impactClass}</strong>
+        </div>
+
+        ${renderNearestResources(siteAnalysis)}
+
+        <p class="field-note">
+            Capacidade renovável é soma nominal das usinas dentro do raio; não representa energia contratada nem conexão garantida.
+        </p>
+    `;
+
+    renderSiteControls();
+}
+
+function renderEnergyBreakdownRows(types) {
+    return types.map(item => `
+        <div class="renewable-breakdown-row">
+            <div class="renewable-breakdown-head">
+                <span><i class="energy-swatch ${getEnergySwatchClass(item.type)}"></i>${item.type}</span>
+                <strong>${item.percentage}%</strong>
+            </div>
+            <div class="bar"><span style="width:${item.percentage}%"></span></div>
+            <small>${formatMw(item.capacityMw)}</small>
+        </div>
+    `).join("");
+}
+
+function renderNearestResources(analysis) {
+    const plants = analysis.energy.topPlants
+        .map((plant) => `
+            <li>
+                <span>${plant.name || plant.type} · ${plant.city}/${plant.state}</span>
+                <strong>${formatMw(plant.capacityMw)} · ${formatKm(plant.distanceKm)}</strong>
+            </li>
+        `)
+        .join("");
+    const water = analysis.water.items
+        .map((item) => `
+            <li>
+                <span>${item.city}/${item.state} · ${item.serviceType}</span>
+                <strong>${formatKm(item.distanceKm)}</strong>
+            </li>
+        `)
+        .join("");
+
+    if (!plants && !water) return "";
+
+    return `
+        <h3>Recursos mais próximos</h3>
+        <ul class="mini-list">
+            ${plants}
+            ${water}
+        </ul>
+    `;
+}
+
 function renderDetails() {
     if (!selectedRegion) return;
     const score = getScore(selectedRegion);
     const status = getClass(score);
+    const scores = getEffectiveScores(selectedRegion);
+    const wuiAssessment = getWuiAssessment(selectedRegion);
 
     document.querySelector("#selectedName").textContent = `${selectedRegion.name} / ${selectedRegion.state}`;
     document.querySelector("#selectedSummary").textContent = selectedRegion.summary;
@@ -215,7 +605,7 @@ function renderDetails() {
 
     document.querySelector("#metrics").innerHTML = Object.entries(metricLabels)
         .map(([key, label]) => {
-            const value = selectedRegion.scores[key] || 0;
+            const value = scores[key] || 0;
             return `
                 <div class="metric">
                     <div class="metric-row">
@@ -228,14 +618,170 @@ function renderDetails() {
         })
         .join("");
 
+    renderWuiResult(wuiAssessment);
+    renderRenewableMix(selectedRegion);
+    renderMethodology(selectedRegion, wuiAssessment);
+
     document.querySelector("#conditions").innerHTML = selectedRegion.conditions
         .map((condition) => `<span class="condition">${condition}</span>`)
         .join("");
 }
 
+function renderWuiResult(assessment) {
+    document.querySelector("#wuiResult").innerHTML = `
+        <div class="wui-head">
+            <span>
+                <span class="wui-label">Índice de impacto</span>
+                <span class="wui-score">${assessment.impactScore}</span>
+            </span>
+            <span class="status-pill ${getWuiClassName(assessment.impactScore)}">${assessment.impactClass}</span>
+        </div>
+        <div class="wui-grid">
+            <span>Estresse Aqueduct</span>
+            <strong>${assessment.stress.label}</strong>
+            <span>Consumo anual estimado</span>
+            <strong>${assessment.annualWaterMegaliters.toLocaleString("pt-BR")} ML/ano</strong>
+            <span>Intensidade</span>
+            <strong>${assessment.waterUseIntensityLPerKwh.toLocaleString("pt-BR")} L/kWh TI</strong>
+            <span>Carga de TI</span>
+            <strong>${assessment.itLoadMw.toLocaleString("pt-BR")} MW</strong>
+        </div>
+        <p class="field-note">${assessment.source}</p>
+    `;
+}
+
+function renderRenewableMix(region) {
+    const summary = RenewableBreakdown.buildRenewableBreakdown(currentData.energy, region);
+
+    if (summary.totalCapacityMw === 0) {
+        document.querySelector("#renewableMix").innerHTML = `
+            <p class="field-note">Sem geração renovável registrada na base ANEEL para este recorte.</p>
+        `;
+        return;
+    }
+
+    document.querySelector("#renewableMix").innerHTML = `
+        <div class="renewable-summary">
+            <span>${summary.scopeLabel}</span>
+            <strong>${summary.totalCapacityMw.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} MW</strong>
+            <small>${summary.totalPlants.toLocaleString("pt-BR")} usina${summary.totalPlants === 1 ? "" : "s"}</small>
+        </div>
+        <div class="renewable-breakdown-list">
+            ${summary.types.map(item => `
+                <div class="renewable-breakdown-row">
+                    <div class="renewable-breakdown-head">
+                        <span><i class="energy-swatch ${getEnergySwatchClass(item.type)}"></i>${item.type}</span>
+                        <strong>${item.percentage}%</strong>
+                    </div>
+                    <div class="bar"><span style="width:${item.percentage}%"></span></div>
+                    <small>${item.capacityMw.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} MW</small>
+                </div>
+            `).join("")}
+        </div>
+        <p class="field-note">
+            Percentual calculado pela capacidade outorgada renovável no ${summary.scopeLabel.toLowerCase()} usado como recorte.
+        </p>
+    `;
+}
+
+function getEnergySwatchClass(type) {
+    const classes = {
+        Solar: "solar",
+        "Eólica": "wind",
+        Hidro: "hydro",
+        Biomassa: "biomass",
+    };
+    return classes[type] || "mixed";
+}
+
+function formatMw(value) {
+    return `${Number(value || 0).toLocaleString("pt-BR", {
+        maximumFractionDigits: 1,
+    })} MW`;
+}
+
+function formatCoordinate(value) {
+    return Number(value || 0).toLocaleString("pt-BR", {
+        maximumFractionDigits: 5,
+    });
+}
+
+function formatNearestRegion(region) {
+    if (!region) return "sem referência";
+    return `${region.name}/${region.state} (${formatKm(region.distanceKm)})`;
+}
+
+function formatServices(services) {
+    if (!services || services.length === 0) return "sem serviço no raio";
+    return services.join(" e ");
+}
+
+function formatCableDistance(cables) {
+    if (cables.count > 0) {
+        return cables.nearestDistanceKm === null
+            ? "cabo no raio"
+            : `mais próximo a ${formatKm(cables.nearestDistanceKm)}`;
+    }
+    if (cables.nearestDistanceKm === null) return "sem cabo na base";
+    return `mais próximo a ${formatKm(cables.nearestDistanceKm)}`;
+}
+
+function formatCoverage(percentage) {
+    if (percentage >= 1000) {
+        return `${(percentage / 100).toLocaleString("pt-BR", {
+            maximumFractionDigits: 1,
+        })}x da carga TI`;
+    }
+    return `${percentage}% da carga TI`;
+}
+
+function formatKm(value) {
+    return `${Number(value || 0).toLocaleString("pt-BR", {
+        maximumFractionDigits: 1,
+    })} km`;
+}
+
+function renderMethodology(region, assessment) {
+    const dataBasis = region.methodology?.dataBasis || [];
+    const proxyNotes = region.methodology?.proxyNotes || [];
+
+    document.querySelector("#methodology").innerHTML = `
+        <div class="methodology-block">
+            <h3>Dados reais usados</h3>
+            <p>${dataBasis.join(" • ") || "Sem fonte declarada"}</p>
+        </div>
+        <div class="methodology-block">
+            <h3>Como calculamos o risco ambiental</h3>
+            <ul>
+                <li><strong>Impacto hídrico:</strong> combina consumo de água do data center, carga de TI e estresse hídrico Aqueduct da UF.</li>
+                <li><strong>Pressão territorial:</strong> municípios mais populosos recebem mais pressão no proxy socioambiental.</li>
+                <li><strong>Mitigação local:</strong> presença de água e esgoto melhora a leitura preliminar de segurança hídrica.</li>
+            </ul>
+        </div>
+        <div class="methodology-block">
+            <h3>Premissas da triagem</h3>
+            <ul>
+                ${proxyNotes.map(note => `<li>${note}</li>`).join("")}
+                <li>WUI é um proxy por UF baseado em The Green Grid WUI e WRI Aqueduct 4.0; não substitui estudo por bacia, outorga ou disponibilidade local.</li>
+                <li>Impacto hídrico atual: ${assessment.impactScore}/100, onde menor é melhor.</li>
+            </ul>
+        </div>
+    `;
+}
+
+function getWuiClassName(impactScore) {
+    if (impactScore >= 76) return "low";
+    if (impactScore >= 51) return "medium";
+    if (impactScore >= 26) return "medium";
+    return "high";
+}
+
 function renderRanking() {
-    const sorted = [...regionsData].sort((a, b) => getScore(b) - getScore(a));
-    document.querySelector("#ranking").innerHTML = sorted
+    const ranked = ViewLimits.limitRankedRegions(regionsData, getScore, selectedRegion, 30);
+    document.querySelector("#rankingNote").textContent = ranked.hiddenCount > 0
+        ? `Mostrando ${ranked.regions.length} de ${ranked.totalCount} regiões. Filtre por estado para investigar mais candidatos.`
+        : `${ranked.totalCount} regiões candidatas neste recorte.`;
+    document.querySelector("#ranking").innerHTML = ranked.regions
         .map((region, index) => {
             const score = getScore(region);
             return `
@@ -265,10 +811,55 @@ function renderWeights() {
         `).join("");
 }
 
+function renderWuiControls() {
+    const presetEntries = Object.entries(WuiModel.WATER_USE_PRESETS);
+    document.querySelector("#wuiPreset").innerHTML = [
+        ...presetEntries.map(([key, preset]) => `
+            <option value="${key}">${preset.label}</option>
+        `),
+        `<option value="custom">Ajustado</option>`,
+    ].join("");
+    document.querySelector("#wuiPreset").value = wuiConfig.preset;
+    document.querySelector("#waterIntensity").value = wuiConfig.waterUseIntensityLPerKwh;
+    document.querySelector("#itLoadMw").value = wuiConfig.itLoadMw;
+    renderWuiPresetDescription();
+}
+
+function renderWuiPresetDescription() {
+    const preset = WuiModel.WATER_USE_PRESETS[wuiConfig.preset];
+    document.querySelector("#wuiPresetDescription").textContent = preset
+        ? preset.description
+        : "Valor ajustado manualmente para simulação.";
+}
+
 function renderSelect() {
-    document.querySelector("#regionSelect").innerHTML = regionsData
+    const selectableRegions = ViewLimits.limitSelectableRegions(regionsData, getScore, selectedState, selectedRegion);
+    document.querySelector("#regionSelect").innerHTML = selectableRegions
         .map(r => `<option value="${r.id}">${r.name} - ${r.state}</option>`)
         .join("");
+}
+
+function renderStateSelect() {
+    const states = RegionOptions.getStateOptions(allRegionsData);
+    document.querySelector("#stateSelect").innerHTML = [
+        `<option value="ALL"${selectedState === "ALL" ? " selected" : ""}>Todos os estados</option>`,
+        ...states.map(state => `<option value="${state}">${state}</option>`),
+    ].join("");
+    document.querySelector("#stateSelect").value = selectedState;
+}
+
+function applyStateFilter(state) {
+    selectedState = state;
+    regionsData = RegionOptions.filterRegionsByState(allRegionsData, state);
+    selectedRegion = null;
+    renderRegions();
+    renderRisk();
+    renderRanking();
+    renderSelect();
+
+    if (regionsData.length > 0) {
+        selectRegion(regionsData[0].id);
+    }
 }
 
 // Event Listeners
@@ -290,8 +881,82 @@ document.querySelector("#resetWeights").addEventListener("click", () => {
     renderDetails();
 });
 
+document.querySelector("#wuiPreset").addEventListener("change", (e) => {
+    const presetKey = e.target.value;
+    wuiConfig.preset = presetKey;
+
+    if (WuiModel.WATER_USE_PRESETS[presetKey]) {
+        wuiConfig.waterUseIntensityLPerKwh = WuiModel.WATER_USE_PRESETS[presetKey].intensity;
+        document.querySelector("#waterIntensity").value = wuiConfig.waterUseIntensityLPerKwh;
+    }
+
+    renderWuiPresetDescription();
+    refreshTerritorialAnalysis();
+});
+
+document.querySelector("#waterIntensity").addEventListener("input", (e) => {
+    wuiConfig.preset = "custom";
+    wuiConfig.waterUseIntensityLPerKwh = Number(e.target.value);
+    document.querySelector("#wuiPreset").value = "custom";
+    renderWuiPresetDescription();
+    refreshTerritorialAnalysis();
+});
+
+document.querySelector("#itLoadMw").addEventListener("input", (e) => {
+    wuiConfig.itLoadMw = Number(e.target.value);
+    refreshTerritorialAnalysis();
+});
+
+function updateSiteRadius(value) {
+    const radius = Math.min(300, Math.max(10, Number(value) || 100));
+    siteConfig.radiusKm = radius;
+    renderSiteControls();
+    renderSiteMarker();
+    renderSiteAnalysis();
+}
+
+document.querySelector("#siteRadius").addEventListener("input", (e) => {
+    updateSiteRadius(e.target.value);
+});
+
+document.querySelector("#siteRadiusInput").addEventListener("input", (e) => {
+    updateSiteRadius(e.target.value);
+});
+
+document.querySelector("#useSelectedRegionAsSite").addEventListener("click", () => {
+    if (!selectedRegion) return;
+    setSimulatedSite(
+        { lat: selectedRegion.lat, lng: selectedRegion.lng, state: selectedRegion.state },
+        { activateResults: true },
+    );
+    map.flyTo([selectedRegion.lat, selectedRegion.lng], 8);
+});
+
+document.querySelector("#calculateSite").addEventListener("click", () => {
+    if (!simulatedSite && selectedRegion) {
+        setSimulatedSite(
+            { lat: selectedRegion.lat, lng: selectedRegion.lng, state: selectedRegion.state },
+            { activateResults: false },
+        );
+    }
+    renderSiteAnalysis();
+    activatePanelTabByTarget("result-site");
+});
+
+function refreshTerritorialAnalysis() {
+    renderRegions();
+    renderRisk();
+    renderRanking();
+    renderDetails();
+    renderSiteAnalysis();
+}
+
 document.querySelector("#focusRegion").addEventListener("click", () => {
     selectRegion(document.querySelector("#regionSelect").value);
+});
+
+document.querySelector("#stateSelect").addEventListener("change", (e) => {
+    applyStateFilter(e.target.value);
 });
 
 document.querySelector("#ranking").addEventListener("click", (e) => {
@@ -337,4 +1002,5 @@ document.querySelectorAll("[data-sub]").forEach(checkbox => {
 
 // Initialization
 initMap();
+initPanelTabs();
 fetchData();
