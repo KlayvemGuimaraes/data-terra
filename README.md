@@ -1,4 +1,4 @@
-# Data Terra
+# DataTerra
 
 Protótipo de inteligência territorial para avaliar regiões candidatas a data
 centers de IA no Brasil. A aplicação cruza dados públicos reais com proxies
