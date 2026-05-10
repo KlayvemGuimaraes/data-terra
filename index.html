@@ -37,9 +37,9 @@
           <div class="panel-section tab-panel is-active" data-tab-panel="controls-layers">
             <h2>
               Camadas
-              <button class="info-hint" type="button" data-info-key="controls-layers" aria-label="Informação sobre camadas" title="Mostra ou oculta os dados geográficos do mapa, como energia renovável, fibra, água e esgoto.">
+              <button class="info-hint" type="button" data-info-key="controls-layers" aria-label="Informação sobre camadas" title="Mostra ou oculta os dados geográficos do mapa, como energia renovável, infraestrutura elétrica, fibra, água e esgoto.">
                 i
-                <span class="info-tooltip" role="tooltip">Mostra ou oculta os dados geográficos do mapa, como energia renovável, fibra, água e esgoto.</span>
+                <span class="info-tooltip" role="tooltip">Mostra ou oculta os dados geográficos do mapa, como energia renovável, infraestrutura elétrica, fibra, água e esgoto.</span>
               </button>
             </h2>
             
@@ -92,11 +92,20 @@
                 <span><i class="energy-swatch biomass"></i>Biomassa</span>
                 <span><i class="energy-swatch mixed"></i>Misto</span>
               </div>
-              <div class="electric-legend" aria-label="Legenda de estruturas elétricas">
-                <span><i class="electric-substation-dot"></i>Subestações</span>
-                <span><i class="electric-transmission-line"></i>Linhas de transmissão</span>
-                <span><i class="electric-load-dot"></i>Carga elétrica</span>
-              </div>
+            </div>
+
+            <label class="check-row">
+              <input type="checkbox" data-layer="electric" checked />
+              <span class="layer-title">Infraestrutura elétrica</span>
+              <button class="info-hint inline-info" type="button" data-info-key="layer-electric" aria-label="Informação sobre infraestrutura elétrica" title="No mapa, aparece como pontos e linhas estimados a partir dos polos de geração ANEEL e centros de demanda SNIS.">
+                i
+                <span class="info-tooltip" role="tooltip">No mapa, aparece como pontos e linhas estimados a partir dos polos de geração ANEEL e centros de demanda SNIS.</span>
+              </button>
+            </label>
+            <div class="sub-filters electric-legend" data-parent="electric" aria-label="Legenda de estruturas elétricas">
+              <span><i class="electric-substation-dot"></i>Subestações estimadas</span>
+              <span><i class="electric-transmission-line"></i>Linhas de transmissão estimadas</span>
+              <span><i class="electric-load-dot"></i>Carga elétrica</span>
             </div>
 
             <label class="check-row">
@@ -458,6 +467,7 @@
     <script src="./wui-model.js"></script>
     <script src="./view-limits.js"></script>
     <script src="./renewable-breakdown.js"></script>
+    <script src="./electric-infrastructure.js"></script>
     <script src="./site-analysis.js"></script>
     <script src="./region-search.js"></script>
     <script src="./api-client.js"></script>

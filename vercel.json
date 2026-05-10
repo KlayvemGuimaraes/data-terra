@@ -1,0 +1,39 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build",
+  "cleanUrls": true,
+  "outputDirectory": ".",
+  "rewrites": [
+    {
+      "source": "/api/cables",
+      "destination": "/data/cables.json"
+    },
+    {
+      "source": "/api/water",
+      "destination": "/data/water.json"
+    },
+    {
+      "source": "/api/energy",
+      "destination": "/data/energy.json"
+    },
+    {
+      "source": "/api/municipalities",
+      "destination": "/data/municipalities.json"
+    },
+    {
+      "source": "/api/summary",
+      "destination": "/data/summary.json"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/data/(.*).json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        }
+      ]
+    }
+  ]
+}

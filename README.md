@@ -126,9 +126,29 @@ Depois abra:
 http://localhost:3000
 ```
 
+## Deploy na Vercel
+
+O deploy da Vercel usa a interface estática da raiz do projeto e redireciona os
+endpoints `/api/*` para arquivos JSON versionados em `data/`.
+
+Antes de subir, valide:
+
+```bash
+npm run build
+npm test
+```
+
+Se o banco local for reingerido, atualize os JSONs usados no deploy:
+
+```bash
+npm run export:static-api
+```
+
+Na Vercel, use a raiz do repositório como Root Directory. O build command pode
+ficar como `npm run build`.
+
 ## Testes
 
 ```bash
-cd server
 npm test
 ```

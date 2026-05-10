@@ -21,6 +21,7 @@ test("loads helper models before the main app script", () => {
   const html = fs.readFileSync(path.join(rootDir, "index.html"), "utf8");
   const limitsScriptIndex = html.indexOf("./view-limits.js");
   const renewableScriptIndex = html.indexOf("./renewable-breakdown.js");
+  const electricScriptIndex = html.indexOf("./electric-infrastructure.js");
   const siteScriptIndex = html.indexOf("./site-analysis.js");
   const regionSearchScriptIndex = html.indexOf("./region-search.js");
   const apiClientScriptIndex = html.indexOf("./api-client.js");
@@ -28,11 +29,13 @@ test("loads helper models before the main app script", () => {
 
   assert.ok(limitsScriptIndex > 0);
   assert.ok(renewableScriptIndex > limitsScriptIndex);
-  assert.ok(siteScriptIndex > renewableScriptIndex);
+  assert.ok(electricScriptIndex > renewableScriptIndex);
+  assert.ok(siteScriptIndex > electricScriptIndex);
   assert.ok(regionSearchScriptIndex > siteScriptIndex);
   assert.ok(apiClientScriptIndex > regionSearchScriptIndex);
   assert.ok(appScriptIndex > limitsScriptIndex);
   assert.ok(appScriptIndex > renewableScriptIndex);
+  assert.ok(appScriptIndex > electricScriptIndex);
   assert.ok(appScriptIndex > siteScriptIndex);
   assert.ok(appScriptIndex > regionSearchScriptIndex);
   assert.ok(appScriptIndex > apiClientScriptIndex);
@@ -106,17 +109,20 @@ test("declares regional fiber proximity rendering", () => {
   assert.match(app, /renderRegionFiberProximity/);
 });
 
-test("explains electrical structure legend without declaring unavailable map layers", () => {
+test("declares electrical infrastructure layer and renderer", () => {
   const html = fs.readFileSync(path.join(rootDir, "index.html"), "utf8");
   const app = fs.readFileSync(path.join(rootDir, "app.js"), "utf8");
 
+  assert.match(html, /data-layer="electric"/);
+  assert.match(html, /Infraestrutura elétrica/);
   assert.match(html, /Subestações/);
   assert.match(html, /Linhas de transmissão/);
   assert.match(html, /Carga elétrica/);
   assert.match(html, /electric-substation-dot/);
   assert.match(html, /electric-transmission-line/);
   assert.match(html, /electric-load-dot/);
-  assert.doesNotMatch(app, /electric:\s*L\.layerGroup\(/);
+  assert.match(app, /electric:\s*L\.layerGroup\(/);
+  assert.match(app, /renderElectricInfrastructure/);
 });
 
 test("main interface sections expose hoverable information hints", () => {
@@ -128,6 +134,7 @@ test("main interface sections expose hoverable information hints", () => {
     "layer-wind",
     "layer-hydro",
     "layer-biomass",
+    "layer-electric",
     "layer-fiber",
     "layer-water",
     "layer-water-supply",

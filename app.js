@@ -1,15 +1,17 @@
 let map;
 let energyRenderer;
+let electricRenderer;
 let regionRenderer;
 let layers = {
     cables: L.layerGroup(),
     water: L.layerGroup(),
     energy: L.layerGroup(),
+    electric: L.layerGroup(),
     regions: L.layerGroup(),
     site: L.layerGroup()
 };
 
-let activeLayers = new Set(["energy", "cables", "water"]);
+let activeLayers = new Set(["energy", "electric", "cables", "water"]);
 let weights = {
     renewables: 5,
     grid: 4,
@@ -77,12 +79,15 @@ function initMap() {
 
     map.createPane("energyGridPane");
     map.getPane("energyGridPane").style.zIndex = 380;
+    map.createPane("electricPane");
+    map.getPane("electricPane").style.zIndex = 405;
     map.createPane("regionPane");
     map.getPane("regionPane").style.zIndex = 430;
     map.createPane("sitePane");
     map.getPane("sitePane").style.zIndex = 470;
 
     energyRenderer = L.canvas({ pane: "energyGridPane", padding: 0.5 });
+    electricRenderer = L.canvas({ pane: "electricPane", padding: 0.5 });
     regionRenderer = L.canvas({ pane: "regionPane", padding: 0.5 });
     Object.values(layers).forEach(layer => layer.addTo(map));
     map.on("zoomend", () => {
@@ -180,6 +185,7 @@ async function fetchData() {
         renderCables();
         renderWater();
         renderEnergy();
+        renderElectricInfrastructure();
         
         allRegionsData = RegionOptions.buildCandidateRegions(water, { energyRows: energy, cables });
         selectedState = "ALL";
@@ -284,6 +290,81 @@ function renderEnergyCellPopup(cell) {
         Capacidade somada: ${capacity} MW<br>
         Tipos: ${cell.types.join(", ")}
     `;
+}
+
+function renderElectricInfrastructure() {
+    layers.electric.clearLayers();
+
+    const infrastructure = ElectricInfrastructure.buildElectricInfrastructure(currentData.energy, currentData.water, {
+        cellSize: 1,
+        minSubstationCapacityMw: 80,
+        maxSubstations: 90,
+        maxLineDistanceKm: 260,
+        maxLines: 130,
+        minLoadPopulation: 100000,
+        maxLoadCenters: 70,
+    });
+
+    infrastructure.transmissionLines.forEach((line) => {
+        L.polyline(
+            [
+                [line.from.lat, line.from.lng],
+                [line.to.lat, line.to.lng],
+            ],
+            {
+                renderer: electricRenderer,
+                pane: "electricPane",
+                color: "#f59e0b",
+                weight: 1.7,
+                opacity: 0.62,
+                dashArray: "6 5",
+                interactive: true,
+            },
+        ).bindPopup(`
+            <strong>Linha de transmissão estimada</strong><br>
+            Liga polos ANEEL próximos para indicar eixo elétrico provável.<br>
+            Distância: ${formatKm(line.distanceKm)}
+        `).addTo(layers.electric);
+    });
+
+    infrastructure.substations.forEach((node) => {
+        L.circleMarker([node.lat, node.lng], {
+            renderer: electricRenderer,
+            pane: "electricPane",
+            radius: Math.min(8, 4 + Math.log10(node.capacityMw + 1)),
+            color: "#ffffff",
+            weight: 1.5,
+            opacity: 0.95,
+            fillColor: "#8b5cf6",
+            fillOpacity: 0.84,
+            interactive: true,
+        }).bindPopup(`
+            <strong>Subestação estimada</strong><br>
+            ${node.city ? `${node.city}/${node.state}<br>` : ""}
+            Polo renovável ANEEL: ${formatMw(node.capacityMw)}<br>
+            Usinas no entorno: ${node.plantCount}<br>
+            Fonte dominante: ${node.dominantType}
+        `).addTo(layers.electric);
+    });
+
+    infrastructure.loadCenters.forEach((center) => {
+        L.circleMarker([center.lat, center.lng], {
+            renderer: electricRenderer,
+            pane: "electricPane",
+            radius: Math.min(7, 3 + Math.log10(center.population + 1) - 4),
+            color: "#ffffff",
+            weight: 1.2,
+            opacity: 0.9,
+            fillColor: "#0f766e",
+            fillOpacity: 0.82,
+            interactive: true,
+        }).bindPopup(`
+            <strong>Carga elétrica</strong><br>
+            ${center.city}/${center.state}<br>
+            População atendida: ${center.population.toLocaleString("pt-BR")}<br>
+            Serviços: ${formatServices(center.services)}
+        `).addTo(layers.electric);
+    });
 }
 
 function renderRegions() {

@@ -15,13 +15,16 @@ test("topbar uses the DataTerra logo asset", () => {
   assert.match(html, /Manual da banca/);
 });
 
-test("topbar logo wrapper is unframed and panel tabs stay in one row", () => {
+test("topbar logo wrapper is unframed and panel tabs keep readable spacing", () => {
   const css = fs.readFileSync(path.join(rootDir, "styles.css"), "utf8");
 
   assert.match(css, /\.brand-lockup\s*{[^}]*background:\s*transparent/s);
   assert.match(css, /\.brand-lockup\s*{[^}]*border:\s*0/s);
   assert.match(css, /\.brand-lockup\s*{[^}]*border-radius:\s*0/s);
-  assert.match(css, /\.panel-tabs\s*{[^}]*grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\)/s);
+  assert.match(css, /\.panel-tabs\s*{[^}]*display:\s*grid/s);
+  assert.match(css, /\.panel-tabs\s*{[^}]*grid-template-columns:\s*[\s\S]*1\.25fr[\s\S]*1\.25fr[\s\S]*0\.7fr[\s\S]*0\.9fr[\s\S]*1fr/s);
+  assert.match(css, /\.panel-tabs\s*{[^}]*gap:\s*4px/s);
+  assert.match(css, /\.tab-button\s*{[^}]*min-width:\s*0/s);
   assert.match(css, /\.tab-button\s*{[^}]*white-space:\s*nowrap/s);
 });
 

@@ -1,0 +1,15 @@
+{
+  "name": "dataterra",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "build": "node scripts/verify-static-api.js",
+    "export:static-api": "node scripts/export-static-api.js",
+    "test": "npm --prefix server test",
+    "start": "npm --prefix server start"
+  },
+  "engines": {
+    "node": "20.x"
+  }
+}
