@@ -164,14 +164,7 @@
     }
 
     function summarizeCables(cables, site, radiusKm) {
-        const nearby = cables
-            .map((cable) => ({
-                name: cable.name || "Cabo sem nome",
-                owners: cable.owners,
-                distanceKm: minDistanceToGeometryKm(site, cable.geometry),
-            }))
-            .filter((cable) => Number.isFinite(cable.distanceKm))
-            .sort((a, b) => a.distanceKm - b.distanceKm);
+        const nearby = buildCableDistances(cables, site);
         const withinRadius = nearby.filter((cable) => cable.distanceKm <= radiusKm);
         const nearest = nearby[0];
 
@@ -186,23 +179,110 @@
         };
     }
 
+    function summarizeFiberProximity(cables, site, radiusKm) {
+        const nearest = buildCableDistances(cables, site)[0];
+
+        if (!nearest) {
+            return {
+                score: 0,
+                label: "Sem dado",
+                className: "unknown",
+                nearestDistanceKm: null,
+                nearestName: null,
+                nearestPoint: null,
+                inRadius: false,
+            };
+        }
+
+        const band = classifyFiberDistance(nearest.distanceKm);
+
+        return {
+            score: scoreFiberDistance(nearest.distanceKm),
+            label: band.label,
+            className: band.className,
+            nearestDistanceKm: round(nearest.distanceKm, 1),
+            nearestName: nearest.name,
+            nearestPoint: nearest.nearestPoint
+                ? {
+                    lat: round(nearest.nearestPoint.lat, 5),
+                    lng: round(nearest.nearestPoint.lng, 5),
+                }
+                : null,
+            inRadius: nearest.distanceKm <= radiusKm,
+        };
+    }
+
+    function buildCableDistances(cables, site) {
+        return (cables || [])
+            .map((cable) => {
+                const proximity = nearestPointToGeometryKm(site, cable.geometry);
+                if (!proximity) return null;
+                return {
+                    name: cable.name || "Cabo sem nome",
+                    owners: cable.owners,
+                    distanceKm: proximity.distanceKm,
+                    nearestPoint: proximity.point,
+                };
+            })
+            .filter(Boolean)
+            .sort((a, b) => a.distanceKm - b.distanceKm);
+    }
+
+    function scoreFiberDistance(distanceKm) {
+        if (!Number.isFinite(distanceKm)) return 0;
+        if (distanceKm <= 5) return 100;
+        if (distanceKm <= 25) {
+            return clamp(Math.round(95 - ((distanceKm - 5) / 20) * 15), 80, 95);
+        }
+        if (distanceKm <= 75) {
+            return clamp(Math.round(79 - ((distanceKm - 25) / 50) * 29), 50, 79);
+        }
+        return clamp(Math.round(49 - Math.min(29, (distanceKm - 75) * 0.3)), 20, 49);
+    }
+
+    function classifyFiberDistance(distanceKm) {
+        if (!Number.isFinite(distanceKm)) return { label: "Sem dado", className: "unknown" };
+        if (distanceKm <= 5) return { label: "Excelente", className: "high" };
+        if (distanceKm <= 25) return { label: "Boa", className: "high" };
+        if (distanceKm <= 75) return { label: "Moderada", className: "medium" };
+        return { label: "Distante", className: "low" };
+    }
+
     function minDistanceToGeometryKm(site, geometry) {
+        const nearest = nearestPointToGeometryKm(site, geometry);
+        return nearest ? nearest.distanceKm : Infinity;
+    }
+
+    function nearestPointToGeometryKm(site, geometry) {
         const lines = getGeometryLines(geometry);
-        let min = Infinity;
+        let nearest = null;
 
         lines.forEach((line) => {
             for (let index = 0; index < line.length; index += 1) {
                 const point = line[index];
                 if (!isLngLat(point)) continue;
 
-                min = Math.min(min, distanceKm(site, { lat: point[1], lng: point[0] }));
+                const endpoint = { lat: Number(point[1]), lng: Number(point[0]) };
+                nearest = keepNearestProximity(nearest, {
+                    point: endpoint,
+                    distanceKm: distanceKm(site, endpoint),
+                });
 
                 if (index === 0 || !isLngLat(line[index - 1])) continue;
-                min = Math.min(min, distanceToSegmentKm(site, line[index - 1], point));
+                nearest = keepNearestProximity(
+                    nearest,
+                    closestPointOnSegmentKm(site, line[index - 1], point),
+                );
             }
         });
 
-        return min;
+        return nearest;
+    }
+
+    function keepNearestProximity(current, candidate) {
+        if (!candidate || !Number.isFinite(candidate.distanceKm)) return current;
+        if (!current || candidate.distanceKm < current.distanceKm) return candidate;
+        return current;
     }
 
     function getGeometryLines(geometry) {
@@ -222,6 +302,10 @@
     }
 
     function distanceToSegmentKm(site, start, end) {
+        return closestPointOnSegmentKm(site, start, end)?.distanceKm ?? Infinity;
+    }
+
+    function closestPointOnSegmentKm(site, start, end) {
         const lngScale = 111.32 * Math.cos(toRadians(site.lat));
         const latScale = 111.32;
         const a = {
@@ -236,11 +320,22 @@
         const dy = b.y - a.y;
         const lengthSquared = dx * dx + dy * dy;
 
-        if (lengthSquared === 0) return Math.sqrt(a.x * a.x + a.y * a.y);
+        if (lengthSquared === 0) {
+            return {
+                point: { lat: Number(start[1]), lng: Number(start[0]) },
+                distanceKm: Math.sqrt(a.x * a.x + a.y * a.y),
+            };
+        }
 
         const t = clamp((-(a.x * dx + a.y * dy)) / lengthSquared, 0, 1);
         const closest = { x: a.x + dx * t, y: a.y + dy * t };
-        return Math.sqrt(closest.x * closest.x + closest.y * closest.y);
+        return {
+            point: {
+                lat: site.lat + closest.y / latScale,
+                lng: site.lng + closest.x / lngScale,
+            },
+            distanceKm: Math.sqrt(closest.x * closest.x + closest.y * closest.y),
+        };
     }
 
     function inferNearestRegion(site, regions) {
@@ -280,17 +375,14 @@
         return clamp(Math.round(impact.suitabilityScore * 0.65 + serviceScore * 0.35), 0, 100);
     }
 
-    function scoreConnectivity(cables, radiusKm) {
-        if (cables.count > 0) return clamp(82 + cables.count * 2, 82, 100);
-        if (cables.nearestDistanceKm === null) return 35;
-        if (cables.nearestDistanceKm <= radiusKm * 1.5) return 68;
-        if (cables.nearestDistanceKm <= radiusKm * 3) return 55;
-        return 40;
+    function scoreConnectivity(cables, fiber) {
+        if (fiber.score > 0) return clamp(fiber.score + Math.min(cables.count, 5) * 2, 0, 100);
+        return 35;
     }
 
-    function buildScores(energy, water, cables, impact, itLoadMw, radiusKm) {
+    function buildScores(energy, water, cables, fiber, impact, itLoadMw) {
         const renewables = scoreRenewables(energy.totalCapacityMw, itLoadMw);
-        const connectivity = scoreConnectivity(cables, radiusKm);
+        const connectivity = scoreConnectivity(cables, fiber);
         return {
             renewables,
             grid: clamp(Math.round(renewables * 0.7 + connectivity * 0.3), 0, 100),
@@ -331,7 +423,8 @@
         const energy = summarizeEnergy(energyRows, itLoadMw);
         const water = summarizeWater(waterRows);
         const cables = summarizeCables(data.cables || [], site, radiusKm);
-        const scores = buildScores(energy, water, cables, impact, itLoadMw, radiusKm);
+        const fiber = summarizeFiberProximity(data.cables || [], site, radiusKm);
+        const scores = buildScores(energy, water, cables, fiber, impact, itLoadMw);
 
         return {
             site: {
@@ -357,6 +450,7 @@
             energy,
             water,
             cables,
+            fiber,
             impact,
             scores,
             overallScore: weightedScore(scores, options.weights || DEFAULT_WEIGHTS),

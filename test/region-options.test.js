@@ -160,3 +160,51 @@ test("uses renewable capacity and population evidence instead of seeded scores",
   assert.equal(ba.scores.renewables, 57);
   assert.ok(sp.methodology.proxyNotes.some((note) => note.includes("capacidade renovável")));
 });
+
+test("uses nearest fiber cable distance as the regional connectivity indicator", () => {
+  const localWaterRows = [
+    {
+      city: "Perto da Fibra",
+      state: "SP",
+      provider: "Provider SP",
+      service_type: "Água",
+      population: 50000,
+      lat: -23.55,
+      lng: -46.63,
+    },
+    {
+      city: "Longe da Fibra",
+      state: "SP",
+      provider: "Provider SP",
+      service_type: "Água",
+      population: 50000,
+      lat: -21.0,
+      lng: -50.0,
+    },
+  ];
+  const cables = [
+    {
+      name: "Backbone SP",
+      geometry: {
+        type: "LineString",
+        coordinates: [
+          [-46.8, -23.7],
+          [-46.63, -23.55],
+          [-46.2, -23.2],
+        ],
+      },
+    },
+  ];
+
+  const regions = buildCandidateRegions(localWaterRows, { cables });
+  const near = regions.find((region) => region.name === "Perto da Fibra");
+  const far = regions.find((region) => region.name === "Longe da Fibra");
+
+  assert.equal(near.fiber.label, "Excelente");
+  assert.equal(near.fiber.score, 100);
+  assert.equal(near.fiber.nearestName, "Backbone SP");
+  assert.equal(near.fiber.nearestDistanceKm, 0);
+  assert.ok(near.scores.connectivity > far.scores.connectivity);
+  assert.ok(near.tags.some((tag) => tag.includes("Fibra")));
+  assert.ok(near.methodology.proxyNotes.some((note) => note.includes("rotas de fibra")));
+});

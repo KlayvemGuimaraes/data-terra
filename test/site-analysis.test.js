@@ -136,3 +136,34 @@ test("calculates site impact and scores from local resources", () => {
   assert.ok(analysis.scores.water > 70);
   assert.ok(analysis.overallScore >= 80);
 });
+
+test("scores fiber proximity from the nearest cable route", () => {
+  const analysis = analyzeSiteResources(fixtures, center, {
+    radiusKm: 35,
+    regions,
+    wuiConfig: { waterUseIntensityLPerKwh: 1, itLoadMw: 50 },
+  });
+
+  assert.equal(analysis.fiber.label, "Excelente");
+  assert.equal(analysis.fiber.score, 100);
+  assert.equal(analysis.fiber.nearestName, "Backbone SP");
+  assert.equal(analysis.fiber.nearestDistanceKm, 0);
+  assert.deepEqual(analysis.fiber.nearestPoint, {
+    lat: -23.55,
+    lng: -46.63,
+  });
+});
+
+test("returns a no-data fiber indicator when cable geometry is unavailable", () => {
+  const analysis = analyzeSiteResources({ ...fixtures, cables: [{ name: "Sem geometria" }] }, center, {
+    radiusKm: 35,
+    regions,
+    wuiConfig: { waterUseIntensityLPerKwh: 1, itLoadMw: 50 },
+  });
+
+  assert.equal(analysis.fiber.label, "Sem dado");
+  assert.equal(analysis.fiber.score, 0);
+  assert.equal(analysis.fiber.nearestDistanceKm, null);
+  assert.equal(analysis.fiber.nearestName, null);
+  assert.equal(analysis.fiber.nearestPoint, null);
+});
