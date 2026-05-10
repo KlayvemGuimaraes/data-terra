@@ -35,6 +35,166 @@
         return clamp(Math.round(minScore + normalized * (maxScore - minScore)), minScore, maxScore);
     }
 
+    function toRadians(value) {
+        return (value * Math.PI) / 180;
+    }
+
+    function distanceKm(a, b) {
+        const lat1 = toNumber(a?.lat);
+        const lng1 = toNumber(a?.lng);
+        const lat2 = toNumber(b?.lat);
+        const lng2 = toNumber(b?.lng);
+
+        if (!isValidCoordinate(lat1, lng1) || !isValidCoordinate(lat2, lng2)) {
+            return Infinity;
+        }
+
+        const earthRadiusKm = 6371;
+        const dLat = toRadians(lat2 - lat1);
+        const dLng = toRadians(lng2 - lng1);
+        const originLat = toRadians(lat1);
+        const targetLat = toRadians(lat2);
+        const h =
+            Math.sin(dLat / 2) ** 2 +
+            Math.cos(originLat) * Math.cos(targetLat) * Math.sin(dLng / 2) ** 2;
+
+        return earthRadiusKm * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+    }
+
+    function buildFiberContext(cables) {
+        const routes = (cables || [])
+            .map((cable) => ({
+                name: cable.name || "Cabo sem nome",
+                lines: getGeometryLines(cable.geometry),
+            }))
+            .filter((route) => route.lines.length > 0);
+
+        return { routes };
+    }
+
+    function getGeometryLines(geometry) {
+        if (!geometry) return [];
+        if (geometry.type === "LineString") return [geometry.coordinates || []];
+        if (geometry.type === "MultiLineString") return geometry.coordinates || [];
+        return [];
+    }
+
+    function isLngLat(point) {
+        return (
+            Array.isArray(point) &&
+            point.length >= 2 &&
+            Number.isFinite(Number(point[0])) &&
+            Number.isFinite(Number(point[1]))
+        );
+    }
+
+    function nearestDistanceToRouteKm(site, lines) {
+        let min = Infinity;
+
+        lines.forEach((line) => {
+            for (let index = 0; index < line.length; index += 1) {
+                const point = line[index];
+                if (!isLngLat(point)) continue;
+
+                min = Math.min(min, distanceKm(site, { lat: point[1], lng: point[0] }));
+
+                if (index === 0 || !isLngLat(line[index - 1])) continue;
+                min = Math.min(min, distanceToSegmentKm(site, line[index - 1], point));
+            }
+        });
+
+        return min;
+    }
+
+    function distanceToSegmentKm(site, start, end) {
+        const siteLat = toNumber(site.lat);
+        const siteLng = toNumber(site.lng);
+        if (!isValidCoordinate(siteLat, siteLng)) return Infinity;
+
+        const lngScale = 111.32 * Math.cos(toRadians(siteLat));
+        const latScale = 111.32;
+        const a = {
+            x: (Number(start[0]) - siteLng) * lngScale,
+            y: (Number(start[1]) - siteLat) * latScale,
+        };
+        const b = {
+            x: (Number(end[0]) - siteLng) * lngScale,
+            y: (Number(end[1]) - siteLat) * latScale,
+        };
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const lengthSquared = dx * dx + dy * dy;
+
+        if (lengthSquared === 0) return Math.sqrt(a.x * a.x + a.y * a.y);
+
+        const t = clamp((-(a.x * dx + a.y * dy)) / lengthSquared, 0, 1);
+        const closest = { x: a.x + dx * t, y: a.y + dy * t };
+        return Math.sqrt(closest.x * closest.x + closest.y * closest.y);
+    }
+
+    function summarizeFiberProximity(fiberContext, site) {
+        let nearest = null;
+
+        (fiberContext.routes || []).forEach((route) => {
+            const candidate = {
+                name: route.name,
+                distanceKm: nearestDistanceToRouteKm(site, route.lines),
+            };
+            if (!Number.isFinite(candidate.distanceKm)) return;
+            if (!nearest || candidate.distanceKm < nearest.distanceKm) {
+                nearest = candidate;
+            }
+        });
+
+        if (!nearest) return null;
+
+        const band = classifyFiberDistance(nearest.distanceKm);
+        return {
+            hasData: true,
+            score: scoreFiberDistance(nearest.distanceKm),
+            label: band.label,
+            className: band.className,
+            nearestDistanceKm: round(nearest.distanceKm, 1),
+            nearestName: nearest.name,
+        };
+    }
+
+    function scoreFiberDistance(distanceKm) {
+        if (!Number.isFinite(distanceKm)) return 0;
+        if (distanceKm <= 5) return 100;
+        if (distanceKm <= 25) {
+            return clamp(Math.round(95 - ((distanceKm - 5) / 20) * 15), 80, 95);
+        }
+        if (distanceKm <= 75) {
+            return clamp(Math.round(79 - ((distanceKm - 25) / 50) * 29), 50, 79);
+        }
+        return clamp(Math.round(49 - Math.min(29, (distanceKm - 75) * 0.3)), 20, 49);
+    }
+
+    function classifyFiberDistance(distanceKm) {
+        if (!Number.isFinite(distanceKm)) return { label: "Sem dado", className: "unknown" };
+        if (distanceKm <= 5) return { label: "Excelente", className: "high" };
+        if (distanceKm <= 25) return { label: "Boa", className: "high" };
+        if (distanceKm <= 75) return { label: "Moderada", className: "medium" };
+        return { label: "Distante", className: "low" };
+    }
+
+    function round(value, digits = 2) {
+        const factor = 10 ** digits;
+        return Math.round((toNumber(value) || 0) * factor) / factor;
+    }
+
+    function formatKm(value) {
+        return `${Number(value || 0).toLocaleString("pt-BR", {
+            maximumFractionDigits: 1,
+        })} km`;
+    }
+
+    function buildFiberTags(fiber) {
+        if (!fiber?.hasData) return [];
+        return [`Fibra ${fiber.label.toLowerCase()} (${formatKm(fiber.nearestDistanceKm)})`];
+    }
+
     function formatServices(services) {
         const sorted = Array.from(services).sort((a, b) => a.localeCompare(b));
         if (sorted.includes("Água") && sorted.includes("Esgoto")) return "Água e Esgoto";
@@ -78,13 +238,14 @@
         return { byCity, byState };
     }
 
-    function buildScores(region, energyContext) {
+    function buildScores(region, energyContext, fiber) {
         const cityEnergy = energyContext.byCity.get(`${region.name}::${region.state}`);
         const stateEnergy = energyContext.byState.get(region.state);
         const population = region.population || 0;
         const localCapacity = cityEnergy?.capacityMw || 0;
         const stateCapacity = stateEnergy?.capacityMw || 0;
         const populationScore = scoreFromLog(population, 12000000, 42, 100);
+        const connectivityScore = fiber?.hasData ? fiber.score : populationScore;
         const serviceCoverageScore = serviceScore(region.services);
         const renewablesScore = localCapacity > 0
             ? scoreFromLog(localCapacity, 1000, 55, 100)
@@ -98,7 +259,7 @@
             grid: gridScore,
             water: serviceCoverageScore,
             environment: clamp(Math.round(86 - populationScore * 0.18 + (serviceCoverageScore >= 78 ? 4 : 0)), 62, 88),
-            connectivity: populationScore,
+            connectivity: connectivityScore,
             licensing: clamp(Math.round(58 + serviceCoverageScore * 0.25), 60, 82),
         };
     }
@@ -143,7 +304,7 @@
         return Array.from(groups.values());
     }
 
-    function buildWaterCandidateRegions(waterRows, energyContext) {
+    function buildWaterCandidateRegions(waterRows, energyContext, fiberContext) {
         return groupWaterRows(waterRows)
             .map((group) => {
                 const lat = group.latTotal / group.coordinateCount;
@@ -164,20 +325,29 @@
                     population: group.population,
                     services: group.services,
                 };
-                const scores = buildScores(region, energyContext);
+                const fiber = summarizeFiberProximity(fiberContext, region);
+                const scores = buildScores(region, energyContext, fiber);
 
                 return {
                     ...region,
+                    fiber,
                     summary: `Cidade com ${group.population.toLocaleString("pt-BR")} habitantes. Serviços de ${serviceLabel} registrados para ${providerLabel || "prestador não informado"}.`,
                     scores,
-                    tags: [serviceLabel, group.state],
+                    tags: [serviceLabel, group.state, ...buildFiberTags(fiber)],
                     recommendation: "Aptidão preliminar baseada em dados reais de saneamento, geração renovável e proxies territoriais declarados.",
                     conditions: ["Validar rede elétrica local", "Confirmar disponibilidade de fibra", "Checar licenciamento ambiental municipal"],
                     methodology: {
-                        dataBasis: ["Saneamento municipal", "Geração renovável ANEEL", "População municipal"],
+                        dataBasis: [
+                            "Saneamento municipal",
+                            "Geração renovável ANEEL",
+                            "População municipal",
+                            ...(fiber?.hasData ? ["Rotas de cabos de fibra"] : []),
+                        ],
                         proxyNotes: [
                             "Energia e rede usam capacidade renovável no município ou na UF como proxy inicial.",
-                            "Conectividade e mercado usam população como proxy até integrar rotas terrestres de fibra.",
+                            fiber?.hasData
+                                ? "Conectividade usa proximidade das rotas de fibra; quanto mais perto do cabo, maior o indicador."
+                                : "Conectividade e mercado usam população como proxy até integrar rotas terrestres de fibra.",
                             "Risco socioambiental é preliminar e deve ser substituído por dados ambientais locais.",
                         ],
                     },
@@ -186,7 +356,7 @@
             .filter(Boolean);
     }
 
-    function buildEnergyCandidateRegions(energyRows, existingKeys) {
+    function buildEnergyCandidateRegions(energyRows, existingKeys, fiberContext) {
         const grouped = new Map();
 
         energyRows.forEach((row) => {
@@ -223,30 +393,40 @@
             const capacityScore = Math.min(100, Math.round(group.capacityMw / 8));
             const renewableScore = scoreFromLog(group.capacityMw, 1000, 60, 100);
             const gridScore = scoreFromLog(group.capacityMw, 1000, 55, 88);
-
-            return {
+            const region = {
                 id: group.id,
                 name: group.name,
                 state: group.state,
                 lat: group.latTotal / group.count,
                 lng: group.lngTotal / group.count,
+            };
+            const fiber = summarizeFiberProximity(fiberContext, region);
+
+            return {
+                ...region,
+                fiber,
                 summary: `Cidade com ${group.count.toLocaleString("pt-BR")} usinas renováveis registradas na ANEEL, somando ${formatMw(group.capacityMw)} MW de capacidade outorgada.`,
                 scores: {
                     renewables: Math.max(60, renewableScore, capacityScore),
                     grid: gridScore,
                     water: 50,
                     environment: 72,
-                    connectivity: 52,
+                    connectivity: fiber?.hasData ? fiber.score : 52,
                     licensing: 70,
                 },
-                tags: ["Energia renovável", group.state],
+                tags: ["Energia renovável", group.state, ...buildFiberTags(fiber)],
                 recommendation: "Candidato inferido por concentração de geração renovável quando não há registro de saneamento na base local.",
                 conditions: ["Adicionar dados de água locais", "Validar rede elétrica e fibra no município"],
                 methodology: {
-                    dataBasis: ["Geração renovável ANEEL"],
+                    dataBasis: [
+                        "Geração renovável ANEEL",
+                        ...(fiber?.hasData ? ["Rotas de cabos de fibra"] : []),
+                    ],
                     proxyNotes: [
                         "Candidato criado por concentração de usinas renováveis sem dado local de saneamento.",
-                        "Água, conectividade e risco permanecem proxies conservadores até integrar bases locais.",
+                        fiber?.hasData
+                            ? "Conectividade usa proximidade das rotas de fibra; quanto mais perto do cabo, maior o indicador."
+                            : "Água, conectividade e risco permanecem proxies conservadores até integrar bases locais.",
                     ],
                 },
             };
@@ -255,11 +435,16 @@
 
     function buildCandidateRegions(waterRows, options = {}) {
         const energyContext = buildEnergyContext(options.energyRows || []);
-        const waterRegions = buildWaterCandidateRegions(waterRows, energyContext);
+        const fiberContext = buildFiberContext(options.cables || []);
+        const waterRegions = buildWaterCandidateRegions(waterRows, energyContext, fiberContext);
         const existingKeys = new Set(
             waterRegions.map((region) => `${region.name}::${region.state}`),
         );
-        const energyRegions = buildEnergyCandidateRegions(options.energyRows || [], existingKeys);
+        const energyRegions = buildEnergyCandidateRegions(
+            options.energyRows || [],
+            existingKeys,
+            fiberContext,
+        );
 
         return [...waterRegions, ...energyRegions];
     }

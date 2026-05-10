@@ -149,7 +149,7 @@ async function fetchData() {
         renderWater();
         renderEnergy();
         
-        allRegionsData = RegionOptions.buildCandidateRegions(water, { energyRows: energy });
+        allRegionsData = RegionOptions.buildCandidateRegions(water, { energyRows: energy, cables });
         selectedState = "ALL";
         regionsData = RegionOptions.filterRegionsByState(allRegionsData, selectedState);
 
@@ -399,9 +399,9 @@ function setSimulatedSite(latlng, options = {}) {
         state: latlng.state,
     };
 
+    renderSiteAnalysis();
     renderSiteMarker();
     renderSiteControls();
-    renderSiteAnalysis();
 
     if (options.activateResults) {
         activatePanelTabByTarget("result-site");
@@ -438,6 +438,42 @@ function renderSiteMarker() {
         setSimulatedSite(marker.getLatLng(), { activateResults: true });
         activatePanelTabByTarget("controls-site");
     });
+
+    renderNearestFiberLine();
+}
+
+function renderNearestFiberLine() {
+    const fiber = siteAnalysis?.fiber;
+    const nearestPoint = fiber?.nearestPoint;
+    if (!nearestPoint || !activeLayers.has("cables")) return;
+
+    L.polyline(
+        [
+            [simulatedSite.lat, simulatedSite.lng],
+            [nearestPoint.lat, nearestPoint.lng],
+        ],
+        {
+            pane: "sitePane",
+            color: "#2970a8",
+            weight: 2,
+            opacity: 0.88,
+            dashArray: "5 6",
+            interactive: false,
+            className: "fiber-proximity-line",
+        },
+    ).addTo(layers.site);
+
+    L.circleMarker([nearestPoint.lat, nearestPoint.lng], {
+        pane: "sitePane",
+        radius: 5,
+        color: "#ffffff",
+        weight: 1.5,
+        opacity: 0.95,
+        fillColor: "#2970a8",
+        fillOpacity: 0.95,
+        interactive: false,
+        className: "fiber-proximity-endpoint",
+    }).addTo(layers.site);
 }
 
 function renderSiteControls() {
@@ -465,6 +501,7 @@ function renderSiteControls() {
 function renderSiteAnalysis() {
     const container = document.querySelector("#siteAnalysis");
     if (!simulatedSite || currentData.energy.length === 0) {
+        siteAnalysis = null;
         container.innerHTML = `
             <p class="field-note">Defina um ponto no mapa ou use a região selecionada para calcular os recursos no raio.</p>
         `;
@@ -514,9 +551,9 @@ function renderSiteAnalysis() {
                 <small>${formatServices(siteAnalysis.water.services)} · ${siteAnalysis.water.municipalities} município${siteAnalysis.water.municipalities === 1 ? "" : "s"}</small>
             </div>
             <div class="resource-card">
-                <span>Conectividade</span>
-                <strong>${siteAnalysis.cables.count}</strong>
-                <small>${formatCableDistance(siteAnalysis.cables)}</small>
+                <span>Proximidade da fibra</span>
+                <strong>${siteAnalysis.fiber.score}/100</strong>
+                <small>${renderFiberProximity(siteAnalysis.fiber, siteAnalysis.cables)}</small>
             </div>
         </div>
 
@@ -577,15 +614,53 @@ function renderNearestResources(analysis) {
             </li>
         `)
         .join("");
+    const fiber = analysis.fiber.nearestName
+        ? `
+            <li>
+                <span>Cabos de Fibra · ${analysis.fiber.nearestName}</span>
+                <strong>${analysis.fiber.label} · ${formatKm(analysis.fiber.nearestDistanceKm)}</strong>
+            </li>
+        `
+        : "";
 
-    if (!plants && !water) return "";
+    if (!plants && !water && !fiber) return "";
 
     return `
         <h3>Recursos mais próximos</h3>
         <ul class="mini-list">
             ${plants}
             ${water}
+            ${fiber}
         </ul>
+    `;
+}
+
+function renderFiberProximity(fiber, cables) {
+    if (!fiber || fiber.label === "Sem dado") {
+        return `<span class="fiber-band unknown">Sem dado</span> sem cabo válido na base`;
+    }
+
+    const cableCount = cables.count === 1 ? "1 cabo no raio" : `${cables.count} cabos no raio`;
+    return `
+        <span class="fiber-band ${fiber.className}">${fiber.label}</span>
+        ${fiber.nearestName} a ${formatKm(fiber.nearestDistanceKm)} · ${cableCount}
+    `;
+}
+
+function renderRegionFiberProximity(fiber) {
+    if (!fiber || fiber.label === "Sem dado") {
+        return `
+            <p class="field-note region-fiber-summary">
+                Fibra: sem rota válida na base para pontuar esta região.
+            </p>
+        `;
+    }
+
+    return `
+        <div class="region-fiber-summary">
+            <span class="fiber-band ${fiber.className}">${fiber.label}</span>
+            <span>${fiber.nearestName} a ${formatKm(fiber.nearestDistanceKm)}. Quanto mais perto da rota, maior o indicador.</span>
+        </div>
     `;
 }
 
@@ -599,6 +674,7 @@ function renderDetails() {
     document.querySelector("#selectedName").textContent = `${selectedRegion.name} / ${selectedRegion.state}`;
     document.querySelector("#selectedSummary").textContent = selectedRegion.summary;
     document.querySelector("#selectedScore").textContent = score;
+    document.querySelector("#selectedFiber").innerHTML = renderRegionFiberProximity(selectedRegion.fiber);
     
     const statusEl = document.querySelector("#selectedClass");
     statusEl.textContent = status.label;
@@ -942,9 +1018,9 @@ document.querySelector("#itLoadMw").addEventListener("input", (e) => {
 function updateSiteRadius(value) {
     const radius = Math.min(300, Math.max(10, Number(value) || 100));
     siteConfig.radiusKm = radius;
-    renderSiteControls();
-    renderSiteMarker();
     renderSiteAnalysis();
+    renderSiteMarker();
+    renderSiteControls();
 }
 
 document.querySelector("#siteRadius").addEventListener("input", (e) => {
@@ -1022,6 +1098,7 @@ function renderMunicipalityDetails(option) {
     document.querySelector("#selectedSummary").textContent =
         "Município escolhido pelo autocomplete. A análise principal passa a ser o raio de consumo do data center.";
     document.querySelector("#selectedScore").textContent = siteAnalysis ? siteAnalysis.overallScore : 0;
+    document.querySelector("#selectedFiber").innerHTML = renderRegionFiberProximity(siteAnalysis?.fiber);
 
     const statusEl = document.querySelector("#selectedClass");
     statusEl.textContent = siteAnalysis ? status.label : "Simulação local";
@@ -1072,12 +1149,16 @@ document.querySelectorAll("[data-layer]").forEach(checkbox => {
         const subContainer = document.querySelector(`.sub-filters[data-parent="${layer}"]`);
         
         if (checkbox.checked) {
+            activeLayers.add(layer);
             map.addLayer(layers[layer]);
             if (subContainer) subContainer.style.display = 'block';
         } else {
+            activeLayers.delete(layer);
             map.removeLayer(layers[layer]);
             if (subContainer) subContainer.style.display = 'none';
         }
+
+        if (layer === "cables") renderSiteMarker();
     });
 });
 

@@ -75,3 +75,22 @@ test("region search uses a writable autocomplete after the state select", () => 
   assert.match(html, /id="regionOptions"/);
   assert.doesNotMatch(html, /id="regionSelect"/);
 });
+
+test("declares fiber proximity legend and local result rendering", () => {
+  const html = fs.readFileSync(path.join(rootDir, "index.html"), "utf8");
+  const app = fs.readFileSync(path.join(rootDir, "app.js"), "utf8");
+
+  assert.match(html, /Proximidade da fibra/);
+  assert.match(html, /fiber-proximity-dot/);
+  assert.match(app, /siteAnalysis\.fiber/);
+  assert.match(app, /renderFiberProximity/);
+});
+
+test("declares regional fiber proximity rendering", () => {
+  const html = fs.readFileSync(path.join(rootDir, "index.html"), "utf8");
+  const app = fs.readFileSync(path.join(rootDir, "app.js"), "utf8");
+
+  assert.match(html, /id="selectedFiber"/);
+  assert.match(app, /buildCandidateRegions\(water,\s*\{\s*energyRows:\s*energy,\s*cables\s*\}\)/);
+  assert.match(app, /renderRegionFiberProximity/);
+});

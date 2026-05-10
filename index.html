@@ -68,6 +68,9 @@
               <input type="checkbox" data-layer="cables" checked />
               <span class="layer-title">Cabos de Fibra</span>
             </label>
+            <div class="sub-filters fiber-layer-note" data-parent="cables">
+              <span><i class="fiber-proximity-dot"></i>Proximidade da fibra: quanto mais perto, melhor</span>
+            </div>
 
             <!-- Water Filters -->
             <label class="check-row">
@@ -207,6 +210,7 @@
               <span><i class="dot high"></i> Alta aptidão</span>
               <span><i class="dot medium"></i> Condicionada</span>
               <span><i class="dot low"></i> Alto risco</span>
+              <span><i class="fiber-proximity-dot"></i> Proximidade da fibra</span>
             </div>
           </div>
 
@@ -215,7 +219,7 @@
             <div class="map-note">
               <strong>Leitura territorial:</strong>
               quadrados agregam energia renovável; pontos mostram regiões candidatas;
-              o círculo marca o raio do data center.
+              o círculo marca o raio do data center; a linha pontilhada indica a fibra mais próxima.
               <span id="mapCandidateNote"></span>
             </div>
           </div>
@@ -242,6 +246,7 @@
                 </div>
                 <span id="selectedClass" class="status-pill"></span>
               </div>
+              <div id="selectedFiber"></div>
             </div>
 
             <div class="panel-section">
