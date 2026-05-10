@@ -334,7 +334,7 @@
                     summary: `Cidade com ${group.population.toLocaleString("pt-BR")} habitantes. Serviços de ${serviceLabel} registrados para ${providerLabel || "prestador não informado"}.`,
                     scores,
                     tags: [serviceLabel, group.state, ...buildFiberTags(fiber)],
-                    recommendation: "Aptidão preliminar baseada em dados reais de saneamento, geração renovável e proxies territoriais declarados.",
+                    recommendation: "Aptidão preliminar baseada em dados reais de saneamento, geração renovável e premissas territoriais declaradas.",
                     conditions: ["Validar rede elétrica local", "Confirmar disponibilidade de fibra", "Checar licenciamento ambiental municipal"],
                     methodology: {
                         dataBasis: [
@@ -343,11 +343,11 @@
                             "População municipal",
                             ...(fiber?.hasData ? ["Rotas de cabos de fibra"] : []),
                         ],
-                        proxyNotes: [
-                            "Energia e rede usam capacidade renovável no município ou na UF como proxy inicial.",
+                        assumptionNotes: [
+                            "Energia e rede usam capacidade renovável no município ou na UF como indicador inicial.",
                             fiber?.hasData
                                 ? "Conectividade usa proximidade das rotas de fibra; quanto mais perto do cabo, maior o indicador."
-                                : "Conectividade e mercado usam população como proxy até integrar rotas terrestres de fibra.",
+                                : "Conectividade e mercado usam população como indicador indireto até integrar rotas terrestres de fibra.",
                             "Risco socioambiental é preliminar e deve ser substituído por dados ambientais locais.",
                         ],
                     },
@@ -422,11 +422,11 @@
                         "Geração renovável ANEEL",
                         ...(fiber?.hasData ? ["Rotas de cabos de fibra"] : []),
                     ],
-                    proxyNotes: [
+                    assumptionNotes: [
                         "Candidato criado por concentração de usinas renováveis sem dado local de saneamento.",
                         fiber?.hasData
                             ? "Conectividade usa proximidade das rotas de fibra; quanto mais perto do cabo, maior o indicador."
-                            : "Água, conectividade e risco permanecem proxies conservadores até integrar bases locais.",
+                            : "Água, conectividade e risco permanecem indicadores estimados conservadores até integrar bases locais.",
                     ],
                 },
             };

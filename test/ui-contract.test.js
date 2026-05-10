@@ -107,3 +107,45 @@ test("explains electrical structure legend without declaring unavailable map lay
   assert.match(html, /electric-load-dot/);
   assert.doesNotMatch(app, /electric:\s*L\.layerGroup\(/);
 });
+
+test("main interface sections expose hoverable information hints", () => {
+  const html = fs.readFileSync(path.join(rootDir, "index.html"), "utf8");
+  const expectedHints = [
+    "controls-layers",
+    "controls-weights",
+    "controls-wui",
+    "controls-site",
+    "controls-region",
+    "map-overview",
+    "result-summary",
+    "result-water",
+    "result-site",
+    "result-method",
+    "result-ranking",
+  ];
+
+  expectedHints.forEach((hintKey) => {
+    assert.match(html, new RegExp(`data-info-key="${hintKey}"`));
+  });
+  assert.ok((html.match(/class="info-hint"/g) || []).length >= expectedHints.length);
+});
+
+test("summary view explains score interpretation, examples and estimated criteria limits", () => {
+  const html = fs.readFileSync(path.join(rootDir, "index.html"), "utf8");
+
+  assert.match(html, /id="scoreGuide"/);
+  assert.match(html, /Como interpretar o score/);
+  assert.match(html, /data-example="good-site"/);
+  assert.match(html, /data-example="bad-site"/);
+  assert.match(html, /Critérios estimados/);
+});
+
+test("information tooltips are positioned against the viewport to avoid clipping", () => {
+  const app = fs.readFileSync(path.join(rootDir, "app.js"), "utf8");
+  const css = fs.readFileSync(path.join(rootDir, "styles.css"), "utf8");
+
+  assert.match(app, /function initInfoHints/);
+  assert.match(app, /getBoundingClientRect/);
+  assert.match(css, /\.info-tooltip\s*{[^}]*position:\s*fixed/s);
+  assert.match(css, /--tooltip-left/);
+});

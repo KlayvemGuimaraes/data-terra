@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Manual da Solução DataTerra</title>
+    <style>
+      :root {
+        --ink: #17231d;
+        --muted: #5f7167;
+        --accent: #0c6b58;
+        --accent-dark: #084d41;
+        --line: #d9e2dd;
+        --soft: #f3f8f5;
+        --gold: #c58a14;
+        --low: #c54532;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: #fff;
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 1.45;
+      }
+
+      .page {
+        max-width: 880px;
+        margin: 0 auto;
+        padding: 34px 42px 44px;
+      }
+
+      header {
+        display: grid;
+        grid-template-columns: 210px 1fr;
+        align-items: center;
+        gap: 26px;
+        padding-bottom: 20px;
+        border-bottom: 3px solid var(--accent);
+      }
+
+      .logo {
+        width: 210px;
+        display: block;
+      }
+
+      h1,
+      h2,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        margin-bottom: 8px;
+        color: var(--accent-dark);
+        font-size: 31px;
+        line-height: 1.1;
+      }
+
+      h2 {
+        margin-bottom: 9px;
+        color: var(--accent-dark);
+        font-size: 20px;
+      }
+
+      .subtitle,
+      .muted,
+      footer {
+        color: var(--muted);
+      }
+
+      .section {
+        padding: 18px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      ul,
+      ol {
+        margin: 8px 0 0;
+        padding-left: 22px;
+      }
+
+      li {
+        margin: 4px 0;
+      }
+
+      .answer {
+        padding: 14px 16px;
+        color: #fff;
+        background: var(--accent-dark);
+        border-radius: 8px;
+        font-weight: 700;
+      }
+
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .flow span,
+      .card,
+      .warning {
+        padding: 11px 12px;
+        border-radius: 8px;
+      }
+
+      .flow span {
+        background: var(--soft);
+        border: 1px solid var(--line);
+        font-weight: 700;
+        text-align: center;
+      }
+
+      .cards,
+      .scale {
+        display: grid;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .scale {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .card {
+        border: 1px solid var(--line);
+      }
+
+      .card strong {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--accent-dark);
+      }
+
+      .scale div {
+        padding: 10px;
+        color: #fff;
+        border-radius: 8px;
+        font-weight: 700;
+      }
+
+      .high {
+        background: #1f9d63;
+      }
+
+      .medium {
+        background: var(--gold);
+      }
+
+      .low {
+        background: var(--low);
+      }
+
+      .warning {
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+      }
+
+      footer {
+        padding-top: 16px;
+        font-size: 12px;
+      }
+
+      @media print {
+        body {
+          print-color-adjust: exact;
+          -webkit-print-color-adjust: exact;
+        }
+
+        .page {
+          max-width: none;
+          padding: 24px 30px;
+        }
+
+        .section {
+          break-inside: avoid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header>
+        <img class="logo" src="../assets/dataterra-logo.png" alt="DataTerra" />
+        <div>
+          <h1>Manual da Solução DataTerra</h1>
+          <p class="subtitle">
+            Guia direto para a banca avaliadora entender o objetivo, o uso e a
+            leitura dos resultados da plataforma.
+          </p>
+        </div>
+      </header>
+
+      <section class="section">
+        <h2>1. Objetivo da solução</h2>
+        <p class="answer">
+          A DataTerra estima o impacto territorial de instalar um data center em
+          uma região, cruzando recursos disponíveis, impacto hídrico e risco
+          ambiental estimado.
+        </p>
+        <p>
+          A pergunta central da plataforma é: se um data center for instalado
+          neste local, quais recursos existem ao redor e quais alertas precisam
+          ser considerados antes de avançar?
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>2. Quando será utilizada</h2>
+        <p>
+          A plataforma deve ser usada na triagem inicial de locais. Ela ajuda a
+          escolher quais regiões merecem estudo técnico mais profundo.
+        </p>
+        <ul>
+          <li>Comparar municípios ou regiões candidatas.</li>
+          <li>Visualizar energia renovável, água, esgoto e conectividade.</li>
+          <li>Simular o raio de consumo de um data center.</li>
+          <li>Explicar para a banca por que um local parece melhor ou pior.</li>
+        </ul>
+      </section>
+
+      <section class="section">
+        <h2>3. Como usar a plataforma</h2>
+        <div class="flow" aria-label="Fluxo principal de uso">
+          <span>1. Escolher local</span>
+          <span>2. Definir raio</span>
+          <span>3. Ver recursos</span>
+          <span>4. Calcular impacto</span>
+        </div>
+        <ol>
+          <li>Selecione um estado e busque um município ou região candidata.</li>
+          <li>Clique no mapa ou use o local selecionado como ponto do data center.</li>
+          <li>Ajuste o raio para medir recursos próximos.</li>
+          <li>Leia o resumo, o impacto hídrico, as premissas e o ranking.</li>
+        </ol>
+      </section>
+
+      <section class="section">
+        <h2>4. Como interpretar o score</h2>
+        <p>
+          O score vai de 0 a 100. Quanto maior, melhor a aptidão preliminar do
+          local para receber um data center.
+        </p>
+        <div class="scale">
+          <div class="high">80-100<br />Alta aptidão</div>
+          <div class="medium">60-79<br />Condicionada</div>
+          <div class="low">0-59<br />Alto risco</div>
+        </div>
+        <p>
+          O cálculo combina energia renovável, infraestrutura elétrica,
+          segurança hídrica, conectividade, risco socioambiental estimado e
+          segurança regulatória preliminar.
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>5. O que observar na avaliação</h2>
+        <div class="cards">
+          <div class="card">
+            <strong>Mapa</strong>
+            Mostra pontos candidatos, quadrados de geração renovável, água,
+            esgoto, fibra e o raio escolhido.
+          </div>
+          <div class="card">
+            <strong>Impacto hídrico</strong>
+            Usa uma estimativa WUI. Maior consumo de água e maior estresse
+            hídrico elevam o impacto.
+          </div>
+          <div class="card">
+            <strong>Recursos no raio</strong>
+            Resume quais fontes renováveis, registros de saneamento e conexões
+            aparecem perto do local.
+          </div>
+          <div class="card">
+            <strong>Premissas</strong>
+            Separa dados reais de indicadores estimados usados apenas para
+            orientar a triagem.
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>6. Limitações e próximos passos</h2>
+        <p class="warning">
+          A DataTerra não substitui estudo ambiental, outorga de água,
+          licenciamento, análise elétrica real ou parecer técnico final.
+        </p>
+        <p>
+          Próximos passos: integrar análise por bacia hidrográfica, subestações,
+          rotas terrestres de fibra, áreas sensíveis e regras de licenciamento.
+        </p>
+      </section>
+
+      <footer>
+        DataTerra - manual sucinto para uso, demonstração e avaliação acadêmica.
+      </footer>
+    </main>
+  </body>
+</html>

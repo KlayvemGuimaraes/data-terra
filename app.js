@@ -52,7 +52,7 @@ const metricLabels = {
     renewables: "Energia renovável",
     grid: "Infraestrutura elétrica",
     water: "Segurança hídrica (WUI)",
-    environment: "Baixo risco socioambiental (proxy)",
+    environment: "Baixo risco socioambiental estimado",
     connectivity: "Conectividade e mercado",
     licensing: "Segurança regulatória",
 };
@@ -110,6 +110,40 @@ function initPanelTabs() {
             const panel = button.closest(".panel");
             setActivePanelTab(panel, button.dataset.tabTarget);
         });
+    });
+}
+
+function initInfoHints() {
+    const viewportPadding = 12;
+
+    document.querySelectorAll(".info-hint").forEach((hint) => {
+        const tooltip = hint.querySelector(".info-tooltip");
+        if (!tooltip) return;
+
+        const positionTooltip = () => {
+            const hintRect = hint.getBoundingClientRect();
+            const tooltipWidth = Math.min(260, window.innerWidth - viewportPadding * 2);
+            const tooltipHeight = tooltip.offsetHeight || 64;
+            let left = hintRect.left + hintRect.width / 2 - tooltipWidth / 2;
+            let top = hintRect.bottom + 8;
+
+            left = Math.max(
+                viewportPadding,
+                Math.min(left, window.innerWidth - tooltipWidth - viewportPadding),
+            );
+
+            if (top + tooltipHeight > window.innerHeight - viewportPadding) {
+                top = Math.max(viewportPadding, hintRect.top - tooltipHeight - 8);
+            }
+
+            tooltip.style.setProperty("--tooltip-left", `${left}px`);
+            tooltip.style.setProperty("--tooltip-top", `${top}px`);
+            tooltip.style.setProperty("--tooltip-width", `${tooltipWidth}px`);
+        };
+
+        hint.addEventListener("mouseenter", positionTooltip);
+        hint.addEventListener("focus", positionTooltip);
+        hint.addEventListener("touchstart", positionTooltip, { passive: true });
     });
 }
 
@@ -822,7 +856,7 @@ function formatKm(value) {
 
 function renderMethodology(region, assessment) {
     const dataBasis = region.methodology?.dataBasis || [];
-    const proxyNotes = region.methodology?.proxyNotes || [];
+    const assumptionNotes = region.methodology?.assumptionNotes || [];
 
     document.querySelector("#methodology").innerHTML = `
         <div class="methodology-block">
@@ -833,15 +867,15 @@ function renderMethodology(region, assessment) {
             <h3>Como calculamos o risco ambiental</h3>
             <ul>
                 <li><strong>Impacto hídrico:</strong> combina consumo de água do data center, carga de TI e estresse hídrico Aqueduct da UF.</li>
-                <li><strong>Pressão territorial:</strong> municípios mais populosos recebem mais pressão no proxy socioambiental.</li>
+                <li><strong>Pressão territorial:</strong> municípios mais populosos recebem mais pressão no indicador socioambiental estimado.</li>
                 <li><strong>Mitigação local:</strong> presença de água e esgoto melhora a leitura preliminar de segurança hídrica.</li>
             </ul>
         </div>
         <div class="methodology-block">
             <h3>Premissas da triagem</h3>
             <ul>
-                ${proxyNotes.map(note => `<li>${note}</li>`).join("")}
-                <li>WUI é um proxy por UF baseado em The Green Grid WUI e WRI Aqueduct 4.0; não substitui estudo por bacia, outorga ou disponibilidade local.</li>
+                ${assumptionNotes.map(note => `<li>${note}</li>`).join("")}
+                <li>WUI é uma estimativa por UF baseada em The Green Grid WUI e WRI Aqueduct 4.0; não substitui estudo por bacia, outorga ou disponibilidade local.</li>
                 <li>Impacto hídrico atual: ${assessment.impactScore}/100, onde menor é melhor.</li>
             </ul>
         </div>
@@ -1186,4 +1220,5 @@ document.querySelectorAll("[data-sub]").forEach(checkbox => {
 // Initialization
 initMap();
 initPanelTabs();
+initInfoHints();
 fetchData();

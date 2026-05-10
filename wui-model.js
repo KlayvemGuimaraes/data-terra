@@ -115,7 +115,7 @@
             suitabilityScore: clamp(100 - impactScore, 0, 100),
             impactClass: classifyImpact(impactScore),
             stress,
-            source: "WUI-proxy inspirado em The Green Grid WUI + WRI Aqueduct 4.0",
+            source: "Estimativa WUI inspirada em The Green Grid WUI + WRI Aqueduct 4.0",
         };
     }
 

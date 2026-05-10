@@ -3,21 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DataTerra | Inteligencia territorial para data centers</title>
+    <title>DataTerra | Inteligência territorial para data centers</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <main class="app-shell">
       <header class="topbar">
-        <div>
-          <p class="eyebrow">Dados reais + proxies declarados</p>
-          <h1>DataTerra</h1>
-        </div>
+        <a class="brand-lockup" href="#" aria-label="DataTerra">
+          <img src="./assets/dataterra-logo-header.png" alt="DataTerra" />
+        </a>
         <p class="topbar-copy">
-          Inteligência territorial para avaliar onde data centers de IA podem
-          crescer com energia limpa, segurança hídrica e menor risco ambiental.
+          Avalie onde instalar um data center: escolha o local, defina o raio e
+          veja recursos disponíveis, impacto hídrico e risco ambiental estimado.
         </p>
+        <div class="topbar-actions">
+          <a class="manual-link" href="./docs/manual-dataterra.pdf" target="_blank" rel="noreferrer">
+            Manual da banca
+          </a>
+        </div>
       </header>
 
       <section class="workspace">
@@ -31,7 +35,13 @@
           </nav>
 
           <div class="panel-section tab-panel is-active" data-tab-panel="controls-layers">
-            <h2>Camadas</h2>
+            <h2>
+              Camadas
+              <button class="info-hint" type="button" data-info-key="controls-layers" aria-label="Informação sobre camadas" title="Mostra ou oculta os dados geográficos do mapa, como energia renovável, fibra, água e risco.">
+                i
+                <span class="info-tooltip" role="tooltip">Mostra ou oculta os dados geográficos do mapa, como energia renovável, fibra, água e risco.</span>
+              </button>
+            </h2>
             
             <!-- Energy Filters -->
             <label class="check-row">
@@ -99,13 +109,19 @@
 
             <label class="check-row">
               <input type="checkbox" data-layer="risk" checked />
-              <span class="layer-title">Risco socioambiental (proxy)</span>
+              <span class="layer-title">Risco socioambiental estimado</span>
             </label>
           </div>
 
           <div class="panel-section tab-panel" data-tab-panel="controls-weights" hidden>
             <div class="section-heading">
-              <h2>Prioridades</h2>
+              <h2>
+                Prioridades
+                <button class="info-hint" type="button" data-info-key="controls-weights" aria-label="Informação sobre prioridades" title="Ajusta o peso de cada critério no score final de aptidão territorial.">
+                  i
+                  <span class="info-tooltip" role="tooltip">Ajusta o peso de cada critério no score final de aptidão territorial.</span>
+                </button>
+              </h2>
               <button id="resetWeights" class="ghost-button" type="button">
                 Resetar
               </button>
@@ -114,7 +130,13 @@
           </div>
 
           <div class="panel-section tab-panel" data-tab-panel="controls-wui" hidden>
-            <h2>Simulação WUI</h2>
+            <h2>
+              Simulação WUI
+              <button class="info-hint" type="button" data-info-key="controls-wui" aria-label="Informação sobre simulação WUI" title="Simula o impacto hídrico do data center a partir da carga de TI, consumo de água e estresse hídrico da UF.">
+                i
+                <span class="info-tooltip" role="tooltip">Simula o impacto hídrico do data center a partir da carga de TI, consumo de água e estresse hídrico da UF.</span>
+              </button>
+            </h2>
             <label class="select-label" for="wuiPreset">Perfil hídrico</label>
             <select id="wuiPreset"></select>
             <p id="wuiPresetDescription" class="field-note"></p>
@@ -141,13 +163,19 @@
               step="1"
             />
             <p class="field-note">
-              Proxy inspirado em TGG WUI, usando estresse hídrico WRI Aqueduct
+              Estimativa inspirada em TGG WUI, usando estresse hídrico WRI Aqueduct
               4.0 por UF.
             </p>
           </div>
 
           <div class="panel-section tab-panel" data-tab-panel="controls-site" hidden>
-            <h2>Local do data center</h2>
+            <h2>
+              Local do data center
+              <button class="info-hint" type="button" data-info-key="controls-site" aria-label="Informação sobre local do data center" title="Define um ponto no mapa e um raio para calcular recursos disponíveis e impacto local.">
+                i
+                <span class="info-tooltip" role="tooltip">Define um ponto no mapa e um raio para calcular recursos disponíveis e impacto local.</span>
+              </button>
+            </h2>
             <p class="field-note">
               Ponto manual no mapa com raio de consumo para energia, água e conectividade.
             </p>
@@ -185,7 +213,13 @@
           </div>
 
           <div class="panel-section tab-panel" data-tab-panel="controls-region" hidden>
-            <h2>Triagem de região</h2>
+            <h2>
+              Triagem de região
+              <button class="info-hint" type="button" data-info-key="controls-region" aria-label="Informação sobre triagem de região" title="Filtra por estado e busca regiões candidatas ou municípios para análise no mapa.">
+                i
+                <span class="info-tooltip" role="tooltip">Filtra por estado e busca regiões candidatas ou municípios para análise no mapa.</span>
+              </button>
+            </h2>
             <label class="select-label" for="stateSelect">Estado</label>
             <select id="stateSelect"></select>
             <label class="select-label" for="regionSearch">Região candidata ou município</label>
@@ -209,7 +243,13 @@
           <div class="map-toolbar">
             <div>
               <p class="eyebrow">Brasil</p>
-              <h2>Hotspots para data centers verdes</h2>
+              <h2>
+                Hotspots para data centers verdes
+                <button class="info-hint" type="button" data-info-key="map-overview" aria-label="Informação sobre o mapa" title="Mapa principal com candidatos, infraestrutura, recursos renováveis agregados e raio de simulação.">
+                  i
+                  <span class="info-tooltip" role="tooltip">Mapa principal com candidatos, infraestrutura, recursos renováveis agregados e raio de simulação.</span>
+                </button>
+              </h2>
             </div>
             <div class="legend" aria-label="Legenda">
               <span><i class="dot high"></i> Alta aptidão</span>
@@ -245,7 +285,13 @@
 
           <div class="tab-panel is-active" data-tab-panel="result-summary">
             <div class="panel-section selected-region">
-              <p class="eyebrow">Região selecionada</p>
+              <p class="eyebrow">
+                Região selecionada
+                <button class="info-hint" type="button" data-info-key="result-summary" aria-label="Informação sobre resumo da região" title="Resume o local ativo, seu score de aptidão e a classificação territorial.">
+                  i
+                  <span class="info-tooltip" role="tooltip">Resume o local ativo, seu score de aptidão e a classificação territorial.</span>
+                </button>
+              </p>
               <h2 id="selectedName">-</h2>
               <p id="selectedSummary" class="muted"></p>
               <div class="score-block">
@@ -258,43 +304,115 @@
               <div id="selectedFiber"></div>
             </div>
 
+            <div id="scoreGuide" class="panel-section score-guide">
+              <h2>
+                Como interpretar o score
+                <button class="info-hint" type="button" data-info-key="result-score-guide" aria-label="Informação sobre interpretação do score" title="Explica a escala de aptidão e reforça quais critérios são indicadores estimados de triagem.">
+                  i
+                  <span class="info-tooltip" role="tooltip">Explica a escala de aptidão e reforça quais critérios são indicadores estimados de triagem.</span>
+                </button>
+              </h2>
+              <div class="score-guide-scale" aria-label="Escala do score territorial">
+                <span><i class="dot high"></i><strong>80-100</strong> Alta aptidão</span>
+                <span><i class="dot medium"></i><strong>60-79</strong> Condicionada</span>
+                <span><i class="dot low"></i><strong>0-59</strong> Alto risco</span>
+              </div>
+              <div class="site-example-grid">
+                <div class="site-example" data-example="good-site">
+                  <span>Local bom</span>
+                  <p>Alta renovável no raio, menor impacto WUI, água/esgoto registrados e conectividade próxima.</p>
+                </div>
+                <div class="site-example" data-example="bad-site">
+                  <span>Local ruim</span>
+                  <p>Pouca geração renovável, maior pressão hídrica, sem saneamento no raio e fibra distante.</p>
+                </div>
+              </div>
+              <p class="assumption-note">
+                <strong>Critérios estimados:</strong> infraestrutura elétrica, conectividade, segurança regulatória
+                e risco socioambiental são leituras preliminares. Eles orientam a triagem, mas não substituem
+                laudos, outorgas, análise de rede ou licenciamento.
+              </p>
+            </div>
+
             <div class="panel-section">
-              <h2>Indicadores</h2>
+              <h2>
+                Indicadores
+                <button class="info-hint" type="button" data-info-key="result-indicators" aria-label="Informação sobre indicadores" title="Mostra a pontuação dos critérios usados para compor o score final.">
+                  i
+                  <span class="info-tooltip" role="tooltip">Mostra a pontuação dos critérios usados para compor o score final.</span>
+                </button>
+              </h2>
               <div id="metrics" class="metrics"></div>
             </div>
 
             <div class="panel-section">
-              <h2>Composição renovável</h2>
+              <h2>
+                Composição renovável
+                <button class="info-hint" type="button" data-info-key="result-renewables" aria-label="Informação sobre composição renovável" title="Detalha quais fontes renováveis predominam no recorte analisado e sua participação.">
+                  i
+                  <span class="info-tooltip" role="tooltip">Detalha quais fontes renováveis predominam no recorte analisado e sua participação.</span>
+                </button>
+              </h2>
               <div id="renewableMix" class="renewable-mix"></div>
             </div>
           </div>
 
           <div class="panel-section tab-panel" data-tab-panel="result-water" hidden>
-            <h2>Impacto hídrico <span class="heading-note">menor é melhor</span></h2>
+            <h2>
+              Impacto hídrico <span class="heading-note">menor é melhor</span>
+              <button class="info-hint" type="button" data-info-key="result-water" aria-label="Informação sobre impacto hídrico" title="Mostra o impacto de água estimado pelo WUI: consumo anual, intensidade e estresse hídrico.">
+                i
+                <span class="info-tooltip" role="tooltip">Mostra o impacto de água estimado pelo WUI: consumo anual, intensidade e estresse hídrico.</span>
+              </button>
+            </h2>
             <div id="wuiResult" class="wui-result"></div>
           </div>
 
           <div class="panel-section tab-panel" data-tab-panel="result-site" hidden>
             <p class="eyebrow">Simulação local</p>
-            <h2>Raio de consumo</h2>
+            <h2>
+              Raio de consumo
+              <button class="info-hint" type="button" data-info-key="result-site" aria-label="Informação sobre raio de consumo" title="Calcula energia, água, fibra e impacto do data center dentro do raio configurado.">
+                i
+                <span class="info-tooltip" role="tooltip">Calcula energia, água, fibra e impacto do data center dentro do raio configurado.</span>
+              </button>
+            </h2>
             <div id="siteAnalysis" class="site-analysis"></div>
           </div>
 
           <div class="tab-panel" data-tab-panel="result-method" hidden>
             <div class="panel-section">
-              <h2>Fontes e premissas</h2>
+              <h2>
+                Fontes e premissas
+                <button class="info-hint" type="button" data-info-key="result-method" aria-label="Informação sobre fontes e premissas" title="Explica quais bases reais e premissas declaradas sustentam os cálculos da plataforma.">
+                  i
+                  <span class="info-tooltip" role="tooltip">Explica quais bases reais e premissas declaradas sustentam os cálculos da plataforma.</span>
+                </button>
+              </h2>
               <div id="methodology" class="methodology"></div>
             </div>
 
             <div class="panel-section">
-              <h2>Recomendação</h2>
+              <h2>
+                Recomendação
+                <button class="info-hint" type="button" data-info-key="result-recommendation" aria-label="Informação sobre recomendação" title="Lista cuidados e validações necessárias antes de considerar o local viável.">
+                  i
+                  <span class="info-tooltip" role="tooltip">Lista cuidados e validações necessárias antes de considerar o local viável.</span>
+                </button>
+              </h2>
               <p id="recommendation" class="recommendation"></p>
               <div id="conditions" class="conditions"></div>
             </div>
           </div>
 
           <div class="panel-section tab-panel" data-tab-panel="result-ranking" hidden>
-            <h2>Ranking</h2>
+            <h2>
+              Ranking
+              <button class="info-hint" type="button" data-info-key="result-ranking" aria-label="Informação sobre ranking" title="Ordena as regiões candidatas pelo score calculado com os critérios atuais.">
+                i
+                <span class="info-tooltip" role="tooltip">Ordena as regiões candidatas pelo score calculado com os critérios atuais.</span>
+              </button>
+            </h2>
             <p id="rankingNote" class="field-note"></p>
             <ol id="ranking" class="ranking"></ol>
           </div>

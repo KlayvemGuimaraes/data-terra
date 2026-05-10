@@ -1,9 +1,114 @@
 # DataTerra
 
-Protótipo de inteligência territorial para avaliar regiões candidatas a data
-centers de IA no Brasil. A aplicação cruza dados públicos reais com proxies
-de triagem para comparar energia renovável, água, conectividade, risco e
-condições iniciais de implantação.
+DataTerra é uma plataforma de inteligência territorial para avaliar o impacto
+de um data center em diferentes regiões do Brasil.
+
+A solução ajuda a responder:
+
+```text
+Se eu instalar um data center neste local, quais recursos existem ao redor e qual impacto estimado ele pode gerar?
+```
+
+## Quando usar
+
+Use a DataTerra na etapa inicial de análise, antes de estudos técnicos completos,
+para comparar locais e decidir onde vale investigar com mais profundidade.
+
+Ela é útil para:
+
+- avaliar disponibilidade de energia renovável;
+- estimar impacto hídrico de um data center;
+- observar infraestrutura de água, esgoto e conectividade;
+- comparar regiões candidatas;
+- justificar escolhas em uma apresentação técnica.
+
+## Como usar a plataforma
+
+1. Escolha um estado ou município.
+2. Selecione uma região candidata ou clique diretamente no mapa.
+3. Defina o raio de consumo do data center.
+4. Veja os recursos disponíveis no entorno: energia, água, esgoto e fibra.
+5. Analise o score, o impacto WUI e as premissas.
+
+Fluxo principal:
+
+```text
+Escolho um local -> defino um raio -> vejo recursos -> calculo impacto
+```
+
+## O que a tela mostra
+
+- **Mapa:** regiões candidatas, energia renovável agregada, água, esgoto, cabos e raio do data center.
+- **Camadas:** controles para ligar/desligar dados no mapa.
+- **Critérios:** pesos usados no score de aptidão.
+- **WUI:** simulação de consumo e impacto hídrico.
+- **Local:** ponto e raio usados para calcular recursos no entorno.
+- **Resumo:** score, classificação e indicadores do local selecionado.
+- **Premissas:** bases reais, indicadores estimados e limitações.
+
+## Como interpretar o score
+
+O score vai de 0 a 100. Quanto maior, melhor a aptidão preliminar.
+
+- `80-100`: alta aptidão.
+- `60-79`: condicionada.
+- `0-59`: alto risco.
+
+O score combina energia renovável, infraestrutura elétrica, segurança hídrica,
+risco socioambiental estimado, conectividade e segurança regulatória preliminar.
+
+## Como funciona o impacto hídrico
+
+A plataforma usa uma estimativa WUI inspirada em The Green Grid e WRI Aqueduct.
+
+Entradas principais:
+
+- carga de TI do data center, em MW;
+- consumo de água, em L/kWh;
+- estresse hídrico da UF.
+
+Leitura:
+
+```text
+maior consumo de água + maior estresse hídrico = maior impacto hídrico
+```
+
+No impacto WUI, menor é melhor.
+
+## Dados e premissas
+
+Dados reais usados:
+
+- geração renovável da ANEEL;
+- registros de água e esgoto;
+- geometrias de cabos;
+- municípios brasileiros;
+- estresse hídrico WRI Aqueduct 4.0.
+
+Indicadores estimados:
+
+- população como indicador indireto de pressão territorial;
+- capacidade renovável como sinal inicial de infraestrutura elétrica;
+- segurança regulatória como leitura preliminar;
+- WUI por UF como estimativa inicial de impacto hídrico.
+
+## Limitações
+
+A DataTerra é uma ferramenta de triagem. Ela não substitui:
+
+- estudo ambiental;
+- análise por bacia hidrográfica;
+- outorga de captação;
+- análise real de conexão elétrica;
+- licenciamento;
+- parecer técnico final.
+
+## Manual para banca
+
+O manual de uso e apresentação está em:
+
+- `docs/manual-dataterra.html`
+- `docs/manual-dataterra.pdf`
 
 ## Como rodar
 
@@ -22,48 +127,9 @@ Depois abra:
 http://localhost:3000
 ```
 
-Observação: a ingestão depende de `server/references/municipios.json`, usado
-para geocodificar os municípios. Esse arquivo é gerado a partir de referência
-externa e fica fora do Git por tamanho/atualização.
-
-## O que o MVP demonstra
-
-- Mapa do Brasil com hotspots de aptidão.
-- Score territorial ponderável pelo usuário.
-- Camadas de energia renovável, cabos, saneamento e risco hídrico/socioambiental preliminar.
-- Ranking de regiões candidatas.
-- Simulação WUI para estimar impacto hídrico de data centers.
-- Recomendações e condicionantes para triagem de investimento/licenciamento.
-
-## Fontes e limites
-
-Dados reais integrados:
-
-- Empreendimentos de geração renovável da ANEEL.
-- Registros municipais de água/esgoto da planilha de saneamento usada no projeto.
-- Geometrias de cabos em `all_cables.json`.
-- Estresse hídrico estadual baseado no WRI Aqueduct 4.0.
-
-Proxies declarados:
-
-- O score territorial é uma triagem preliminar, não um parecer técnico final.
-- Energia e infraestrutura elétrica usam capacidade renovável municipal/estadual
-  como sinal inicial.
-- Conectividade e mercado ainda usam população como proxy até integrar rotas
-  terrestres de fibra e subestações.
-- O WUI é um proxy inspirado em The Green Grid WUI combinado com WRI Aqueduct
-  por UF; não substitui análise por bacia hidrográfica, outorga, captação,
-  disponibilidade local ou licenciamento.
-
 ## Testes
 
 ```bash
 cd server
 npm test
-```
-
-Também é possível rodar diretamente da raiz:
-
-```bash
-node --test test/*.test.js
 ```

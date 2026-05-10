@@ -158,7 +158,7 @@ test("uses renewable capacity and population evidence instead of seeded scores",
   assert.equal(sp.scores.grid, 84);
   assert.equal(sp.scores.connectivity, 100);
   assert.equal(ba.scores.renewables, 57);
-  assert.ok(sp.methodology.proxyNotes.some((note) => note.includes("capacidade renovável")));
+  assert.ok(sp.methodology.assumptionNotes.some((note) => note.includes("capacidade renovável")));
 });
 
 test("uses nearest fiber cable distance as the regional connectivity indicator", () => {
@@ -206,5 +206,5 @@ test("uses nearest fiber cable distance as the regional connectivity indicator",
   assert.equal(near.fiber.nearestDistanceKm, 0);
   assert.ok(near.scores.connectivity > far.scores.connectivity);
   assert.ok(near.tags.some((tag) => tag.includes("Fibra")));
-  assert.ok(near.methodology.proxyNotes.some((note) => note.includes("rotas de fibra")));
+  assert.ok(near.methodology.assumptionNotes.some((note) => note.includes("rotas de fibra")));
 });

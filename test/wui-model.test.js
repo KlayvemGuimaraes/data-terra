@@ -18,7 +18,7 @@ test("looks up Aqueduct baseline water stress by Brazilian state", () => {
   assert.equal(Number(sp.score.toFixed(3)), 1.137);
 });
 
-test("calculates WUI proxy from data center water intensity and local stress", () => {
+test("calculates WUI estimate from data center water intensity and local stress", () => {
   const assessment = calculateWuiAssessment({
     state: "PB",
     waterUseIntensityLPerKwh: 2.5,
