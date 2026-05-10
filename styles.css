@@ -194,7 +194,8 @@ input {
   margin-bottom: 8px;
 }
 
-.energy-legend {
+.energy-legend,
+.electric-legend {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px 10px;
@@ -204,7 +205,13 @@ input {
   font-weight: 720;
 }
 
-.energy-legend span {
+.electric-legend {
+  grid-template-columns: 1fr;
+  margin-top: 8px;
+}
+
+.energy-legend span,
+.electric-legend span {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -448,6 +455,30 @@ select,
   height: 0;
   display: inline-block;
   border-top: 2px dashed var(--blue);
+}
+
+.electric-substation-dot,
+.electric-load-dot {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  border-radius: 50%;
+}
+
+.electric-substation-dot {
+  background: #8b5cf6;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.82);
+}
+
+.electric-transmission-line {
+  width: 18px;
+  height: 0;
+  display: inline-block;
+  border-top: 2px solid #f59e0b;
+}
+
+.electric-load-dot {
+  background: #0f766e;
 }
 
 .high {

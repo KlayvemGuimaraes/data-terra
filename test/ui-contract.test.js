@@ -94,3 +94,16 @@ test("declares regional fiber proximity rendering", () => {
   assert.match(app, /buildCandidateRegions\(water,\s*\{\s*energyRows:\s*energy,\s*cables\s*\}\)/);
   assert.match(app, /renderRegionFiberProximity/);
 });
+
+test("explains electrical structure legend without declaring unavailable map layers", () => {
+  const html = fs.readFileSync(path.join(rootDir, "index.html"), "utf8");
+  const app = fs.readFileSync(path.join(rootDir, "app.js"), "utf8");
+
+  assert.match(html, /Subestações/);
+  assert.match(html, /Linhas de transmissão/);
+  assert.match(html, /Carga elétrica/);
+  assert.match(html, /electric-substation-dot/);
+  assert.match(html, /electric-transmission-line/);
+  assert.match(html, /electric-load-dot/);
+  assert.doesNotMatch(app, /electric:\s*L\.layerGroup\(/);
+});
