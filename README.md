@@ -304,7 +304,7 @@ Os testes cobrem:
 - contrato de deploy estático na Vercel;
 - consistência dos JSONs usados por `/api/*`.
 
-## Manual para banca
+## Como calculamos
 
 - [Manual HTML: uso e metodologia completa](docs/manual-dataterra.html)
 - [Manual PDF para a banca](docs/manual-dataterra.pdf)
@@ -355,6 +355,10 @@ A base CNUC municipal é uma reserva aproximada. A análise detalhada usa políg
 - Limites: 400 feições CNUC consultadas; mapa exibe até 30 UCs/40 linhas simplificadas. Avaliação usa os polígonos originais retornados. Geometrias visualmente omitidas por tamanho não invalidam atributos já consultados.
 
 ## Identidade visual do simulador
+
+O link “Como calculamos” abre o PDF da metodologia. O botão de tema alterna
+entre claro e escuro, inicia conforme o dispositivo e guarda a escolha no navegador.
+O PDF mantém fundo claro para leitura e impressão; o tema não altera os cálculos.
 
 O simulador compartilha a paleta e a tipografia da
 [nossa landing page](https://github.com/nuvemnove/dataterra-landingpage): verde-floresta
