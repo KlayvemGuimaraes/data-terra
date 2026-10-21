@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DataTerra | Inteligência territorial para data centers</title>
+    <script src="./theme.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="./styles.css" />
     <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg" />
@@ -22,10 +23,11 @@
         </a>
         <div class="topbar-copy"><span class="eyebrow">Inteligência territorial</span><p>Boas decisões começam pelo território.</p></div>
         <div class="topbar-actions">
-          <a class="method-link" href="./docs/manual-dataterra.html#calculo-score" target="_blank" rel="noreferrer">Como calculamos <span aria-hidden="true">↗</span></a>
-          <a class="manual-link" href="./docs/manual-dataterra.pdf" target="_blank" rel="noreferrer">
-            Manual da banca
-          </a>
+          <button id="themeToggle" class="theme-toggle" type="button" aria-label="Ativar modo escuro" aria-pressed="false" title="Ativar modo escuro">
+            <svg class="theme-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg>
+            <svg class="theme-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 13A9 9 0 0 1 11 3.2 9 9 0 1 0 20.8 13Z"/></svg>
+          </button>
+          <a class="method-link" href="./docs/manual-dataterra.pdf" target="_blank" rel="noreferrer" aria-label="Como calculamos (PDF, abre em nova aba)">Como calculamos <span aria-hidden="true">↗</span></a>
         </div>
       </header>
 

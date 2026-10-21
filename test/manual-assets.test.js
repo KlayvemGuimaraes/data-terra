@@ -16,7 +16,8 @@ test("topbar uses the landing wordmark and matching favicon", () => {
   assert.match(html, /aria-label="DataTerra"/);
   assert.match(html, /href="\.\/assets\/favicon\.svg"/);
   assert.match(html, /href="\.\/docs\/manual-dataterra\.pdf"/);
-  assert.match(html, /Manual da banca/);
+  assert.match(html, /Como calculamos/);
+  assert.doesNotMatch(html, /Manual da banca/);
 });
 
 test("topbar logo wrapper is unframed and panel tabs keep readable spacing", () => {
@@ -40,7 +41,7 @@ test("review manual exists as HTML and PDF with evaluator-focused content", () =
   assert.ok(fs.existsSync(manualPdfPath), "manual PDF should exist");
 
   const manualHtml = fs.readFileSync(manualHtmlPath, "utf8");
-  assert.match(manualHtml, /Manual da Solução DataTerra/);
+  assert.match(manualHtml, /Como calculamos/);
   assert.match(manualHtml, /Quando será utilizada/);
   assert.match(manualHtml, /Como usar a plataforma/);
   assert.match(manualHtml, /Escolher local/);

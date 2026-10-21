@@ -2,16 +2,26 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <title>Manual da Solução DataTerra</title>
+    <title>Como calculamos | DataTerra</title>
     <style>
+      @font-face { font-family: "Montserrat"; src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2"); font-weight: 100 900; font-display: block; }
+      @font-face { font-family: "Poppins"; src: url("../assets/fonts/poppins-latin-400.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Poppins"; src: url("../assets/fonts/poppins-latin-600.woff2") format("woff2"); font-weight: 500 900; font-display: block; }
+      h1, h2, h3 { font-family: "Montserrat", sans-serif; }
+      .document-brand { display: flex; align-items: center; font-family: "Montserrat", sans-serif; font-weight: 750; font-size: 28px; letter-spacing: -1.3px; color: #203c31; }
+      .document-brand svg { color: #174b3c; margin-right: 9px; flex-shrink: 0; }
+      .document-brand .brand-light { font-weight: 400; }
+      .document-brand .brand-period { color: #a15c3b; }
+      .doc-kicker { color: #719052; letter-spacing: 1.4px; text-transform: uppercase; font-size: 10px; margin-bottom: 8px; }
+
       @page { size: A4; margin: 10mm; }
       :root {
-        --ink: #17231d;
+        --ink: #203c31;
         --muted: #5f7167;
-        --accent: #0c6b58;
-        --accent-dark: #084d41;
-        --line: #d9e2dd;
-        --soft: #f3f8f5;
+        --accent: #174b3c;
+        --accent-dark: #174b3c;
+        --line: #dfe5d9;
+        --soft: #f3f5ec;
         --gold: #c58a14;
         --low: #c54532;
       }
@@ -24,7 +34,8 @@
         margin: 0;
         color: var(--ink);
         background: #fff;
-        font-family: Arial, Helvetica, sans-serif;
+        font-family: "Poppins", Arial, sans-serif;
+        font-size: 14px;
         line-height: 1.45;
       }
 
@@ -36,7 +47,7 @@
 
       header {
         display: grid;
-        grid-template-columns: 210px 1fr;
+        grid-template-columns: 200px 1fr;
         align-items: center;
         gap: 26px;
         padding-bottom: 20px;
@@ -57,7 +68,7 @@
       h1 {
         margin-bottom: 8px;
         color: var(--accent-dark);
-        font-size: 31px;
+        font-size: 27px;
         line-height: 1.1;
       }
 
@@ -199,8 +210,10 @@
 
         .section { break-inside: avoid; }
         .territorial-overview { break-inside: auto; break-before: page; }
-        .calculation-page { break-before: page; break-inside: auto; font-size: 13px; }
-        #auditoria-modelo, #auditoria-modelo table { font-size: 12px; }
+        .calculation-page { break-before: page; break-inside: auto; font-size: 11.7px; }
+        #auditoria-modelo, #auditoria-modelo table { font-size: 11px; }
+        .calculation-page table { font-size: 11.7px; }
+        .coverage-heading { break-before: page; }
         h3 { break-after: avoid; }
       }
     </style>
@@ -208,12 +221,16 @@
   <body>
     <main class="page">
       <header>
-        <img class="logo" src="../assets/dataterra-logo.png" alt="DataTerra" />
+<div class="document-brand" aria-label="DataTerra"><svg class="brand-icon" xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" />
+            <path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" />
+            <path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" />
+          </svg><span>data<span class="brand-light">terra</span><span class="brand-period">.</span></span></div>
         <div>
-          <h1>Manual da Solução DataTerra</h1>
+          <p class="doc-kicker">Metodologia · MVP</p><h1>Como calculamos</h1>
           <p class="subtitle">
-            Guia direto para a banca avaliadora entender o objetivo, o uso e a
-            leitura dos resultados da plataforma.
+            Dados, critérios e limites do score de aptidão territorial.
+            Guia para entender e reproduzir os resultados da DataTerra.
           </p>
         </div>
       </header>
@@ -259,6 +276,7 @@
           <li>Clique no mapa ou use o local selecionado como ponto do data center.</li>
           <li>Ajuste o raio para medir recursos próximos.</li>
           <li>Leia o resumo, o impacto hídrico, as premissas e o ranking.</li>
+          <li>Use os atalhos para escolher local, definir raio e avaliar o resultado. O botão de tema alterna entre claro e escuro e guarda a preferência neste navegador.</li>
         </ol>
       </section>
 
@@ -329,7 +347,7 @@
 <li><strong>Ambiente:</strong> <a href="https://geoservicos.inde.gov.br/geoserver/MMA/ows?service=WFS&amp;version=2.0.0&amp;request=GetCapabilities">MMA/CNUC, camada cnuc_26_07_31</a>. Cruza o ponto com polígonos publicados e identifica UCs dentro do raio. Ponto em proteção integral = 15; em outra UC = 40; consulta completa sem interseção no ponto = 70, sem certificar ausência de outras restrições. Se o serviço falhar, usa a reserva municipal (38 com proteção integral registrada; 58 nos demais casos). A sede mais próxima é apenas referência de reserva e pode pertencer a outro município. A qualidade do polígono depende da declaração da fonte.</li>
 <li><strong>Diligência regulatória:</strong> 20 com interseção em proteção integral, 40 em outra UC, 60 nos demais casos. O motor relaciona a localização à consulta ao gestor/plano de manejo (<a href="https://www.planalto.gov.br/ccivil_03/leis/l9985.htm">SNUC</a>), à verificação de competência federal em UC federal não APA (<a href="https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp140.htm">LC 140/2011</a>) e à consulta de enquadramento, uso do solo e <a href="https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15190.htm">Lei 15.190/2025</a>. Para captação própria/lançamento, orienta a verificação de outorga. Regras revisadas em 20/10/2026; não determina aprovação, dispensa ou competência definitiva. Zoneamento e normas estaduais/municipais específicas exigem confirmação externa.</li>
 </ul>
-<h3>Classificação, cobertura e uso do mapa</h3>
+<h3 class="coverage-heading">Classificação, cobertura e uso do mapa</h3>
 <p>Faixas: Alta aptidão ≥80; Condicionada 60–79; Alto risco &lt;60. Por precaução, o score local fica limitado a 39 em proteção integral, 59 em outra UC e 79 enquanto alguma das quatro consultas estiver incompleta. A interface mostra a média antes do limite. Esses limites não são proibições legais automáticas e independem dos pesos escolhidos.</p>
 <p>As camadas oficiais são carregadas ao escolher o ponto e mudar o raio. O CNUC consulta até 400 feições; se esse limite for atingido sem comprovar fim da lista, a cobertura fica parcial. A transmissão usa o inventário oficial completo de 1.817 linhas baixado em 20/10/2026, com data de aquisição informada. Para manter o mapa leve, exibe até 30 UCs e 40 linhas mais próximas, com geometrias simplificadas; a avaliação usa as geometrias originais consultadas. A bacia exibida é a do ponto, não a de toda a área de consumo. O marcador climático representa a referência em grade, não uma estação.</p>
 <p>O ranking regional permanece uma comparação preliminar de bases locais. A aba Local e o resumo do ponto usam as consultas detalhadas; os dois resultados podem diferir. Cada fonte informa sucesso, ausência, cobertura parcial ou indisponibilidade e a data da consulta. Trocar o local descarta respostas antigas; o botão Atualizar consultas permite tentar novamente. As consultas válidas ficam em cache por até uma hora. Na atualização do mesmo local, resultados anteriores são preservados se a fonte falhar, com aviso de cobertura parcial.</p>
@@ -422,7 +440,7 @@
 <p><strong>Limite de interpretação:</strong> os pesos e cortes são escolhas do MVP, ainda sem validação empírica como modelo preditivo. Ambiente e diligência compartilham a interseção CNUC; esse efeito é intencional, não são evidências independentes. Revisões das fórmulas devem atualizar este manual, o PDF e os testes correspondentes.</p>
 </section>
       <footer>
-        DataTerra - manual de uso, metodologia de cálculo e avaliação acadêmica.
+        DataTerra · Como calculamos · Metodologia do MVP, outubro de 2026.
       </footer>
     </main>
   </body>
