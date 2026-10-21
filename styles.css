@@ -68,7 +68,7 @@ input {
   height: 56px;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   padding: 0;
   background: transparent;
   border: 0;
@@ -76,12 +76,10 @@ input {
   overflow: hidden;
 }
 
-.brand-lockup img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-}
+.brand-lockup { color: var(--ink); text-decoration: none; font-family: "Montserrat", sans-serif; font-size: 28px; font-weight: 750; letter-spacing: -1.3px; white-space: nowrap; }
+.brand-icon { color: var(--accent); flex-shrink: 0; margin-right: 9px; }
+.brand-light { font-weight: 400; }
+.brand-period { color: #a15c3b; }
 
 .topbar-copy {
   flex: 1;
@@ -1432,7 +1430,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .skip-link:focus { top: 12px; }
 .topbar { flex-shrink: 0; height: 86px; padding: 16px 28px; background: var(--bg); color: var(--ink); border-color: var(--line); gap: 28px; }
 .brand-lockup { width: 190px; min-width: 190px; height: 48px; }
-.brand-lockup img { object-fit: cover; mix-blend-mode: multiply; }
 .topbar-copy { padding-left: 28px; border-left: 1px solid var(--line); color: var(--muted); font-size: 12px; }
 .topbar .eyebrow { color: var(--accent); font-size: 9px; letter-spacing: 1.6px; margin-bottom: 5px; }
 .topbar-actions { gap: 22px; }
@@ -1516,7 +1513,7 @@ input[type="range"] { accent-color: var(--accent); }
 }
 @media (max-width: 780px) {
   .topbar { flex-direction: row; align-items: center; gap: 12px; padding: 14px 16px; height: 76px; }
-  .brand-lockup { width: 145px; min-width: 145px; height: 40px; }
+  .brand-lockup { width: 155px; min-width: 155px; height: 40px; font-size: 23px; }
   .topbar-actions { width: auto; }
   .manual-link { width: auto; min-height: 40px; padding: 0 12px; font-size: 10px; }
   .method-link { display: none; }

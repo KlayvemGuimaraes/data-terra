@@ -5,12 +5,16 @@ const test = require("node:test");
 
 const rootDir = path.join(__dirname, "..");
 
-test("topbar uses the DataTerra logo asset", () => {
+test("topbar uses the landing wordmark and matching favicon", () => {
   const html = fs.readFileSync(path.join(rootDir, "index.html"), "utf8");
 
   assert.match(html, /class="brand-lockup"/);
-  assert.match(html, /src="\.\/assets\/dataterra-logo-header\.png"/);
-  assert.match(html, /alt="DataTerra"/);
+  assert.match(html, /class="brand-icon"/);
+  assert.match(html, /class="brand-wordmark"/);
+  assert.match(html, /class="brand-light">terra/);
+  assert.match(html, /class="brand-period">\./);
+  assert.match(html, /aria-label="DataTerra"/);
+  assert.match(html, /href="\.\/assets\/favicon\.svg"/);
   assert.match(html, /href="\.\/docs\/manual-dataterra\.pdf"/);
   assert.match(html, /Manual da banca/);
 });
