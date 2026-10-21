@@ -69,6 +69,12 @@
 
       .subtitle,
       .muted,
+      table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+      th, td { border: 1px solid var(--line); padding: 7px; text-align: left; }
+      th { background: var(--soft); }
+      tr { break-inside: avoid; }
+      .formula { background: var(--soft); padding: 10px; font-family: monospace; overflow-wrap: anywhere; }
+      h2, h3 { break-after: avoid; }
       footer {
         color: var(--muted);
       }
@@ -169,6 +175,12 @@
         border: 1px solid #fed7aa;
       }
 
+      table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+      th, td { border: 1px solid var(--line); padding: 7px; text-align: left; }
+      th { background: var(--soft); }
+      tr { break-inside: avoid; }
+      .formula { background: var(--soft); padding: 10px; font-family: monospace; overflow-wrap: anywhere; }
+      h2, h3 { break-after: avoid; }
       footer {
         padding-top: 16px;
         font-size: 12px;
@@ -186,7 +198,9 @@
         }
 
         .section { break-inside: avoid; }
-        .section:last-of-type { break-inside: auto; break-before: page; }
+        .territorial-overview { break-inside: auto; break-before: page; }
+        .calculation-page { break-before: page; break-inside: auto; font-size: 13px; }
+        #auditoria-modelo, #auditoria-modelo table { font-size: 12px; }
         h3 { break-after: avoid; }
       }
     </style>
@@ -304,12 +318,12 @@
         </p>
       </section>
 
-      <section class="section"><h3>Critérios territoriais e cobertura</h3>
+      <section class="section territorial-overview"><h3>7. Critérios territoriais e cobertura</h3>
 <p>O score local combina sete critérios com pesos ajustáveis: energia 5, infraestrutura 4, água 5, conectividade 3, diligência regulatória 4, ambiente 3 e subestação 3. Os três grupos têm médias próprias; o total usa a média ponderada dos critérios, arredondada. Os indicadores e limites a seguir são premissas do MVP, não notas emitidas pelos órgãos oficiais.</p>
 <ul>
 <li><strong>Subestação:</strong> <a href="https://dados.ons.org.br/dataset/subestacao">ONS</a>, 1.684 instalações com coordenadas e tensão ≥69 kV na base versionada. Distância geodésica à instalação mais próxima: até 20 km = 90; de 20 a 50 km = 89 a 60; acima de 50 km dentro do raio = 59 a 40; fora dessas faixas = 32. Bônus de 5 para tensão ≥230 kV; sem dados = 40. Não comprova capacidade disponível.</li>
 <li><strong>Infraestrutura:</strong> snapshot versionado de 1.817 geometrias oficiais <a href="https://sigel.aneel.gov.br/arcgis/rest/services/PORTAL/Transmiss%C3%A3o/MapServer/1">ANEEL/SIGEL - ONS</a>. Distância aproximada ao segmento de linha mais próximo dentro do raio: até 5 km = 90; até 20 = 75; até 50 = 55; demais = 35. Nenhuma linha no raio = 25; consulta indisponível ou parcial = 40. Não é rota de conexão nem análise de capacidade.</li>
-<li><strong>Água, bacia e clima:</strong> 30% do indicador anterior de WUI/saneamento + 50% da classe da microbacia ANA + 20% do indicador climático. O WUI continua usando carga de TI, intensidade de consumo e Aqueduct por UF; o consumo anual de água não é alterado pela climatologia.</li>
+<li><strong>Água, bacia e clima:</strong> 30% do indicador anterior de WUI/saneamento + 50% da classe da microbacia ANA + 20% do indicador climático. O impacto WUI usa intensidade de consumo e Aqueduct por UF. A carga de TI altera o volume anual de água, mas não a nota de impacto WUI; a climatologia também não altera esse volume.</li>
 <li><strong>Microbacia:</strong> <a href="https://www.snirh.gov.br/arcgis/rest/services/INDE/Camadas/MapServer/47">ANA/SNIRH, balanço quantitativo 2020</a>, consulta espacial do ponto. Classes baixo, mediano/moderado, alto, muito alto, crítico e intermitente recebem 90, 75, 50, 30, 15 e 20 pontos; sem classe válida = 50. Exibe código, região, classe e comprometimento percentual. Na borda entre bacias, adota a classe mais conservadora das retornadas. Não substitui outorga ou estudo hídrico atualizado.</li>
 <li><strong>Clima:</strong> <a href="https://power.larc.nasa.gov/docs/services/api/temporal/climatology/">NASA POWER/MERRA-2</a>, climatologia em grade, com período e data de consulta informados na interface. Usa máxima climatológica T2M_MAX, umidade RH2M e precipitação PRECTOTCORR, não observação meteorológica do dia. Indicador = 100 − 4 × excesso da máxima sobre 28 °C − 3 × meses abaixo de 1 mm/dia − 0,5 × excesso da umidade média sobre 75%; limitado a 10–100. Dados ausentes/inválidos = 50. É heurística de triagem térmica/hídrica; não é projeto de refrigeração. INMET ainda não foi integrado.</li>
 <li><strong>Ambiente:</strong> <a href="https://geoservicos.inde.gov.br/geoserver/MMA/ows?service=WFS&amp;version=2.0.0&amp;request=GetCapabilities">MMA/CNUC, camada cnuc_26_07_31</a>. Cruza o ponto com polígonos publicados e identifica UCs dentro do raio. Ponto em proteção integral = 15; em outra UC = 40; consulta completa sem interseção no ponto = 70, sem certificar ausência de outras restrições. Se o serviço falhar, usa a reserva municipal (38 com proteção integral registrada; 58 nos demais casos). A sede mais próxima é apenas referência de reserva e pode pertencer a outro município. A qualidade do polígono depende da declaração da fonte.</li>
@@ -321,8 +335,94 @@
 <p>O ranking regional permanece uma comparação preliminar de bases locais. A aba Local e o resumo do ponto usam as consultas detalhadas; os dois resultados podem diferir. Cada fonte informa sucesso, ausência, cobertura parcial ou indisponibilidade e a data da consulta. Trocar o local descarta respostas antigas; o botão Atualizar consultas permite tentar novamente. As consultas válidas ficam em cache por até uma hora. Na atualização do mesmo local, resultados anteriores são preservados se a fonte falhar, com aviso de cobertura parcial.</p>
 <p>FUNAI, INCRA, APPs, zonas de amortecimento, embargos, riscos SGB e normas locais específicas não têm cobertura geométrica nesta versão. A pesquisa continua sendo referência para ampliação. Mesmo com as quatro fontes disponíveis, não se deve inferir liberação ambiental do imóvel. O sistema avalia um ponto e um raio, sem delimitar o lote nem as obras associadas.</p>
 </section>
+
+<section class="section calculation-page" id="calculo-score">
+<h2>8. Como o cálculo funciona, passo a passo</h2>
+<p><strong>Referência:</strong> implementação do MVP publicada em 20/10/2026. Este capítulo descreve a análise do ponto na aba Local e no resumo do ponto. As notas são heurísticas próprias de triagem, sem calibração como probabilidade de sucesso, custo ou redução de emissões de CO₂.</p>
+<ol><li>Definir coordenadas, raio, carga de TI, intensidade de água e pesos.</li><li>Recortar usinas e saneamento pelo raio; encontrar fibra e subestação mais próximas; consultar transmissão, CNUC, microbacia e clima.</li><li>Converter os dados em sete notas de 0 a 100, conforme as fórmulas seguintes.</li><li>Calcular a média ponderada dos critérios e os três subtotais.</li><li>Aplicar o limite preventivo; só então classificar o resultado final.</li></ol>
+<table><thead><tr><th>Grupo</th><th>Critério / símbolo</th><th>Peso padrão</th></tr></thead><tbody>
+<tr><td rowspan="2">Recursos e impacto</td><td>Energia renovável / E</td><td>5</td></tr><tr><td>Água, bacia e clima / A</td><td>5</td></tr>
+<tr><td rowspan="3">Viabilidade estimada</td><td>Infraestrutura elétrica / T</td><td>4</td></tr><tr><td>Conectividade e mercado / C</td><td>3</td></tr><tr><td>Diligência regulatória / L</td><td>4</td></tr>
+<tr><td rowspan="2">Riscos territoriais</td><td>Restrições ambientais / U</td><td>3</td></tr><tr><td>Distância de subestação / S</td><td>3</td></tr>
+</tbody></table>
+<p class="formula">Média padrão = round((5E + 4T + 5A + 3C + 4L + 3U + 3S) / 27)<br>Score final = min(média ponderada, limite preventivo)</p>
+<p>Com pesos personalizados, o denominador é a soma dos pesos positivos ativos. Peso zero retira o critério da média; se todos forem zero, a média é zero. Os limites preventivos continuam ativos mesmo com peso ambiental zero.</p>
+<p class="formula">Recursos = round((5E + 5A) / 10)<br>Viabilidade = round((4T + 3C + 4L) / 11)<br>Riscos territoriais = round((3U + 3S) / 6)</p>
+<p>Os grupos usam os pesos escolhidos, sem receber o limite preventivo. <strong>O total não é a média simples dos três grupos</strong>, nem a média dos subtotais já arredondados. Mesmo no grupo “Riscos territoriais”, nota maior significa condição mais favorável.</p>
+<p><strong>Notação:</strong> round é arredondamento ao inteiro mais próximo (metade positiva para cima); clamp(x, a, b) limita x ao intervalo [a, b]. Distâncias estão em km. Os arredondamentos intermediários descritos fazem parte do cálculo.</p>
+</section>
+<section class="section calculation-page" id="formulas-energia-rede">
+<h2>9. Fórmulas: energia, transmissão, fibra e subestação</h2>
+<h3>Energia renovável (E)</h3>
+<p class="formula">E = clamp(round(100 × capacidade renovável no raio / carga de TI), 0, 100)</p>
+<p>Capacidade e carga em MW. Soma as potências nominais não negativas das usinas da base ANEEL dentro do raio; o total é arredondado a duas casas antes da nota. Uma oferta nominal igual à carga já gera 100 pontos. Não aplica fator de capacidade, simultaneidade, PUE, contratos ou disponibilidade de conexão. Ausência de usinas na base do recorte gera 0, sem provar inexistência física.</p>
+<h3>Transmissão oficial (T)</h3>
+<p>Menor distância ao traçado ANEEL/SIGEL dentro do raio: d ≤ 5: <strong>90</strong>; 5 &lt; d ≤ 20: <strong>75</strong>; 20 &lt; d ≤ 50: <strong>55</strong>; d &gt; 50, ainda no raio: <strong>35</strong>. Consulta completa sem linha no raio: <strong>25</strong>. Fonte parcial ou indisponível: <strong>40</strong>.</p>
+<p>Distância aproximada por projeção local sobre segmentos (111,32 km por grau de latitude; longitude corrigida pelo cosseno da latitude), arredondada a duas casas na API antes das faixas. Não mede percurso de obra, acesso à rede nem capacidade elétrica.</p>
+<h3>Conectividade e mercado (C)</h3>
+<p>Apesar do nome, o cálculo local usa proximidade de cabos e sua quantidade; não há variável econômica de mercado. Seja d a distância ao cabo mais próximo da base, inclusive fora do raio, e n o número de cabos no raio.</p>
+<p class="formula">F(d) = 100, se d ≤ 5<br>F(d) = clamp(round(95 − 15 × (d − 5)/20), 80, 95), se 5 &lt; d ≤ 25<br>F(d) = clamp(round(79 − 29 × (d − 25)/50), 50, 79), se 25 &lt; d ≤ 75<br>F(d) = clamp(round(49 − min(29, 0,3 × (d − 75))), 20, 49), se d &gt; 75<br>C = clamp(F(d) + 2 × min(n, 5), 0, 100)</p>
+<p>Sem geometria válida de cabo: F = 0 e C = 35. A distância usa segmentos e extremidades das rotas. Proximidade de cabo submarino não garante ponto de acesso, fibra terrestre, latência ou contratação.</p>
+<h3>Subestação oficial (S)</h3>
+<p>Seleciona a ONS mais próxima entre coordenadas válidas da base (tensão ≥69 kV), usando Haversine, raio terrestre de 6.371 km. Seja d a distância sem arredondamento e r o raio selecionado. Aplicar nesta ordem:</p>
+<p class="formula">S₀ = 90, se d ≤ 20<br>S₀ = clamp(round(89 − 29 × (d − 20)/30), 60, 89), se 20 &lt; d ≤ 50<br>S₀ = clamp(round(59 − 19 × (d − 50)/max(1, r − 50)), 40, 59), se 50 &lt; d ≤ r<br>S₀ = 32, nos demais casos<br>S = clamp(S₀ + bônus de tensão, 0, 100)</p>
+<p>Bônus = 5 se tensão ≥230 kV, senão 0. Sem subestação válida: S = 40, sem bônus. As faixas até 50 km prevalecem mesmo quando a instalação está fora de um raio menor. O bônus também se aplica à faixa 32. São regras do modelo, não garantia de conexão.</p>
+</section>
+<section class="section calculation-page" id="formulas-agua">
+<h2>10. Fórmulas: água, microbacia e clima</h2>
+<p class="formula">A = round(0,30 × A₀ + 0,50 × B + 0,20 × K)</p>
+<h3>Indicador base de água (A₀)</h3>
+<p>Seja i a intensidade em L/kWh e e o escore Aqueduct 4.0 da UF, na escala 0 a 5. A UF é a informada no ponto; se ausente, usa a região candidata mais próxima.</p>
+<p class="formula">Impacto WUI = round(100 × clamp(i/3, 0, 1) × (0,35 + 0,65 × clamp(e/5, 0, 1)))<br>Aptidão WUI = 100 − impacto WUI<br>A₀ = clamp(round(0,65 × aptidão WUI + 0,35 × saneamento), 0, 100)</p>
+<p>Saneamento: água e esgoto no conjunto dos registros do raio = <strong>88</strong>; apenas água = <strong>72</strong>; apenas esgoto = <strong>64</strong>; nenhum dos dois registrado = <strong>42</strong>. Não comprova atendimento do lote. Impacto WUI: 0–25 baixo; 26–50 moderado; 51–75 substancial; 76–100 alto. Aqui, menor impacto é melhor.</p>
+<p>UF sem dado Aqueduct recebe e = 0 no código atual, com indicação “Sem dado Aqueduct”. Essa reserva pode subestimar o impacto e precisa de verificação; não é evidência de baixo estresse. O indicador é inspirado no WUI, não reprodução certificada do método The Green Grid.</p>
+<h3>Microbacia (B)</h3>
+<p>Usa a classe do balanço quantitativo ANA 2020 no ponto: baixo = 90; mediano/moderado = 75; alto = 50; muito alto = 30; crítico = 15; intermitente = 20. Classe desconhecida ou fonte indisponível = 50. Quando mais de uma bacia intersecta o ponto, escolhe a menor nota das retornadas. Não calcula média das bacias do raio.</p>
+<h3>Clima (K)</h3>
+<p>T = maior T2M_MAX entre os 12 meses (°C); H = média aritmética dos 12 RH2M (%); D = quantidade de meses com PRECTOTCORR &lt; 1 mm/dia.</p>
+<p class="formula">K = round(clamp(100 − 4 × max(0, T − 28) − 3D − 0,5 × max(0, H − 75), 10, 100))</p>
+<p>Exige os 12 meses válidos de cada variável; rejeita valores de preenchimento, temperatura fora de −70 a 65 °C, precipitação fora de 0 a 100 mm/dia e umidade fora de 0 a 100%. Se inválido/ausente, K = 50. Usa a média H antes de arredondá-la para exibição. O período climatológico vem da resposta NASA; não é previsão do tempo.</p>
+<h3>Consumos anuais, separados da nota</h3>
+<p class="formula">Energia anual (GWh) = round(carga de TI em MW × 8,76, uma casa)<br>Água anual (ML) = round(i × carga de TI em MW × 1.000 × 8.760 / 1.000.000)</p>
+<p>Assume operação contínua por 8.760 h/ano. Exemplo: 50 MW e 1 L/kWh = 438 GWh/ano e 438 ML/ano. A carga aumenta volumes e muda a cobertura renovável, mas não muda diretamente a nota WUI. Bacia e clima alteram A, sem alterar automaticamente i ou o volume anual.</p>
+</section>
+<section class="section calculation-page" id="limites-e-exemplo">
+<h2>11. Ambiente, limites e exemplo completo</h2>
+<table><thead><tr><th>Situação no ponto</th><th>Ambiente U</th><th>Diligência L</th><th>Teto final</th></tr></thead><tbody>
+<tr><td>Interseção em UC de proteção integral</td><td>15</td><td>20</td><td>39</td></tr>
+<tr><td>Interseção em outra UC, sem proteção integral</td><td>40</td><td>40</td><td>59</td></tr>
+<tr><td>Sem interseção CNUC, consulta completa</td><td>70</td><td>60</td><td>100 se as quatro fontes estão OK; senão 79</td></tr>
+<tr><td>CNUC incompleto, sem interseção conhecida</td><td>38 se reserva municipal indica proteção integral; senão 58</td><td>60</td><td>79</td></tr>
+</tbody></table>
+<p>Uma interseção conhecida prevalece mesmo com consulta parcial. UCs apenas próximas, dentro do raio mas sem conter o ponto, não acionam os tetos de 39/59. Os tetos têm precedência: proteção integral, outra UC, incompletude, sem limitação adicional. São precauções próprias do MVP, não proibições legais nem probabilidades.</p>
+<p>“Quatro fontes OK” significa status <code>ok</code> em CNUC, transmissão, ANA e NASA. Não garante cobertura de todos os riscos ou atualidade de todos os dados. Por exemplo, uma classe ANA desconhecida pode ter status OK e receber 50; falta de geometria visual da bacia não invalida seus atributos. As reservas ONS, fibra, saneamento e Aqueduct não acionam, por si, o teto de 79.</p>
+<h3>Exemplo didático reproduzível</h3>
+<p>Considere 50 MW de carga, 1 L/kWh, UF SP (Aqueduct 1,137287117), ≥50 MW renováveis no raio, ausência de saneamento registrado, microbacia “baixo”, T = 38,45 °C, H = 81,1%, D = 0; linha a 2 km, cabo a 17,1 km e pelo menos cinco cabos no raio; subestação a 10 km com tensão &lt;230 kV. Ponto em proteção integral e quatro consultas OK. É um cenário didático, não laudo de um imóvel.</p>
+<p class="formula">Impacto WUI = 17; aptidão WUI = 83<br>A₀ = round(0,65 × 83 + 0,35 × 42) = 69<br>K = round(100 − 4 × 10,45 − 0,5 × 6,1) = 55<br>A = round(0,30 × 69 + 0,50 × 90 + 0,20 × 55) = 77<br>E = 100; T = 90; C = 86 + 10 = 96; L = 20; U = 15; S = 90<br>Média = round((500 + 360 + 385 + 288 + 80 + 45 + 270) / 27)<br>Média = round(1.928 / 27) = 71<br>Score final = min(71, 39) = 39 → Alto risco</p>
+<p>Subtotais: Recursos = 89; Viabilidade = 66; Riscos territoriais = 53. As notas favoráveis de energia e rede não anulam a interseção conhecida.</p>
+</section>
+<section class="section calculation-page" id="auditoria-modelo">
+<h2>12. Ranking, dados ausentes e auditoria</h2>
+<h3>Por que ranking e resultado local podem ser diferentes?</h3>
+<p>O ranking compara candidatos gerados pelas bases municipais de saneamento e geração. Usa as notas de <code>region-options.js</code>, substitui água pela aptidão WUI da UF e acrescenta ambiente municipal e subestação ONS. Aplica a média dos sete critérios, mas não as consultas detalhadas nem os tetos territoriais da análise local.</p>
+<p>No ranking, energia/rede são indicadores de capacidade municipal ou estadual; conectividade usa fibra ou reserva estimada; diligência também é estimada. A análise Local recalcula recursos pelo raio, substitui transmissão e diligência, combina água/bacia/clima e cruza os polígonos. A classificação do ranking não deve ser apresentada como validação detalhada do ponto.</p>
+<h3>Ausência, indisponibilidade e atualização</h3>
+<ul><li><strong>Consulta completa sem resultado:</strong> pode pontuar ausência no recorte (por exemplo, transmissão 25). Não equivale a uma fonte que falhou.</li><li><strong>Consulta em andamento, parcial ou indisponível:</strong> usa as reservas descritas e limita a média a 79, salvo limite ambiental menor. A fonte e o estado ficam visíveis.</li><li><strong>Nova tentativa no mesmo local:</strong> o cliente preserva um resultado anterior com status OK se a atualização falhar e o marca parcial. Alertas ambientais conhecidos nesse resultado continuam válidos. Isso não representa histórico permanente; novas tentativas e seleções dependem do estado/cache corrente.</li><li><strong>Mudança de ponto ou raio:</strong> respostas da seleção anterior são descartadas. Fontes completas ficam em cache por até uma hora; a data da consulta não é a data de atualização da base oficial.</li><li><strong>Mapa:</strong> desligar uma camada apenas altera a visualização, não os pesos ou critérios do cálculo. Exibir menos geometrias não reduz a lista de resultados usada pelo motor.</li></ul>
+<h3>O que guardar para reproduzir um resultado</h3>
+<p>Registrar coordenadas, raio, UF utilizada, carga de TI, L/kWh, sete pesos, versão do código, notas individuais, média, teto aplicado, resultado final e status de cada fonte. Guardar também edição/data dos snapshots e respostas oficiais consultadas: serviços remotos podem mudar, mesmo com o mesmo ponto.</p>
+<table><thead><tr><th>Parte verificável</th><th>Implementação</th></tr></thead><tbody>
+<tr><td>Catálogo, pesos, médias e grupos</td><td>evaluation-criteria.js</td></tr>
+<tr><td>Recorte, energia, fibra, subestação e agregação local</td><td>site-analysis.js</td></tr>
+<tr><td>WUI e coeficientes Aqueduct por UF</td><td>wui-model.js</td></tr>
+<tr><td>Interseções, bacia, clima, diligência e tetos</td><td>territorial-model.js</td></tr>
+<tr><td>Fontes, edições, limites e distâncias de transmissão</td><td>server/territory-service.js</td></tr>
+<tr><td>Atualização, cache e seleção ativa</td><td>territorial-client.js</td></tr>
+<tr><td>Ranking e orquestração</td><td>region-options.js e app.js</td></tr>
+</tbody></table>
+<p><strong>Limite de interpretação:</strong> os pesos e cortes são escolhas do MVP, ainda sem validação empírica como modelo preditivo. Ambiente e diligência compartilham a interseção CNUC; esse efeito é intencional, não são evidências independentes. Revisões das fórmulas devem atualizar este manual, o PDF e os testes correspondentes.</p>
+</section>
       <footer>
-        DataTerra - manual sucinto para uso, demonstração e avaliação acadêmica.
+        DataTerra - manual de uso, metodologia de cálculo e avaliação acadêmica.
       </footer>
     </main>
   </body>

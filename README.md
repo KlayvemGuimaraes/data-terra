@@ -33,11 +33,24 @@ qual impacto hídrico/territorial ele pode gerar?
   autocomplete, referência próxima e geocodificação auxiliar.
   Fonte: https://github.com/kelvins/municipios-brasileiros
 
+Fontes adicionais da análise territorial local:
+
+| Fonte | Uso no cálculo | Referência da versão |
+| --- | --- | --- |
+| [ONS](https://dados.ons.org.br/dataset/subestacao) | Distância e tensão da subestação mais próxima | 1.684 instalações válidas, ≥69 kV |
+| [ANEEL/SIGEL - ONS](https://sigel.aneel.gov.br/arcgis/rest/services/PORTAL/Transmiss%C3%A3o/MapServer/1) | Distância ao traçado de transmissão | Snapshot de 1.817 geometrias adquirido em 20/10/2026 |
+| [MMA/CNUC](https://geoservicos.inde.gov.br/geoserver/MMA/ows?service=WFS&version=2.0.0&request=GetCapabilities) | Interseção com UC, ambiente, diligência e tetos | Polígonos `cnuc_26_07_31`; tabela municipal apenas como reserva |
+| [ANA/SNIRH](https://www.snirh.gov.br/arcgis/rest/services/INDE/Camadas/MapServer/47) | Classe da microbacia no ponto | Balanço quantitativo 2020 |
+| [NASA POWER](https://power.larc.nasa.gov/docs/services/api/temporal/climatology/) | Temperatura, precipitação e umidade climatológicas | Período informado pela resposta, exibido na interface |
+
+A data de consulta não equivale à atualização da base. Contagens descrevem os
+snapshots desta versão e devem ser revistas em uma nova ingestão.
+
 ## Resumo para apresentação
 
 A DataTerra ajuda a comparar regiões candidatas para data centers considerando
-energia renovável, infraestrutura elétrica estimada, disponibilidade hídrica,
-água/esgoto, conectividade por fibra e impacto WUI.
+energia renovável, transmissão e subestações oficiais, água/esgoto, microbacia,
+clima, conectividade, unidades de conservação e diligência regulatória.
 
 O objetivo não é substituir estudos técnicos finais. A plataforma serve como
 triagem inicial para responder onde vale investigar com mais profundidade.
@@ -65,16 +78,17 @@ outorga ou conexão elétrica. Ela é útil para:
 2. Escolha uma UF, município ou região candidata.
 3. Clique no mapa ou use a região selecionada como local do data center.
 4. Defina o raio de consumo.
-5. Observe energia renovável, água/esgoto, fibra e infraestrutura elétrica
-   estimada no entorno.
+5. Observe os recursos e as novas camadas oficiais no entorno; aguarde os estados
+   das quatro consultas territoriais na aba Local.
 6. Analise score, WUI, indicadores, ranking e premissas.
 
 ## O que a tela mostra
 
 - **Mapa:** regiões candidatas, recursos próximos e raio do data center.
-- **Camadas:** energia renovável, infraestrutura elétrica estimada, cabos,
-  água e esgoto.
-- **Critérios:** pesos organizados entre recursos/impacto e viabilidade estimada.
+- **Camadas:** energia, cabos, saneamento, subestações ONS, transmissão ANEEL/SIGEL,
+  polígonos CNUC, microbacia ANA e referência climática NASA. A infraestrutura
+  estimada e a referência municipal ambiental são camadas opcionais de reserva.
+- **Critérios:** pesos em recursos/impacto, viabilidade estimada e riscos territoriais.
 - **WUI:** simulação de impacto hídrico do data center.
 - **Local:** ponto manual no mapa e raio de consumo.
 - **Resumo:** score, classificação e indicadores principais.
@@ -93,8 +107,8 @@ O score vai de 0 a 100. Quanto maior, melhor a aptidão preliminar.
 O score combina:
 
 - energia renovável;
-- infraestrutura elétrica estimada;
-- segurança hídrica/WUI;
+- proximidade da transmissão oficial;
+- água, bacia e clima;
 - conectividade e mercado;
 - diligência regulatória preliminar;
 - ambiente;
@@ -103,22 +117,66 @@ O score combina:
 Para deixar a avaliação mais transparente, a interface separa esses critérios
 em três grupos e mostra um subtotal de 0 a 100 para cada um:
 
-- **Recursos e impacto:** energia renovável e segurança hídrica/WUI;
+- **Recursos e impacto:** energia renovável e água/bacia/clima;
 - **Viabilidade estimada:** infraestrutura elétrica, conectividade/mercado e
   diligência regulatória;
 - **Riscos territoriais:** ambiente e subestação ONS.
 
-Os subtotais ajudam a entender os pontos fortes e fracos do local. O score geral
-continua sendo a média ponderada dos sete critérios, portanto o ranking e as
-faixas de aptidão mantêm a mesma regra de cálculo.
+Os subtotais usam os pesos de cada grupo. O total **não é a média simples dos
+três grupos**: usa diretamente as sete notas e, na análise local, recebe um
+limite preventivo após o arredondamento.
+
+| Critério | Peso padrão |
+| --- | ---: |
+| Energia renovável (E) | 5 |
+| Infraestrutura elétrica (T) | 4 |
+| Água, bacia e clima (A) | 5 |
+| Conectividade e mercado (C) | 3 |
+| Diligência regulatória (L) | 4 |
+| Restrições ambientais (U) | 3 |
+| Distância de subestação (S) | 3 |
+
+```text
+Média = round((5E + 4T + 5A + 3C + 4L + 3U + 3S) / 27)
+Score local final = min(média, limite preventivo)
+```
+
+Com pesos personalizados, dividir pela soma dos pesos positivos ativos. Peso
+zero exclui o critério da média; todos zero resultam em zero. Os tetos continuam
+ativos independentemente dos pesos: 39 em UC de proteção integral; 59 em outra
+UC; 79 enquanto alguma consulta territorial estiver incompleta; 100 nos demais
+casos. Uma interseção conhecida tem precedência sobre a incompletude.
+
+**Exemplo didático:** notas E=100, T=90, A=77, C=96, L=20, U=15 e S=90 dão
+1.928/27, arredondado para 71. Se o ponto estiver em proteção integral,
+o resultado final é 39 (Alto risco), mesmo com bons indicadores de energia.
+Os subtotais desse exemplo são 89, 66 e 53.
+
+O [manual, capítulos 8 a 12](docs/manual-dataterra.html#calculo-score) detalha
+cada fórmula, unidade, faixa, arredondamento, reserva para dado ausente e a
+reprodução completa desse exemplo. [Versão PDF](docs/manual-dataterra.pdf).
+
+**Ranking versus análise local:** o ranking usa bases municipais e indicadores
+preliminares, sem as quatro consultas detalhadas nem seus tetos. A aba Local e
+o resumo do ponto usam o cálculo territorial. Por isso, os resultados podem
+diferir; uma boa posição no ranking não valida o imóvel.
+
+Todas as notas e cortes são heurísticas do MVP, não notas oficiais, probabilidades
+de aprovação ou estimativas de redução de CO₂. No grupo Riscos territoriais,
+assim como nos demais, uma nota maior indica condição mais favorável.
 
 ## Como funciona o impacto hídrico
 
-A plataforma estima WUI com base em:
+A nota de impacto WUI combina intensidade de água (L/kWh) e estresse Aqueduct
+da UF. A carga de TI (MW) altera o volume anual, mas não diretamente essa nota.
+Na análise local, água combina 30% de WUI/saneamento, 50% de microbacia ANA e
+20% de clima NASA. Bacia e clima não alteram automaticamente o consumo anual.
 
-- carga de TI do data center, em MW;
-- consumo de água, em L/kWh;
-- estresse hídrico da UF, baseado no WRI Aqueduct.
+```text
+Água anual (ML) = round(L/kWh × MW × 1.000 × 8.760 / 1.000.000)
+```
+
+Por exemplo: 50 MW e 1 L/kWh resultam em 438 ML/ano, assumindo operação contínua.
 
 Leitura:
 
@@ -156,7 +214,8 @@ modelos JS locais: WUI, ranking, energia, busca, análise local
         |
         | consome
         v
-/api/* na Vercel -> rewrites para data/*.json
+/api/* estática -> rewrites para data/*.json
+/api/territory -> função Node: CNUC + ANA + NASA + snapshot ANEEL/SIGEL
         |
         | origem dos JSONs
         v
@@ -208,8 +267,9 @@ http://localhost:3000
 
 ## Deploy na Vercel
 
-O deploy usa a interface estática da raiz do projeto. Os endpoints `/api/*`
-são redirecionados para arquivos JSON versionados em `data/` via `vercel.json`.
+O deploy usa a interface estática da raiz e Node 24. Os endpoints das bases
+locais apontam para JSONs em `data/`; `/api/territory` é uma função dinâmica
+com timeout de 60 segundos, configurada em `vercel.json`.
 
 Antes de subir:
 
@@ -246,8 +306,9 @@ Os testes cobrem:
 
 ## Manual para banca
 
-- `docs/manual-dataterra.html`
-- `docs/manual-dataterra.pdf`
+- [Manual HTML: uso e metodologia completa](docs/manual-dataterra.html)
+- [Manual PDF para a banca](docs/manual-dataterra.pdf)
+- Capítulos 8–12: pesos, fórmulas, limites, exemplo numérico e rastreabilidade.
 
 ## Limitações
 
