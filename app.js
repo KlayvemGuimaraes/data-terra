@@ -103,6 +103,15 @@ function initMap() {
 }
 
 function initPanelTabs() {
+    document.querySelectorAll("[data-workspace-tab]").forEach(link => {
+        link.addEventListener("click", () => {
+            activatePanelTabByTarget(link.dataset.workspaceTab);
+            document.querySelector(link.getAttribute("href"))?.focus({ preventScroll: true });
+        });
+    });
+    document.querySelectorAll("[data-tab-target]").forEach(button => {
+        button.setAttribute("aria-pressed", String(button.classList.contains("is-active")));
+    });
     document.querySelectorAll(".panel-tabs").forEach(tabList => {
         tabList.addEventListener("click", (event) => {
             const button = event.target.closest("[data-tab-target]");
@@ -158,6 +167,7 @@ function setActivePanelTab(panel, target) {
 
     panel.querySelectorAll("[data-tab-target]").forEach(tabButton => {
         tabButton.classList.toggle("is-active", tabButton.dataset.tabTarget === target);
+        tabButton.setAttribute("aria-pressed", String(tabButton.dataset.tabTarget === target));
     });
 
     panel.querySelectorAll("[data-tab-panel]").forEach(tabPanel => {
