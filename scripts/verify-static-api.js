@@ -23,6 +23,8 @@ function verifyStaticApi() {
     ["/api/energy", "/data/energy.json"],
     ["/api/municipalities", "/data/municipalities.json"],
     ["/api/summary", "/data/summary.json"],
+    ["/api/substations", "/data/substations.json"],
+    ["/api/environmental", "/data/environmental-risk.json"],
   ];
 
   assert(
@@ -46,6 +48,13 @@ function verifyStaticApi() {
   assert(summary.water === water.length, "summary.water does not match data/water.json");
   assert(summary.energy === energy.length, "summary.energy does not match data/energy.json");
 
+  const transmission = readJson("data/transmission.json");
+  assert(transmission.features.length > 0 && summary.transmission === transmission.features.length, "invalid transmission snapshot");
+  const substations = readJson("data/substations.json");
+  const environmental = readJson("data/environmental-risk.json");
+  assert(substations.length > 0 && substations.every(s => Number.isFinite(s.lat) && Number.isFinite(s.lng) && s.voltageKv >= 69), "invalid ONS dataset");
+  assert(environmental.length > 0 && environmental.every(r => r.nome && /^[A-Z]{2}$/.test(r.uf) && typeof r.has_uc_protection === "boolean"), "invalid CNUC dataset");
+  assert(summary.substations === substations.length && summary.envRisk === environmental.length, "territorial summary mismatch");
   console.log("Static API ready for Vercel.");
 }
 

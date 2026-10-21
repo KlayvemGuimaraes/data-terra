@@ -1,18 +1,11 @@
 (function (root, factory) {
     if (typeof module === "object" && module.exports) {
-        module.exports = factory(require("./wui-model"));
+        module.exports = factory(require("./wui-model"), require("./evaluation-criteria"), require("./territorial-model"));
     } else {
-        root.SiteAnalysis = factory(root.WuiModel);
+        root.SiteAnalysis = factory(root.WuiModel, root.EvaluationCriteria, root.TerritorialModel);
     }
-})(typeof globalThis !== "undefined" ? globalThis : this, function (WuiModel) {
+})(typeof globalThis !== "undefined" ? globalThis : this, function (WuiModel, EvaluationCriteria, TerritorialModel) {
     const TYPE_ORDER = ["Hidro", "Solar", "Biomassa", "Eólica"];
-    const DEFAULT_WEIGHTS = {
-        renewables: 5,
-        grid: 4,
-        water: 5,
-        connectivity: 3,
-        licensing: 4,
-    };
 
     function toNumber(value, fallback = 0) {
         const number = Number(value);
@@ -379,7 +372,90 @@
         return 35;
     }
 
-    function buildScores(energy, water, cables, fiber, impact, itLoadMw) {
+    function scoreSubstation(substations, site, radiusKm) {
+        if (!substations || substations.length === 0) return 40;
+
+        const candidates = substations
+            .map((s) => {
+                const lat = toNumber(s.lat, NaN);
+                const lng = toNumber(s.lng, NaN);
+                if (!isValidCoordinate(lat, lng)) return null;
+                return { ...s, dist: distanceKm(site, { lat, lng }) };
+            })
+            .filter(Boolean)
+            .sort((a, b) => a.dist - b.dist);
+
+        const nearest = candidates[0];
+        if (!nearest) return 40;
+
+        let score;
+        if (nearest.dist <= 20) {
+            score = 90;
+        } else if (nearest.dist <= 50) {
+            score = clamp(Math.round(89 - ((nearest.dist - 20) / 30) * 29), 60, 89);
+        } else if (nearest.dist <= radiusKm) {
+            score = clamp(Math.round(59 - ((nearest.dist - 50) / Math.max(1, radiusKm - 50)) * 19), 40, 59);
+        } else {
+            score = 32;
+        }
+
+        // Bônus por subestação de alta tensão (≥230kV conectada ao SIN)
+        const voltageBonus = toNumber(nearest.voltageKv) >= 230 ? 5 : 0;
+        return clamp(score + voltageBonus, 0, 100);
+    }
+
+    function summarizeNearestSubstation(substations, site) {
+        if (!substations || substations.length === 0) {
+            return { count: 0, nearestDistanceKm: null, nearestName: null, nearestVoltageKv: null };
+        }
+        const candidates = substations
+            .map((s) => {
+                const lat = toNumber(s.lat, NaN);
+                const lng = toNumber(s.lng, NaN);
+                if (!isValidCoordinate(lat, lng)) return null;
+                return { ...s, dist: distanceKm(site, { lat, lng }) };
+            })
+            .filter(Boolean)
+            .sort((a, b) => a.dist - b.dist);
+        const nearest = candidates[0];
+        return {
+            count: substations.length,
+            nearestDistanceKm: nearest ? round(nearest.dist, 1) : null,
+            nearestName: nearest?.name || null,
+            nearestVoltageKv: nearest?.voltageKv || null,
+        };
+    }
+
+    function normalizeMunicipality(value) {
+        return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toUpperCase();
+    }
+
+    function environmentalRecord(envRisk, municipality) {
+        if (!municipality) return null;
+        return (envRisk || []).find((r) =>
+            normalizeMunicipality(r.nome) === normalizeMunicipality(municipality.name) &&
+            normalizeMunicipality(r.uf) === normalizeMunicipality(municipality.state)) || null;
+    }
+
+    function scoreEnvironmental(envRisk, municipality) {
+        const record = environmentalRecord(envRisk, municipality);
+        // Ausência de registro e cobertura parcial nunca significam ausência de restrições.
+        return record?.has_uc_protection ? 38 : 58;
+    }
+
+    function summarizeEnvironmental(envRisk, municipality) {
+        const record = environmentalRecord(envRisk, municipality);
+        return {
+            status: record?.has_uc_protection ? "atencao" : "sem-dado",
+            label: record?.has_uc_protection
+                ? "UC de proteção integral registrada no município de referência"
+                : "Cobertura ambiental insuficiente para afastar restrições",
+            municipality: municipality ? `${municipality.name}/${municipality.state}` : null,
+            source: "MMA/CNUC jul/2026; referência pela sede municipal mais próxima, sem interseção de polígonos. FUNAI e INCRA não integrados.",
+        };
+    }
+
+    function buildScores(energy, water, cables, fiber, impact, itLoadMw, substations, envRisk, site, nearestRegion, radiusKm) {
         const renewables = scoreRenewables(energy.totalCapacityMw, itLoadMw);
         const connectivity = scoreConnectivity(cables, fiber);
         return {
@@ -388,21 +464,17 @@
             water: scoreWater(water, impact),
             connectivity,
             licensing: water.points > 0 ? 76 : 58,
+            environmental: scoreEnvironmental(envRisk, nearestRegion),
+            substation: scoreSubstation(substations, site, radiusKm),
         };
-    }
-
-    function weightedScore(scores, weights) {
-        const entries = Object.entries(weights || DEFAULT_WEIGHTS);
-        const totalWeight = entries.reduce((sum, [, weight]) => sum + weight, 0);
-        const weighted = entries.reduce((sum, [key, weight]) => {
-            return sum + (scores[key] || 0) * weight;
-        }, 0);
-        return Math.round(weighted / totalWeight);
     }
 
     function analyzeSiteResources(data, site, options = {}) {
         const radiusKm = clamp(toNumber(options.radiusKm, 100), 5, 500);
         const regions = options.regions || [];
+        const substations = options.substations || data.substations || [];
+        const envRisk = options.envRisk || data.envRisk || [];
+        const municipality = inferNearestRegion(site, options.municipalities || data.municipalities || []);
         const nearestRegion = inferNearestRegion(site, regions);
         const state = String(site?.state || nearestRegion?.state || "NA").toUpperCase();
         const itLoadMw = clamp(toNumber(options.wuiConfig?.itLoadMw, 50), 1, 500);
@@ -422,7 +494,12 @@
         const water = summarizeWater(waterRows);
         const cables = summarizeCables(data.cables || [], site, radiusKm);
         const fiber = summarizeFiberProximity(data.cables || [], site, radiusKm);
-        const scores = buildScores(energy, water, cables, fiber, impact, itLoadMw);
+        const baseScores = buildScores(energy, water, cables, fiber, impact, itLoadMw, substations, envRisk, site, municipality, radiusKm);
+        const territorial = TerritorialModel.assess(options.territory || {}, baseScores);
+        const scores = territorial.scores;
+        const scoreWeights = options.weights || EvaluationCriteria.getDefaultWeights();
+        const envSummary = summarizeEnvironmental(envRisk, municipality);
+        const substationSummary = summarizeNearestSubstation(substations, site);
 
         return {
             site: {
@@ -450,8 +527,13 @@
             cables,
             fiber,
             impact,
+            environmental: envSummary,
+            nearestSubstation: substationSummary,
             scores,
-            overallScore: weightedScore(scores, options.weights || DEFAULT_WEIGHTS),
+            groupScores: EvaluationCriteria.calculateGroupScores(scores, scoreWeights),
+            territorial,
+            rawScore: EvaluationCriteria.calculateWeightedScore(scores, scoreWeights),
+            overallScore: Math.min(territorial.cap, EvaluationCriteria.calculateWeightedScore(scores, scoreWeights)),
         };
     }
 
@@ -462,6 +544,10 @@
 
     return {
         analyzeSiteResources,
+        scoreSubstation,
+        scoreEnvironmental,
+        summarizeEnvironmental,
+        inferNearestRegion,
         distanceKm,
         minDistanceToGeometryKm,
     };

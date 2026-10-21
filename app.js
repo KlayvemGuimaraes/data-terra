@@ -7,18 +7,19 @@ let layers = {
     water: L.layerGroup(),
     energy: L.layerGroup(),
     electric: L.layerGroup(),
+    substations: L.layerGroup(),
+    environmental: L.layerGroup(),
+    protectedAreas: L.layerGroup(),
+    transmission: L.layerGroup(),
+    basins: L.layerGroup(),
+    climate: L.layerGroup(),
     regions: L.layerGroup(),
     site: L.layerGroup()
 };
 
-let activeLayers = new Set(["energy", "electric", "cables", "water"]);
-let weights = {
-    renewables: 5,
-    grid: 4,
-    water: 5,
-    connectivity: 3,
-    licensing: 4,
-};
+let activeLayers = new Set(["energy", "cables", "water", "substations", "protectedAreas", "transmission", "basins"]);
+let territorialScoreCache = new WeakMap();
+let weights = EvaluationCriteria.getDefaultWeights();
 
 let selectedRegion = null;
 let selectedState = "ALL";
@@ -35,10 +36,18 @@ let regionsData = [];
 let regionSearchOptions = [];
 let simulatedSite = null;
 let siteAnalysis = null;
+let liveTerritory = {};
+const territoryClient = TerritorialClient.create({ onUpdate(data) {
+    liveTerritory = data;
+    renderSiteAnalysis();
+    renderLiveLayers();
+} });
 let currentData = {
     cables: [],
     water: [],
     energy: [],
+    substations: [],
+    envRisk: [],
     municipalities: []
 };
 
@@ -47,13 +56,8 @@ let subFilters = {
     water: { service: ["Água", "Esgoto"], pop: 0 }
 };
 
-const metricLabels = {
-    renewables: "Energia renovável",
-    grid: "Infraestrutura elétrica",
-    water: "Segurança hídrica (WUI)",
-    connectivity: "Conectividade e mercado",
-    licensing: "Segurança regulatória",
-};
+const criteriaCatalog = EvaluationCriteria.CRITERIA;
+const criteriaGroups = EvaluationCriteria.GROUPS;
 
 const energyTypeColors = {
     Solar: "#facc15",
@@ -71,10 +75,9 @@ function initMap() {
         zoomControl: false
     });
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: 'abcd',
-        maxZoom: 20
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
     }).addTo(map);
 
     map.createPane("energyGridPane");
@@ -89,7 +92,7 @@ function initMap() {
     energyRenderer = L.canvas({ pane: "energyGridPane", padding: 0.5 });
     electricRenderer = L.canvas({ pane: "electricPane", padding: 0.5 });
     regionRenderer = L.canvas({ pane: "regionPane", padding: 0.5 });
-    Object.values(layers).forEach(layer => layer.addTo(map));
+    Object.entries(layers).forEach(([key, layer]) => { if (!["environmental", "electric", "climate"].includes(key)) layer.addTo(map); });
     map.on("zoomend", () => {
         if (map.hasLayer(layers.energy)) renderEnergy();
     });
@@ -173,14 +176,17 @@ function activatePanelTabByTarget(target) {
 // Data Fetching
 async function fetchData() {
     try {
-        const [cables, water, energy, municipalities] = await Promise.all([
+        const [cables, water, energy, municipalities, substations, envRisk] = await Promise.all([
             ApiClient.fetchJson('/api/cables'),
             ApiClient.fetchJson('/api/water'),
             ApiClient.fetchJson('/api/energy'),
-            ApiClient.fetchOptionalJson('/api/municipalities', [])
+            ApiClient.fetchOptionalJson('/api/municipalities', []),
+            ApiClient.fetchOptionalJson('/api/substations', []),
+            ApiClient.fetchOptionalJson('/api/environmental', [])
         ]);
 
-        currentData = { cables, water, energy, municipalities };
+        currentData = { cables, water, energy, municipalities, substations, envRisk };
+        renderTerritorialLayers();
 
         renderCables();
         renderWater();
@@ -206,6 +212,25 @@ async function fetchData() {
     } catch (error) {
         console.error('Error loading data:', error);
     }
+}
+
+function escapeText(value) {
+    return String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function renderTerritorialLayers() {
+    layers.substations.clearLayers();
+    layers.environmental.clearLayers();
+    currentData.substations.forEach(s => L.circleMarker([s.lat, s.lng], {
+        radius: 4, color: "#fbbf24", weight: 1, fillOpacity: 0.7,
+    }).bindPopup(`<strong>${escapeText(s.name)}</strong><br>ONS · ${s.voltageKv} kV<br>Proximidade não garante conexão ou capacidade disponível.`).addTo(layers.substations));
+    currentData.municipalities.forEach(m => {
+        const summary = SiteAnalysis.summarizeEnvironmental(currentData.envRisk, m);
+        if (summary.status !== "atencao") return;
+        L.circleMarker([m.lat, m.lng], {
+            radius: 5, color: "#fb7185", weight: 1, fillOpacity: 0.3,
+        }).bindPopup(`<strong>${escapeText(m.name)}/${escapeText(m.state)}</strong><br>${summary.label}.<br>Sede municipal: não representa limite ou sobreposição no terreno.`).addTo(layers.environmental);
+    });
 }
 
 function renderCables() {
@@ -377,7 +402,7 @@ function renderRegions() {
     });
 
     ordered.forEach(region => {
-        const score = getScore(region);
+        const score = region.id === selectedRegion?.id && siteAnalysis ? siteAnalysis.overallScore : getScore(region);
         const status = getClass(score);
         const isSelected = region.id === selectedRegion?.id;
         const marker = L.circleMarker([region.lat, region.lng], {
@@ -429,12 +454,7 @@ function getRegionMarkerColor(className) {
 
 // Logic helpers (same as original but adapted)
 function getScore(region) {
-    const totalWeight = Object.values(weights).reduce((sum, value) => sum + value, 0);
-    const scores = getEffectiveScores(region);
-    const weighted = Object.entries(weights).reduce((sum, [key, weight]) => {
-        return sum + (scores[key] || 0) * weight;
-    }, 0);
-    return Math.round(weighted / totalWeight);
+    return EvaluationCriteria.calculateWeightedScore(getEffectiveScores(region), weights);
 }
 
 function getWuiInput(region) {
@@ -450,7 +470,20 @@ function getWuiAssessment(region) {
 }
 
 function getEffectiveScores(region) {
-    return WuiModel.applyWuiToScores(region.scores, getWuiInput(region));
+    let territorial = territorialScoreCache.get(region);
+    if (!territorial || territorial.radiusKm !== siteConfig.radiusKm) {
+        territorial = {
+            radiusKm: siteConfig.radiusKm,
+            environmental: SiteAnalysis.scoreEnvironmental(currentData.envRisk, region),
+            substation: SiteAnalysis.scoreSubstation(currentData.substations, region, siteConfig.radiusKm),
+        };
+        territorialScoreCache.set(region, territorial);
+    }
+    return {
+        ...WuiModel.applyWuiToScores(region.scores, getWuiInput(region)),
+        environmental: territorial.environmental,
+        substation: territorial.substation,
+    };
 }
 
 function getClass(score) {
@@ -482,6 +515,7 @@ function selectRegion(id) {
 function setSimulatedSite(latlng, options = {}) {
     if (!latlng || !Number.isFinite(Number(latlng.lat)) || !Number.isFinite(Number(latlng.lng))) return;
 
+    if (selectedRegion && (Math.abs(selectedRegion.lat - Number(latlng.lat)) > 0.00001 || Math.abs(selectedRegion.lng - Number(latlng.lng)) > 0.00001)) selectedRegion = null;
     simulatedSite = {
         lat: Number(latlng.lat),
         lng: Number(latlng.lng),
@@ -491,6 +525,9 @@ function setSimulatedSite(latlng, options = {}) {
     renderSiteAnalysis();
     renderSiteMarker();
     renderSiteControls();
+    renderRegions();
+    renderRanking();
+    renderDetails();
 
     if (options.activateResults) {
         activatePanelTabByTarget("result-site");
@@ -587,6 +624,60 @@ function renderSiteControls() {
     `;
 }
 
+function renderLiveLayers() {
+    const mapping = { environment: 'protectedAreas', transmission: 'transmission', basin: 'basins', climate: 'climate' };
+    const colors = { environment: '#be185d', transmission: '#b45309', basin: '#0284c7' };
+    for (const [kind, layerName] of Object.entries(mapping)) {
+        layers[layerName].clearLayers();
+        const data = liveTerritory[kind];
+        if (!data) continue;
+        if (kind === 'climate') {
+            if (data.status === 'ok' && simulatedSite) L.circleMarker([simulatedSite.lat, simulatedSite.lng], { radius: 9, color: '#ea580c', fillOpacity: 0.2 }).bindPopup(`NASA POWER · referência em grade<br>Máxima climatológica: ${escapeText(data.maxTemperature)} °C<br>${escapeText(data.edition)}`).addTo(layers.climate);
+            continue;
+        }
+        L.geoJSON(data.features || [], {
+            style: { color: colors[kind], weight: kind === 'transmission' ? 2 : 1.5, fillOpacity: 0.1 },
+            onEachFeature(feature, layer) {
+                const p = feature.properties || {};
+                layer.bindPopup(`<strong>${escapeText(p.name || data.source)}</strong><br>${escapeText(p.category || p.class || '')}<br>${escapeText(data.source)} · geometria visual simplificada${p.atPoint ? '<br>Interseção com o ponto selecionado' : ''}`);
+            },
+        }).addTo(layers[layerName]);
+    }
+}
+
+function renderTerritorialDetails() {
+    const statusText = { loading: 'Consultando', ok: 'Consultado', partial: 'Cobertura parcial', unavailable: 'Indisponível', 'no-data': 'Sem dado no ponto' };
+    const labels = { environment: 'Áreas protegidas · CNUC', transmission: 'Linhas oficiais · ANEEL/ONS', basin: 'Microbacia · ANA', climate: 'Clima · NASA POWER' };
+    const summaries = {
+        environment: data => `${data.count ?? 0} UC(s) no raio; ${data.items?.filter(i => i.atPoint).length ?? 0} no ponto.`,
+        transmission: data => data.nearestDistanceKm == null ? 'Nenhuma linha identificada no raio consultado.' : `${data.nearestName} · distância aproximada ${formatKm(data.nearestDistanceKm)} ao traçado.`,
+        basin: data => `${data.code} · ${data.region} · classe ${data.class}. Comprometimento: ${data.commitmentPercent == null ? 'não informado' : Number(data.commitmentPercent).toFixed(1) + '%'}.`,
+        climate: data => `Máxima climatológica ${data.maxTemperature} °C · umidade média ${data.humidity}% · ${data.dryMonths} mês(es) com precipitação média inferior a 1 mm/dia. Indicador climático: ${data.score}/100.`,
+    };
+    return `<details class="methodology-block territorial-details" data-territory-section="main" open>
+        <summary>Consulta territorial e próximos passos</summary>
+        <div aria-live="polite">${Object.entries(labels).map(([kind, label]) => {
+            const data = liveTerritory[kind] || { status: 'loading' };
+            return `<details class="territorial-source" data-territory-section="${kind}"><summary>${label} · ${data.refreshing ? 'Atualizando (resultado anterior)' : statusText[data.status] || 'Sem dado'}</summary>
+                <p>${escapeText(data.status === 'ok' || data.status === 'partial' ? summaries[kind](data) : data.message || 'Aguardando consulta à fonte oficial.')}</p>
+                ${data.items ? `<ul>${data.items.filter(i => i.atPoint).map(i => `<li>${escapeText(i.name)} · ${escapeText(i.group)} · plano de manejo: ${escapeText(i.managementPlan || 'não informado')}. Gestor: ${escapeText(i.manager || 'não informado')}.</li>`).join('')}</ul>` : ''}
+                <p class="field-note">${escapeText(data.message || '')} ${escapeText(data.edition || '')}${data.fetchedAt ? ` · consultado em ${escapeText(new Date(data.fetchedAt).toLocaleString('pt-BR'))}` : ''}${data.displayLimited ? ' · mapa mostra apenas as feições mais próximas; contagem inclui todas as consultadas.' : ''}${data.geometryStatus && data.geometryStatus !== 'ok' ? ' · geometria indisponível para exibição.' : ''}</p>
+            </details>`;
+        }).join('')}</div>
+        <details data-territory-section="rules"><summary>Regras de triagem e diligências</summary><ul>${siteAnalysis.territorial.rules.map(r => `<li><strong>${escapeText(r.title)}:</strong> ${escapeText(r.text)} <a href="${r.url}" target="_blank" rel="noopener">Fonte oficial</a></li>`).join('')}</ul></details>
+        <p class="field-note">${escapeText(siteAnalysis.territorial.warnings.join(' '))}</p>
+        <button type="button" id="retryTerritory" class="secondary-button">Atualizar consultas</button>
+    </details>`;
+}
+
+document.addEventListener('click', event => {
+    if (event.target.closest('#retryTerritory') && simulatedSite) {
+        liveTerritory = territoryClient.request(simulatedSite, siteConfig.radiusKm, true);
+        renderLiveLayers();
+        renderSiteAnalysis();
+    }
+});
+
 function renderSiteAnalysis() {
     const container = document.querySelector("#siteAnalysis");
     if (!simulatedSite || currentData.energy.length === 0) {
@@ -597,7 +688,10 @@ function renderSiteAnalysis() {
         return;
     }
 
+    const nextTerritory = territoryClient.request(simulatedSite, siteConfig.radiusKm);
+    if (nextTerritory !== liveTerritory) { liveTerritory = nextTerritory; renderLiveLayers(); }
     siteAnalysis = SiteAnalysis.analyzeSiteResources(currentData, simulatedSite, {
+        territory: liveTerritory,
         radiusKm: siteConfig.radiusKm,
         regions: allRegionsData,
         wuiConfig,
@@ -605,6 +699,8 @@ function renderSiteAnalysis() {
     });
     const status = getClass(siteAnalysis.overallScore);
     const coverage = siteAnalysis.load.renewableCoveragePercentage;
+    const groupScores = siteAnalysis.groupScores;
+    const expandedTerritory = new Map([...container.querySelectorAll("[data-territory-section]")].map(el => [el.dataset.territorySection, el.open]));
 
     container.innerHTML = `
         <div class="site-score-card">
@@ -616,6 +712,9 @@ function renderSiteAnalysis() {
             <span class="status-pill ${status.className}">${status.label}</span>
         </div>
 
+        ${renderScoreGroupSummary(groupScores)}
+        <p class="field-note">${siteAnalysis.territorial.complete ? 'Consulta das quatro fontes concluída.' : 'Consulta incompleta ou em andamento; score provisório.'} Média: ${siteAnalysis.rawScore}/100${siteAnalysis.rawScore > siteAnalysis.overallScore ? ` · limite preventivo: ${siteAnalysis.territorial.cap}` : ''}.</p>
+        ${renderTerritorialDetails()}
         <div class="site-location-grid">
             <span>Coordenadas</span>
             <strong>lat ${formatCoordinate(siteAnalysis.site.lat)} / lng ${formatCoordinate(siteAnalysis.site.lng)}</strong>
@@ -646,6 +745,12 @@ function renderSiteAnalysis() {
             </div>
         </div>
 
+        <details class="methodology-block">
+            <summary>Subestação ONS e referência municipal de reserva</summary>
+            <p><strong>Subestação ONS:</strong> ${siteAnalysis.nearestSubstation.nearestName ? `${escapeText(siteAnalysis.nearestSubstation.nearestName)} · ${formatKm(siteAnalysis.nearestSubstation.nearestDistanceKm)} em linha geodésica · ${siteAnalysis.nearestSubstation.nearestVoltageKv} kV` : "Sem dados disponíveis (40 pontos)"}. Validar capacidade e acesso com o agente responsável.</p>
+            <p><strong>Ambiental:</strong> ${siteAnalysis.environmental.label}. Referência: ${escapeText(siteAnalysis.environmental.municipality || "indisponível")}.</p>
+            <p>${siteAnalysis.environmental.source} Consultar limites, planos de manejo e órgão licenciador antes de selecionar o terreno.</p>
+        </details>
         <h3>Matriz renovável no raio</h3>
         <div class="renewable-breakdown-list">
             ${renderEnergyBreakdownRows(siteAnalysis.energy.types)}
@@ -670,7 +775,10 @@ function renderSiteAnalysis() {
         </p>
     `;
 
+    container.querySelectorAll("[data-territory-section]").forEach(el => { if (expandedTerritory.has(el.dataset.territorySection)) el.open = expandedTerritory.get(el.dataset.territorySection); });
+    renderLocalScoreSummary(siteAnalysis);
     renderSiteControls();
+    renderRegions();
 }
 
 function renderEnergyBreakdownRows(types) {
@@ -758,11 +866,13 @@ function renderDetails() {
     const score = getScore(selectedRegion);
     const status = getClass(score);
     const scores = getEffectiveScores(selectedRegion);
+    const groupScores = EvaluationCriteria.calculateGroupScores(scores, weights);
     const wuiAssessment = getWuiAssessment(selectedRegion);
 
     document.querySelector("#selectedName").textContent = `${selectedRegion.name} / ${selectedRegion.state}`;
     document.querySelector("#selectedSummary").textContent = selectedRegion.summary;
     document.querySelector("#selectedScore").textContent = score;
+    document.querySelector("#selectedScoreGroups").innerHTML = renderScoreGroupSummary(groupScores);
     document.querySelector("#selectedFiber").innerHTML = renderRegionFiberProximity(selectedRegion.fiber);
     
     const statusEl = document.querySelector("#selectedClass");
@@ -771,20 +881,7 @@ function renderDetails() {
     
     document.querySelector("#recommendation").textContent = selectedRegion.recommendation;
 
-    document.querySelector("#metrics").innerHTML = Object.entries(metricLabels)
-        .map(([key, label]) => {
-            const value = scores[key] || 0;
-            return `
-                <div class="metric">
-                    <div class="metric-row">
-                        <span>${label}</span>
-                        <span>${value}/100</span>
-                    </div>
-                    <div class="bar"><span style="width:${value}%"></span></div>
-                </div>
-            `;
-        })
-        .join("");
+    document.querySelector("#metrics").innerHTML = renderMetricGroups(scores, groupScores);
 
     renderWuiResult(wuiAssessment);
     renderRenewableMix(selectedRegion);
@@ -793,6 +890,7 @@ function renderDetails() {
     document.querySelector("#conditions").innerHTML = selectedRegion.conditions
         .map((condition) => `<span class="condition">${condition}</span>`)
         .join("");
+    if (siteAnalysis) renderLocalScoreSummary(siteAnalysis);
 }
 
 function renderWuiResult(assessment) {
@@ -926,7 +1024,8 @@ function renderMethodology(region, assessment) {
             </ul>
         </div>
         <div class="methodology-block">
-            <h3>Premissas da triagem</h3>
+            <h3>Premissas das bases regionais</h3>
+            <p>A simulação local incorpora as consultas oficiais descritas em Novas fontes e premissas territoriais.</p>
             <ul>
                 ${assumptionNotes.map(note => `<li>${note}</li>`).join("")}
                 <li>WUI é uma estimativa por UF baseada em The Green Grid WUI e WRI Aqueduct 4.0; não substitui estudo por bacia, outorga ou disponibilidade local.</li>
@@ -948,6 +1047,7 @@ function renderRanking() {
     document.querySelector("#rankingNote").textContent = ranked.hiddenCount > 0
         ? `Mostrando ${ranked.regions.length} de ${ranked.totalCount} regiões. Filtre por estado para investigar mais candidatos.`
         : `${ranked.totalCount} regiões candidatas neste recorte.`;
+    document.querySelector("#rankingNote").textContent += " Ranking preliminar das bases locais; consulte o score detalhado na aba Local.";
     document.querySelector("#ranking").innerHTML = ranked.regions
         .map((region, index) => {
             const score = getScore(region);
@@ -966,16 +1066,82 @@ function renderRanking() {
 }
 
 function renderWeights() {
-    document.querySelector("#weights").innerHTML = Object.entries(metricLabels)
-        .map(([key, label]) => `
-            <div class="weight-control">
-                <div class="weight-head">
-                    <span>${label}</span>
-                    <span id="weight-value-${key}">${weights[key]}</span>
+    document.querySelector("#weights").innerHTML = criteriaGroups
+        .map((group) => `
+            <section class="criteria-group" data-criteria-group="${group.id}">
+                <div class="criteria-group-heading">
+                    <h3>${group.label}</h3>
+                    <p>${group.description}</p>
                 </div>
-                <input type="range" min="1" max="5" value="${weights[key]}" data-weight="${key}" />
+                <div class="criteria-group-controls">
+                    ${group.criteria.map(renderWeightControl).join("")}
+                </div>
+            </section>
+        `)
+        .join("");
+}
+
+function renderWeightControl(key) {
+    const criterion = criteriaCatalog[key];
+    return `
+        <div class="weight-control">
+            <div class="weight-head">
+                <label for="weight-${key}">${criterion.label}</label>
+                <span id="weight-value-${key}">${weights[key]}</span>
             </div>
-        `).join("");
+            <input
+                id="weight-${key}"
+                type="range"
+                min="1"
+                max="5"
+                value="${weights[key]}"
+                data-weight="${key}"
+            />
+        </div>
+    `;
+}
+
+function renderScoreGroupSummary(groupScores) {
+    return `
+        <div class="criteria-score-grid">
+            ${criteriaGroups.map((group) => `
+                <div class="criteria-score-card" data-score-group="${group.id}">
+                    <span>${group.label}</span>
+                    <strong>${groupScores[group.id]}<small>/100</small></strong>
+                </div>
+            `).join("")}
+        </div>
+    `;
+}
+
+function renderMetricGroups(scores, groupScores) {
+    return criteriaGroups.map((group) => `
+        <section class="criteria-metric-group" data-metric-group="${group.id}">
+            <div class="criteria-metric-heading">
+                <div>
+                    <h3>${group.label}</h3>
+                    <p>${group.description}</p>
+                </div>
+                <strong>${groupScores[group.id]}/100</strong>
+            </div>
+            <div class="criteria-metric-list">
+                ${group.criteria.map((key) => renderMetric(key, scores[key])).join("")}
+            </div>
+        </section>
+    `).join("");
+}
+
+function renderMetric(key, score) {
+    const value = Number.isFinite(Number(score)) ? Number(score) : 0;
+    return `
+        <div class="metric">
+            <div class="metric-row">
+                <span>${criteriaCatalog[key].label}</span>
+                <span>${value}/100</span>
+            </div>
+            <div class="bar"><span style="width:${value}%"></span></div>
+        </div>
+    `;
 }
 
 function renderWuiControls() {
@@ -1066,14 +1232,16 @@ document.querySelector("#weights").addEventListener("input", (e) => {
     renderRegions();
     renderRanking();
     renderDetails();
+    renderSiteAnalysis();
 });
 
 document.querySelector("#resetWeights").addEventListener("click", () => {
-    weights = { renewables: 5, grid: 4, water: 5, connectivity: 3, licensing: 4 };
+    weights = EvaluationCriteria.getDefaultWeights();
     renderWeights();
     renderRegions();
     renderRanking();
     renderDetails();
+    renderSiteAnalysis();
 });
 
 document.querySelector("#wuiPreset").addEventListener("change", (e) => {
@@ -1108,6 +1276,9 @@ function updateSiteRadius(value) {
     renderSiteAnalysis();
     renderSiteMarker();
     renderSiteControls();
+    renderRegions();
+    renderRanking();
+    renderDetails();
 }
 
 document.querySelector("#siteRadius").addEventListener("input", (e) => {
@@ -1166,17 +1337,10 @@ function selectRegionSearchOption() {
 }
 
 function renderMunicipalityDetails(option) {
-    const status = siteAnalysis ? getClass(siteAnalysis.overallScore) : { label: "Simulação local", className: "medium" };
-
     document.querySelector("#selectedName").textContent = `${option.name} / ${option.state}`;
     document.querySelector("#selectedSummary").textContent =
         "Município escolhido pelo autocomplete. A análise principal passa a ser o raio de consumo do data center.";
-    document.querySelector("#selectedScore").textContent = siteAnalysis ? siteAnalysis.overallScore : 0;
-    document.querySelector("#selectedFiber").innerHTML = renderRegionFiberProximity(siteAnalysis?.fiber);
-
-    const statusEl = document.querySelector("#selectedClass");
-    statusEl.textContent = siteAnalysis ? status.label : "Simulação local";
-    statusEl.className = `status-pill ${status.className}`;
+    renderLocalScoreSummary(siteAnalysis);
 
     document.querySelector("#metrics").innerHTML = `
         <p class="field-note">
@@ -1192,6 +1356,32 @@ function renderMunicipalityDetails(option) {
         "Checar licenciamento municipal e ambiental",
     ].map((condition) => `<span class="condition">${condition}</span>`).join("");
     renderRenewableMix({ name: option.name, state: option.state });
+}
+
+function renderLocalScoreSummary(analysis) {
+    const status = analysis
+        ? getClass(analysis.overallScore)
+        : { label: "Simulação local", className: "medium" };
+
+    if (!selectedRegion) {
+        document.querySelector("#selectedName").textContent = "Local simulado";
+        document.querySelector("#selectedSummary").textContent = "Triagem do ponto e raio escolhidos. Consulte cobertura, regras e próximos passos na aba Local.";
+    }
+    document.querySelector("#selectedCoverage").textContent = analysis?.territorial.complete ? "Consulta territorial concluída; consulte limites e diligências na aba Local." : "Resultado provisório: consulta territorial incompleta ou em andamento.";
+    if (analysis) {
+        document.querySelector("#metrics").innerHTML = renderMetricGroups(analysis.scores, analysis.groupScores);
+        document.querySelector("#recommendation").textContent = analysis.territorial.warnings.join(' ');
+        document.querySelector("#conditions").innerHTML = analysis.territorial.rules.map(rule => `<span class="condition">${escapeText(rule.title)}</span>`).join('');
+    }
+    document.querySelector("#selectedScore").textContent = analysis?.overallScore || 0;
+    document.querySelector("#selectedScoreGroups").innerHTML = analysis
+        ? renderScoreGroupSummary(analysis.groupScores)
+        : "";
+    document.querySelector("#selectedFiber").innerHTML = renderRegionFiberProximity(analysis?.fiber);
+
+    const statusEl = document.querySelector("#selectedClass");
+    statusEl.textContent = status.label;
+    statusEl.className = `status-pill ${status.className}`;
 }
 
 document.querySelector("#focusRegion").addEventListener("click", () => {

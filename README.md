@@ -74,7 +74,7 @@ outorga ou conexão elétrica. Ela é útil para:
 - **Mapa:** regiões candidatas, recursos próximos e raio do data center.
 - **Camadas:** energia renovável, infraestrutura elétrica estimada, cabos,
   água e esgoto.
-- **Critérios:** pesos usados no score de aptidão territorial.
+- **Critérios:** pesos organizados entre recursos/impacto e viabilidade estimada.
 - **WUI:** simulação de impacto hídrico do data center.
 - **Local:** ponto manual no mapa e raio de consumo.
 - **Resumo:** score, classificação e indicadores principais.
@@ -96,7 +96,21 @@ O score combina:
 - infraestrutura elétrica estimada;
 - segurança hídrica/WUI;
 - conectividade e mercado;
-- segurança regulatória preliminar.
+- diligência regulatória preliminar;
+- ambiente;
+- distância de subestação ONS.
+
+Para deixar a avaliação mais transparente, a interface separa esses critérios
+em três grupos e mostra um subtotal de 0 a 100 para cada um:
+
+- **Recursos e impacto:** energia renovável e segurança hídrica/WUI;
+- **Viabilidade estimada:** infraestrutura elétrica, conectividade/mercado e
+  diligência regulatória;
+- **Riscos territoriais:** ambiente e subestação ONS.
+
+Os subtotais ajudam a entender os pontos fortes e fracos do local. O score geral
+continua sendo a média ponderada dos sete critérios, portanto o ranking e as
+faixas de aptidão mantêm a mesma regra de cálculo.
 
 ## Como funciona o impacto hídrico
 
@@ -124,14 +138,12 @@ Dados reais usados:
 - coordenadas de municípios brasileiros;
 - referência de estresse hídrico WRI Aqueduct.
 
-Indicadores estimados:
+Indicadores de triagem:
 
-- **infraestrutura elétrica:** derivada de polos de geração renovável e centros
-  de demanda, não de uma base oficial de subestações ou transmissão;
-- **linhas de transmissão no mapa:** aproximação visual entre polos elétricos
-  estimados;
-- **segurança regulatória:** leitura preliminar para compor triagem;
-- **WUI por UF:** estimativa territorial, não estudo de bacia hidrográfica.
+- No ranking regional, infraestrutura e água ainda usam as bases locais de referência.
+- Na simulação local, transmissão oficial ANEEL/SIGEL, microbacia ANA, climatologia NASA e polígonos CNUC alteram o cálculo.
+- Os pesos, fórmulas, limites preventivos e regras de diligência são premissas do MVP, documentadas na interface e no manual; não representam aprovação dos órgãos.
+- A camada elétrica estimada permanece opcional e desligada inicialmente.
 
 ## Arquitetura resumida
 
@@ -157,6 +169,7 @@ Componentes principais:
 - `styles.css`: layout e identidade visual.
 - `app.js`: orquestra mapa, estado da UI, seleção de região e renderizações.
 - `site-analysis.js`: cálculo de recursos dentro do raio.
+- `evaluation-criteria.js`: catálogo, grupos, pesos e agregação dos critérios.
 - `wui-model.js`: cálculo de impacto hídrico/WUI.
 - `region-options.js`: construção das regiões candidatas.
 - `electric-infrastructure.js`: infraestrutura elétrica estimada.
@@ -249,8 +262,33 @@ A DataTerra é uma ferramenta de triagem. Ela não substitui:
 
 ## Próximos passos recomendados
 
-- Integrar base oficial de subestações e linhas de transmissão.
-- Melhorar granularidade hídrica para bacia ou município, não só UF.
+- Integrar capacidade disponível de conexão elétrica.
+- Atualizar balanços hídricos e incluir séries INMET e riscos físicos.
 - Separar `app.js` em módulos menores depois da apresentação.
 - Adicionar cenários de carga por tipo de data center.
 - Criar relatório exportável por local analisado.
+
+## Critérios territoriais (outubro/2026)
+
+O simulador e o ranking usam sete critérios em três grupos. Os novos pesos padrão são 3 para ambiente e 3 para proximidade ONS. As premissas e faixas completas estão na interface e em `docs/manual-dataterra.html` / `.pdf`.
+
+- `node scripts/ingest-substations.js`: ONS, coordenadas válidas e tensão ≥69 kV.
+- `node scripts/ingest-environmental.js [CSV-local]`: CNUC julho/2026, presença municipal de proteção integral; parser CSV com aspas. Falhas preservam a base anterior.
+- FUNAI/INCRA não integrados; valores `null` significam desconhecidos. Nunca interpretar silêncio da base como liberação ambiental.
+- Atualizar contagens em `data/summary.json` após ingest (ou executar `npm run export:static-api` com o banco local disponível).
+- `npm test` e `npm run build` verificam regressões e contrato estático antes do deploy.
+
+A base CNUC municipal é uma reserva aproximada. A análise detalhada usa polígonos CNUC publicados, snapshot de transmissão ANEEL/SIGEL, balanço por microbacia ANA (2020), climatologia NASA POWER e regras federais de diligência. Normas locais específicas e licenciamento definitivo exigem validação externa.
+
+### API territorial
+
+`GET /api/territory?kind=environment|basin|transmission|climate&lat=-23.86&lng=-46.46&radius=30`
+
+- Implementação em `api/territory.js` e `server/territory-service.js`, compartilhada pelo Express e pela função Node do Vercel (60 s). Não requer chave das fontes.
+- Parâmetros restritos ao recorte brasileiro e raio de 10–300 km; hosts oficiais fixos, sem URL arbitrária.
+- Fontes independentes, timeout de 40 s por consulta, cache de sucessos por 1 h, dados ausentes nunca equivalem a ausência de risco.
+- `territorial-model.js` faz interseções, distâncias e regras; `territorial-client.js` descarta respostas antigas e oferece nova tentativa.
+- A API estática anterior permanece; `/api/territory` requer servidor ou função Vercel. Abrir apenas com servidor de arquivos não habilita a consulta detalhada.
+- `npm test` cobre furos de polígonos, múltiplos polígonos, dados ausentes, limites preventivos, validação da API, cache e concorrência de seleção.
+- `node scripts/ingest-transmission.js`: atualiza o snapshot nacional de 1.817 geometrias oficiais, validando contagem e unicidade antes de substituir o arquivo. Transmissão não depende de chamada remota durante a simulação.
+- Limites: 400 feições CNUC consultadas; mapa exibe até 30 UCs/40 linhas simplificadas. Avaliação usa os polígonos originais retornados. Geometrias visualmente omitidas por tamanho não invalidam atributos já consultados.
