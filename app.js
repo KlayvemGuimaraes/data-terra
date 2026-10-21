@@ -7,18 +7,15 @@ let layers = {
     water: L.layerGroup(),
     energy: L.layerGroup(),
     electric: L.layerGroup(),
+    substations: L.layerGroup(),
+    environmental: L.layerGroup(),
     regions: L.layerGroup(),
     site: L.layerGroup()
 };
 
-let activeLayers = new Set(["energy", "electric", "cables", "water"]);
-let weights = {
-    renewables: 5,
-    grid: 4,
-    water: 5,
-    connectivity: 3,
-    licensing: 4,
-};
+let activeLayers = new Set(["energy", "electric", "cables", "water", "substations"]);
+let territorialScoreCache = new WeakMap();
+let weights = EvaluationCriteria.getDefaultWeights();
 
 let selectedRegion = null;
 let selectedState = "ALL";
@@ -39,6 +36,8 @@ let currentData = {
     cables: [],
     water: [],
     energy: [],
+    substations: [],
+    envRisk: [],
     municipalities: []
 };
 
@@ -47,13 +46,8 @@ let subFilters = {
     water: { service: ["Água", "Esgoto"], pop: 0 }
 };
 
-const metricLabels = {
-    renewables: "Energia renovável",
-    grid: "Infraestrutura elétrica",
-    water: "Segurança hídrica (WUI)",
-    connectivity: "Conectividade e mercado",
-    licensing: "Segurança regulatória",
-};
+const criteriaCatalog = EvaluationCriteria.CRITERIA;
+const criteriaGroups = EvaluationCriteria.GROUPS;
 
 const energyTypeColors = {
     Solar: "#facc15",
@@ -71,10 +65,9 @@ function initMap() {
         zoomControl: false
     });
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: 'abcd',
-        maxZoom: 20
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
     }).addTo(map);
 
     map.createPane("energyGridPane");
@@ -89,7 +82,7 @@ function initMap() {
     energyRenderer = L.canvas({ pane: "energyGridPane", padding: 0.5 });
     electricRenderer = L.canvas({ pane: "electricPane", padding: 0.5 });
     regionRenderer = L.canvas({ pane: "regionPane", padding: 0.5 });
-    Object.values(layers).forEach(layer => layer.addTo(map));
+    Object.entries(layers).forEach(([key, layer]) => { if (key !== "environmental") layer.addTo(map); });
     map.on("zoomend", () => {
         if (map.hasLayer(layers.energy)) renderEnergy();
     });
@@ -173,14 +166,17 @@ function activatePanelTabByTarget(target) {
 // Data Fetching
 async function fetchData() {
     try {
-        const [cables, water, energy, municipalities] = await Promise.all([
+        const [cables, water, energy, municipalities, substations, envRisk] = await Promise.all([
             ApiClient.fetchJson('/api/cables'),
             ApiClient.fetchJson('/api/water'),
             ApiClient.fetchJson('/api/energy'),
-            ApiClient.fetchOptionalJson('/api/municipalities', [])
+            ApiClient.fetchOptionalJson('/api/municipalities', []),
+            ApiClient.fetchOptionalJson('/api/substations', []),
+            ApiClient.fetchOptionalJson('/api/environmental', [])
         ]);
 
-        currentData = { cables, water, energy, municipalities };
+        currentData = { cables, water, energy, municipalities, substations, envRisk };
+        renderTerritorialLayers();
 
         renderCables();
         renderWater();
@@ -206,6 +202,25 @@ async function fetchData() {
     } catch (error) {
         console.error('Error loading data:', error);
     }
+}
+
+function escapeText(value) {
+    return String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function renderTerritorialLayers() {
+    layers.substations.clearLayers();
+    layers.environmental.clearLayers();
+    currentData.substations.forEach(s => L.circleMarker([s.lat, s.lng], {
+        radius: 4, color: "#fbbf24", weight: 1, fillOpacity: 0.7,
+    }).bindPopup(`<strong>${escapeText(s.name)}</strong><br>ONS · ${s.voltageKv} kV<br>Proximidade não garante conexão ou capacidade disponível.`).addTo(layers.substations));
+    currentData.municipalities.forEach(m => {
+        const summary = SiteAnalysis.summarizeEnvironmental(currentData.envRisk, m);
+        if (summary.status !== "atencao") return;
+        L.circleMarker([m.lat, m.lng], {
+            radius: 5, color: "#fb7185", weight: 1, fillOpacity: 0.3,
+        }).bindPopup(`<strong>${escapeText(m.name)}/${escapeText(m.state)}</strong><br>${summary.label}.<br>Sede municipal: não representa limite ou sobreposição no terreno.`).addTo(layers.environmental);
+    });
 }
 
 function renderCables() {
@@ -429,12 +444,7 @@ function getRegionMarkerColor(className) {
 
 // Logic helpers (same as original but adapted)
 function getScore(region) {
-    const totalWeight = Object.values(weights).reduce((sum, value) => sum + value, 0);
-    const scores = getEffectiveScores(region);
-    const weighted = Object.entries(weights).reduce((sum, [key, weight]) => {
-        return sum + (scores[key] || 0) * weight;
-    }, 0);
-    return Math.round(weighted / totalWeight);
+    return EvaluationCriteria.calculateWeightedScore(getEffectiveScores(region), weights);
 }
 
 function getWuiInput(region) {
@@ -450,7 +460,20 @@ function getWuiAssessment(region) {
 }
 
 function getEffectiveScores(region) {
-    return WuiModel.applyWuiToScores(region.scores, getWuiInput(region));
+    let territorial = territorialScoreCache.get(region);
+    if (!territorial || territorial.radiusKm !== siteConfig.radiusKm) {
+        territorial = {
+            radiusKm: siteConfig.radiusKm,
+            environmental: SiteAnalysis.scoreEnvironmental(currentData.envRisk, region),
+            substation: SiteAnalysis.scoreSubstation(currentData.substations, region, siteConfig.radiusKm),
+        };
+        territorialScoreCache.set(region, territorial);
+    }
+    return {
+        ...WuiModel.applyWuiToScores(region.scores, getWuiInput(region)),
+        environmental: territorial.environmental,
+        substation: territorial.substation,
+    };
 }
 
 function getClass(score) {
@@ -491,6 +514,9 @@ function setSimulatedSite(latlng, options = {}) {
     renderSiteAnalysis();
     renderSiteMarker();
     renderSiteControls();
+    renderRegions();
+    renderRanking();
+    renderDetails();
 
     if (options.activateResults) {
         activatePanelTabByTarget("result-site");
@@ -605,6 +631,7 @@ function renderSiteAnalysis() {
     });
     const status = getClass(siteAnalysis.overallScore);
     const coverage = siteAnalysis.load.renewableCoveragePercentage;
+    const groupScores = siteAnalysis.groupScores;
 
     container.innerHTML = `
         <div class="site-score-card">
@@ -615,6 +642,8 @@ function renderSiteAnalysis() {
             </div>
             <span class="status-pill ${status.className}">${status.label}</span>
         </div>
+
+        ${renderScoreGroupSummary(groupScores)}
 
         <div class="site-location-grid">
             <span>Coordenadas</span>
@@ -646,6 +675,12 @@ function renderSiteAnalysis() {
             </div>
         </div>
 
+        <details class="methodology-block">
+            <summary>Riscos territoriais · detalhes e próximos passos</summary>
+            <p><strong>Subestação ONS:</strong> ${siteAnalysis.nearestSubstation.nearestName ? `${escapeText(siteAnalysis.nearestSubstation.nearestName)} · ${formatKm(siteAnalysis.nearestSubstation.nearestDistanceKm)} em linha geodésica · ${siteAnalysis.nearestSubstation.nearestVoltageKv} kV` : "Sem dados disponíveis (40 pontos)"}. Validar capacidade e acesso com o agente responsável.</p>
+            <p><strong>Ambiental:</strong> ${siteAnalysis.environmental.label}. Referência: ${escapeText(siteAnalysis.environmental.municipality || "indisponível")}.</p>
+            <p>${siteAnalysis.environmental.source} Consultar limites, planos de manejo e órgão licenciador antes de selecionar o terreno.</p>
+        </details>
         <h3>Matriz renovável no raio</h3>
         <div class="renewable-breakdown-list">
             ${renderEnergyBreakdownRows(siteAnalysis.energy.types)}
@@ -670,6 +705,7 @@ function renderSiteAnalysis() {
         </p>
     `;
 
+    if (!selectedRegion) renderLocalScoreSummary(siteAnalysis);
     renderSiteControls();
 }
 
@@ -758,11 +794,13 @@ function renderDetails() {
     const score = getScore(selectedRegion);
     const status = getClass(score);
     const scores = getEffectiveScores(selectedRegion);
+    const groupScores = EvaluationCriteria.calculateGroupScores(scores, weights);
     const wuiAssessment = getWuiAssessment(selectedRegion);
 
     document.querySelector("#selectedName").textContent = `${selectedRegion.name} / ${selectedRegion.state}`;
     document.querySelector("#selectedSummary").textContent = selectedRegion.summary;
     document.querySelector("#selectedScore").textContent = score;
+    document.querySelector("#selectedScoreGroups").innerHTML = renderScoreGroupSummary(groupScores);
     document.querySelector("#selectedFiber").innerHTML = renderRegionFiberProximity(selectedRegion.fiber);
     
     const statusEl = document.querySelector("#selectedClass");
@@ -771,20 +809,7 @@ function renderDetails() {
     
     document.querySelector("#recommendation").textContent = selectedRegion.recommendation;
 
-    document.querySelector("#metrics").innerHTML = Object.entries(metricLabels)
-        .map(([key, label]) => {
-            const value = scores[key] || 0;
-            return `
-                <div class="metric">
-                    <div class="metric-row">
-                        <span>${label}</span>
-                        <span>${value}/100</span>
-                    </div>
-                    <div class="bar"><span style="width:${value}%"></span></div>
-                </div>
-            `;
-        })
-        .join("");
+    document.querySelector("#metrics").innerHTML = renderMetricGroups(scores, groupScores);
 
     renderWuiResult(wuiAssessment);
     renderRenewableMix(selectedRegion);
@@ -966,16 +991,82 @@ function renderRanking() {
 }
 
 function renderWeights() {
-    document.querySelector("#weights").innerHTML = Object.entries(metricLabels)
-        .map(([key, label]) => `
-            <div class="weight-control">
-                <div class="weight-head">
-                    <span>${label}</span>
-                    <span id="weight-value-${key}">${weights[key]}</span>
+    document.querySelector("#weights").innerHTML = criteriaGroups
+        .map((group) => `
+            <section class="criteria-group" data-criteria-group="${group.id}">
+                <div class="criteria-group-heading">
+                    <h3>${group.label}</h3>
+                    <p>${group.description}</p>
                 </div>
-                <input type="range" min="1" max="5" value="${weights[key]}" data-weight="${key}" />
+                <div class="criteria-group-controls">
+                    ${group.criteria.map(renderWeightControl).join("")}
+                </div>
+            </section>
+        `)
+        .join("");
+}
+
+function renderWeightControl(key) {
+    const criterion = criteriaCatalog[key];
+    return `
+        <div class="weight-control">
+            <div class="weight-head">
+                <label for="weight-${key}">${criterion.label}</label>
+                <span id="weight-value-${key}">${weights[key]}</span>
             </div>
-        `).join("");
+            <input
+                id="weight-${key}"
+                type="range"
+                min="1"
+                max="5"
+                value="${weights[key]}"
+                data-weight="${key}"
+            />
+        </div>
+    `;
+}
+
+function renderScoreGroupSummary(groupScores) {
+    return `
+        <div class="criteria-score-grid">
+            ${criteriaGroups.map((group) => `
+                <div class="criteria-score-card" data-score-group="${group.id}">
+                    <span>${group.label}</span>
+                    <strong>${groupScores[group.id]}<small>/100</small></strong>
+                </div>
+            `).join("")}
+        </div>
+    `;
+}
+
+function renderMetricGroups(scores, groupScores) {
+    return criteriaGroups.map((group) => `
+        <section class="criteria-metric-group" data-metric-group="${group.id}">
+            <div class="criteria-metric-heading">
+                <div>
+                    <h3>${group.label}</h3>
+                    <p>${group.description}</p>
+                </div>
+                <strong>${groupScores[group.id]}/100</strong>
+            </div>
+            <div class="criteria-metric-list">
+                ${group.criteria.map((key) => renderMetric(key, scores[key])).join("")}
+            </div>
+        </section>
+    `).join("");
+}
+
+function renderMetric(key, score) {
+    const value = Number.isFinite(Number(score)) ? Number(score) : 0;
+    return `
+        <div class="metric">
+            <div class="metric-row">
+                <span>${criteriaCatalog[key].label}</span>
+                <span>${value}/100</span>
+            </div>
+            <div class="bar"><span style="width:${value}%"></span></div>
+        </div>
+    `;
 }
 
 function renderWuiControls() {
@@ -1066,14 +1157,16 @@ document.querySelector("#weights").addEventListener("input", (e) => {
     renderRegions();
     renderRanking();
     renderDetails();
+    renderSiteAnalysis();
 });
 
 document.querySelector("#resetWeights").addEventListener("click", () => {
-    weights = { renewables: 5, grid: 4, water: 5, connectivity: 3, licensing: 4 };
+    weights = EvaluationCriteria.getDefaultWeights();
     renderWeights();
     renderRegions();
     renderRanking();
     renderDetails();
+    renderSiteAnalysis();
 });
 
 document.querySelector("#wuiPreset").addEventListener("change", (e) => {
@@ -1108,6 +1201,9 @@ function updateSiteRadius(value) {
     renderSiteAnalysis();
     renderSiteMarker();
     renderSiteControls();
+    renderRegions();
+    renderRanking();
+    renderDetails();
 }
 
 document.querySelector("#siteRadius").addEventListener("input", (e) => {
@@ -1166,17 +1262,10 @@ function selectRegionSearchOption() {
 }
 
 function renderMunicipalityDetails(option) {
-    const status = siteAnalysis ? getClass(siteAnalysis.overallScore) : { label: "Simulação local", className: "medium" };
-
     document.querySelector("#selectedName").textContent = `${option.name} / ${option.state}`;
     document.querySelector("#selectedSummary").textContent =
         "Município escolhido pelo autocomplete. A análise principal passa a ser o raio de consumo do data center.";
-    document.querySelector("#selectedScore").textContent = siteAnalysis ? siteAnalysis.overallScore : 0;
-    document.querySelector("#selectedFiber").innerHTML = renderRegionFiberProximity(siteAnalysis?.fiber);
-
-    const statusEl = document.querySelector("#selectedClass");
-    statusEl.textContent = siteAnalysis ? status.label : "Simulação local";
-    statusEl.className = `status-pill ${status.className}`;
+    renderLocalScoreSummary(siteAnalysis);
 
     document.querySelector("#metrics").innerHTML = `
         <p class="field-note">
@@ -1192,6 +1281,22 @@ function renderMunicipalityDetails(option) {
         "Checar licenciamento municipal e ambiental",
     ].map((condition) => `<span class="condition">${condition}</span>`).join("");
     renderRenewableMix({ name: option.name, state: option.state });
+}
+
+function renderLocalScoreSummary(analysis) {
+    const status = analysis
+        ? getClass(analysis.overallScore)
+        : { label: "Simulação local", className: "medium" };
+
+    document.querySelector("#selectedScore").textContent = analysis?.overallScore || 0;
+    document.querySelector("#selectedScoreGroups").innerHTML = analysis
+        ? renderScoreGroupSummary(analysis.groupScores)
+        : "";
+    document.querySelector("#selectedFiber").innerHTML = renderRegionFiberProximity(analysis?.fiber);
+
+    const statusEl = document.querySelector("#selectedClass");
+    statusEl.textContent = status.label;
+    statusEl.className = `status-pill ${status.className}`;
 }
 
 document.querySelector("#focusRegion").addEventListener("click", () => {

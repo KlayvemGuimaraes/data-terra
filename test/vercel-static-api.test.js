@@ -23,6 +23,8 @@ test("vercel rewrites API endpoints to static data files", () => {
       ["/api/energy", "/data/energy.json"],
       ["/api/municipalities", "/data/municipalities.json"],
       ["/api/summary", "/data/summary.json"],
+    ["/api/substations", "/data/substations.json"],
+    ["/api/environmental", "/data/environmental-risk.json"],
     ],
   );
 });

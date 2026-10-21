@@ -23,6 +23,14 @@
     {
       "source": "/api/summary",
       "destination": "/data/summary.json"
+    },
+    {
+      "source": "/api/substations",
+      "destination": "/data/substations.json"
+    },
+    {
+      "source": "/api/environmental",
+      "destination": "/data/environmental-risk.json"
     }
   ],
   "headers": [

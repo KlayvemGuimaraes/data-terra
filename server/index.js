@@ -80,6 +80,9 @@ function normalizeText(value) {
 }
 
 // API Endpoints
+app.get('/api/substations', (req, res) => res.sendFile(path.join(__dirname, '../data/substations.json')));
+app.get('/api/environmental', (req, res) => res.sendFile(path.join(__dirname, '../data/environmental-risk.json')));
+
 app.get('/api/cables', (req, res) => {
     const cables = db.prepare('SELECT * FROM cables').all();
     res.json(cables.map(c => ({
@@ -122,6 +125,8 @@ app.get('/api/summary', (req, res) => {
     const energyCount = db.prepare('SELECT COUNT(*) as count FROM energy_plants').get().count;
     
     res.json({
+        substations: require("../data/substations.json").length,
+        envRisk: require("../data/environmental-risk.json").length,
         cables: cableCount,
         water: waterCount,
         energy: energyCount

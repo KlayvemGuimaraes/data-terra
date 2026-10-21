@@ -72,6 +72,9 @@
         color: var(--muted);
       }
 
+      h3 { color: var(--accent-dark); }
+      a { color: var(--accent); overflow-wrap: anywhere; }
+      li { break-inside: avoid; }
       .section {
         padding: 18px 0;
         border-bottom: 1px solid var(--line);
@@ -181,9 +184,9 @@
           padding: 24px 30px;
         }
 
-        .section {
-          break-inside: avoid;
-        }
+        .section { break-inside: avoid; }
+        .section:last-of-type { break-inside: auto; break-before: page; }
+        h3 { break-after: avoid; }
       }
     </style>
   </head>
@@ -257,7 +260,8 @@
         </div>
         <p>
           O cálculo combina energia renovável, infraestrutura elétrica,
-          segurança hídrica, conectividade e segurança regulatória preliminar.
+          segurança hídrica, conectividade, segurança regulatória preliminar,
+          restrições ambientais municipais e distância de subestação oficial.
         </p>
       </section>
 
@@ -294,11 +298,20 @@
           licenciamento, análise elétrica real ou parecer técnico final.
         </p>
         <p>
-          Próximos passos: integrar análise por bacia hidrográfica, subestações,
-          rotas terrestres de fibra, áreas sensíveis e regras de licenciamento.
+          Próximos passos: integrar bacias hidrográficas, clima, linhas oficiais de transmissão,
+          rotas terrestres de fibra, polígonos de áreas sensíveis e regras de licenciamento.
         </p>
       </section>
 
+      <section class="section"><h3>Critérios territoriais e cobertura</h3>
+<p>O score é a média ponderada dos sete critérios, arredondada: energia 5, infraestrutura 4, água 5, conectividade 3, regulação 4, ambiental 3 e subestação 3. Os grupos Recursos e impacto, Viabilidade estimada e Riscos territoriais têm médias próprias; a média final usa os critérios, não a média dos grupos. Pesos zero excluem critérios; todos em zero resultam em 0.</p>
+<ul>
+<li><a href="https://dados.ons.org.br/dataset/subestacao" target="_blank" rel="noopener">ONS - subestações da Rede de Operação</a>: 1.684 registros com coordenadas e tensão ≥69 kV no arquivo versionado. Distância geodésica ao ponto oficial mais próximo, inclusive fora do raio; não é rota de conexão. Até 20 km: 90 pontos; de 20 a 50 km: 89 a 60; acima de 50 km e dentro do raio: 59 a 40; fora dessas faixas: 32. Soma 5 pontos se a instalação mais próxima tem ≥230 kV. Sem coordenadas válidas: 40. Não comprova disponibilidade de conexão ou potência.</li>
+<li><a href="https://dados.mma.gov.br/dataset/44b6dc8a-dc82-4a84-8d95-1b0da7c85dac/resource/72dd3d2d-3cca-4b97-b382-a1c90531e379" target="_blank" rel="noopener">MMA/CNUC - CSV julho/2026</a>: 1.772 municípios com UCs declaradas, cruzados por nome e UF. Presença de UC de proteção integral: 38 pontos; demais situações ou ausência de dados: 58 (incerteza, não liberação ambiental). Para pontos livres, utiliza a sede municipal mais próxima, que pode pertencer a outro município. Não cruza o terreno ou o raio com polígonos e não confirma sobreposição.</li>
+<li>As camadas ONS e CNUC podem ser alternadas em Camadas. Os pontos CNUC representam sedes municipais, nunca limites das UCs. As linhas e subestações estimadas da camada elétrica anterior continuam identificadas como estimativas.</li>
+<li>FUNAI e INCRA não integrados nesta versão: valores desconhecidos, nunca ausência comprovada de terras indígenas ou territórios quilombolas. Permanecem pendentes as geometrias oficiais de transmissão, bacias ANA, clima INMET, riscos SGB e regras locais de licenciamento. WUI continua por UF e segurança regulatória é um proxy de saneamento.</li>
+<li>Próximos passos por local: consultar limites e planos de manejo das UCs, direitos territoriais, órgão licenciador, outorga e disponibilidade de conexão. Alta aptidão (≥80), Condicionada (60–79) e Alto risco (&lt;60) são faixas de triagem; um score alto não afasta restrições.</li>
+</ul></section>
       <footer>
         DataTerra - manual sucinto para uso, demonstração e avaliação acadêmica.
       </footer>

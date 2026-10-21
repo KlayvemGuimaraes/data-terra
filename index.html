@@ -116,6 +116,9 @@
                 <span class="info-tooltip" role="tooltip">No mapa, aparece como linhas azuis. Elas indicam rotas de fibra; quanto mais perto do local, melhor a conectividade.</span>
               </button>
             </label>
+            <label class="check-row"><input type="checkbox" data-layer="substations" checked /><span class="layer-title">Subestações oficiais · ONS</span></label>
+            <label class="check-row"><input type="checkbox" data-layer="environmental" /><span class="layer-title">UCs · referência municipal CNUC</span></label>
+            <p class="field-note">CNUC: pontos nas sedes municipais, sem limites de áreas protegidas.</p>
             <div class="sub-filters fiber-layer-note" data-parent="cables">
               <span><i class="fiber-proximity-dot"></i>Proximidade da fibra: quanto mais perto, melhor</span>
             </div>
@@ -161,16 +164,20 @@
             <div class="section-heading">
               <h2>
                 Prioridades
-                <button class="info-hint" type="button" data-info-key="controls-weights" aria-label="Informação sobre prioridades" title="Ajusta o peso de cada critério no score final de aptidão territorial.">
+                <button class="info-hint" type="button" data-info-key="controls-weights" aria-label="Informação sobre prioridades" title="Ajusta o peso dos critérios, organizados entre recursos e impacto e viabilidade estimada, no score final de aptidão territorial.">
                   i
-                  <span class="info-tooltip" role="tooltip">Ajusta o peso de cada critério no score final de aptidão territorial.</span>
+                  <span class="info-tooltip" role="tooltip">Ajusta o peso dos critérios, organizados entre recursos e impacto e viabilidade estimada, no score final de aptidão territorial.</span>
                 </button>
               </h2>
               <button id="resetWeights" class="ghost-button" type="button">
                 Resetar
               </button>
             </div>
-            <div id="weights"></div>
+            <p class="field-note">
+              Os grupos organizam a leitura da avaliação. O score geral continua
+              combinando todos os critérios conforme os pesos definidos.
+            </p>
+            <div id="weights" class="criteria-groups"></div>
           </div>
 
           <div class="panel-section tab-panel" data-tab-panel="controls-wui" hidden>
@@ -342,6 +349,11 @@
                 </div>
                 <span id="selectedClass" class="status-pill"></span>
               </div>
+              <div
+                id="selectedScoreGroups"
+                class="criteria-score-summary"
+                aria-label="Scores separados por grupo de avaliação"
+              ></div>
               <div id="selectedFiber"></div>
             </div>
 
@@ -383,7 +395,7 @@
                   <span class="info-tooltip" role="tooltip">Mostra a pontuação dos critérios usados para compor o score final.</span>
                 </button>
               </h2>
-              <div id="metrics" class="metrics"></div>
+              <div id="metrics" class="metrics criteria-metrics"></div>
             </div>
 
             <div class="panel-section">
@@ -430,6 +442,15 @@
                   <span class="info-tooltip" role="tooltip">Explica quais bases reais e premissas declaradas sustentam os cálculos da plataforma.</span>
                 </button>
               </h2>
+              <details class="methodology-block"><summary>Novas fontes e premissas territoriais</summary><h3>Critérios territoriais e cobertura</h3>
+<p>O score é a média ponderada dos sete critérios, arredondada: energia 5, infraestrutura 4, água 5, conectividade 3, regulação 4, ambiental 3 e subestação 3. Os grupos Recursos e impacto, Viabilidade estimada e Riscos territoriais têm médias próprias; a média final usa os critérios, não a média dos grupos. Pesos zero excluem critérios; todos em zero resultam em 0.</p>
+<ul>
+<li><a href="https://dados.ons.org.br/dataset/subestacao" target="_blank" rel="noopener">ONS - subestações da Rede de Operação</a>: 1.684 registros com coordenadas e tensão ≥69 kV no arquivo versionado. Distância geodésica ao ponto oficial mais próximo, inclusive fora do raio; não é rota de conexão. Até 20 km: 90 pontos; de 20 a 50 km: 89 a 60; acima de 50 km e dentro do raio: 59 a 40; fora dessas faixas: 32. Soma 5 pontos se a instalação mais próxima tem ≥230 kV. Sem coordenadas válidas: 40. Não comprova disponibilidade de conexão ou potência.</li>
+<li><a href="https://dados.mma.gov.br/dataset/44b6dc8a-dc82-4a84-8d95-1b0da7c85dac/resource/72dd3d2d-3cca-4b97-b382-a1c90531e379" target="_blank" rel="noopener">MMA/CNUC - CSV julho/2026</a>: 1.772 municípios com UCs declaradas, cruzados por nome e UF. Presença de UC de proteção integral: 38 pontos; demais situações ou ausência de dados: 58 (incerteza, não liberação ambiental). Para pontos livres, utiliza a sede municipal mais próxima, que pode pertencer a outro município. Não cruza o terreno ou o raio com polígonos e não confirma sobreposição.</li>
+<li>As camadas ONS e CNUC podem ser alternadas em Camadas. Os pontos CNUC representam sedes municipais, nunca limites das UCs. As linhas e subestações estimadas da camada elétrica anterior continuam identificadas como estimativas.</li>
+<li>FUNAI e INCRA não integrados nesta versão: valores desconhecidos, nunca ausência comprovada de terras indígenas ou territórios quilombolas. Permanecem pendentes as geometrias oficiais de transmissão, bacias ANA, clima INMET, riscos SGB e regras locais de licenciamento. WUI continua por UF e segurança regulatória é um proxy de saneamento.</li>
+<li>Próximos passos por local: consultar limites e planos de manejo das UCs, direitos territoriais, órgão licenciador, outorga e disponibilidade de conexão. Alta aptidão (≥80), Condicionada (60–79) e Alto risco (&lt;60) são faixas de triagem; um score alto não afasta restrições.</li>
+</ul></details>
               <div id="methodology" class="methodology"></div>
             </div>
 
@@ -465,6 +486,7 @@
     <script src="./energy-grid.js"></script>
     <script src="./region-options.js"></script>
     <script src="./wui-model.js"></script>
+    <script src="./evaluation-criteria.js"></script>
     <script src="./view-limits.js"></script>
     <script src="./renewable-breakdown.js"></script>
     <script src="./electric-infrastructure.js"></script>

@@ -74,7 +74,7 @@ outorga ou conexão elétrica. Ela é útil para:
 - **Mapa:** regiões candidatas, recursos próximos e raio do data center.
 - **Camadas:** energia renovável, infraestrutura elétrica estimada, cabos,
   água e esgoto.
-- **Critérios:** pesos usados no score de aptidão territorial.
+- **Critérios:** pesos organizados entre recursos/impacto e viabilidade estimada.
 - **WUI:** simulação de impacto hídrico do data center.
 - **Local:** ponto manual no mapa e raio de consumo.
 - **Resumo:** score, classificação e indicadores principais.
@@ -97,6 +97,17 @@ O score combina:
 - segurança hídrica/WUI;
 - conectividade e mercado;
 - segurança regulatória preliminar.
+
+Para deixar a avaliação mais transparente, a interface separa esses critérios
+em dois grupos e mostra um subtotal de 0 a 100 para cada um:
+
+- **Recursos e impacto:** energia renovável e segurança hídrica/WUI;
+- **Viabilidade estimada:** infraestrutura elétrica, conectividade/mercado e
+  segurança regulatória.
+
+Os subtotais ajudam a entender os pontos fortes e fracos do local. O score geral
+continua sendo a média ponderada dos cinco critérios, portanto o ranking e as
+faixas de aptidão mantêm a mesma regra de cálculo.
 
 ## Como funciona o impacto hídrico
 
@@ -157,6 +168,7 @@ Componentes principais:
 - `styles.css`: layout e identidade visual.
 - `app.js`: orquestra mapa, estado da UI, seleção de região e renderizações.
 - `site-analysis.js`: cálculo de recursos dentro do raio.
+- `evaluation-criteria.js`: catálogo, grupos, pesos e agregação dos critérios.
 - `wui-model.js`: cálculo de impacto hídrico/WUI.
 - `region-options.js`: construção das regiões candidatas.
 - `electric-infrastructure.js`: infraestrutura elétrica estimada.
@@ -254,3 +266,15 @@ A DataTerra é uma ferramenta de triagem. Ela não substitui:
 - Separar `app.js` em módulos menores depois da apresentação.
 - Adicionar cenários de carga por tipo de data center.
 - Criar relatório exportável por local analisado.
+
+## Critérios territoriais (outubro/2026)
+
+O simulador e o ranking usam sete critérios em três grupos. Os novos pesos padrão são 3 para ambiente e 3 para proximidade ONS. As premissas e faixas completas estão na interface e em `docs/manual-dataterra.html` / `.pdf`.
+
+- `node scripts/ingest-substations.js`: ONS, coordenadas válidas e tensão ≥69 kV.
+- `node scripts/ingest-environmental.js [CSV-local]`: CNUC julho/2026, presença municipal de proteção integral; parser CSV com aspas. Falhas preservam a base anterior.
+- FUNAI/INCRA não integrados; valores `null` significam desconhecidos. Nunca interpretar silêncio da base como liberação ambiental.
+- Atualizar contagens em `data/summary.json` após ingest (ou executar `npm run export:static-api` com o banco local disponível).
+- `npm test` e `npm run build` verificam regressões e contrato estático antes do deploy.
+
+CNUC não representa sobreposição no terreno/raio; a sede municipal mais próxima é uma referência aproximada. Distância ONS é geodésica, não rota ou garantia de conexão. Clima, bacias, transmissão oficial e regras de licenciamento continuam pendentes.

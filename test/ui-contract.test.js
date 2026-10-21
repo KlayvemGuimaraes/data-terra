@@ -19,6 +19,7 @@ test("declares a Leaflet layer for every layer checkbox", () => {
 
 test("loads helper models before the main app script", () => {
   const html = fs.readFileSync(path.join(rootDir, "index.html"), "utf8");
+  const criteriaScriptIndex = html.indexOf("./evaluation-criteria.js");
   const limitsScriptIndex = html.indexOf("./view-limits.js");
   const renewableScriptIndex = html.indexOf("./renewable-breakdown.js");
   const electricScriptIndex = html.indexOf("./electric-infrastructure.js");
@@ -28,9 +29,11 @@ test("loads helper models before the main app script", () => {
   const appScriptIndex = html.indexOf("./app.js");
 
   assert.ok(limitsScriptIndex > 0);
+  assert.ok(criteriaScriptIndex > 0);
   assert.ok(renewableScriptIndex > limitsScriptIndex);
   assert.ok(electricScriptIndex > renewableScriptIndex);
   assert.ok(siteScriptIndex > electricScriptIndex);
+  assert.ok(siteScriptIndex > criteriaScriptIndex);
   assert.ok(regionSearchScriptIndex > siteScriptIndex);
   assert.ok(apiClientScriptIndex > regionSearchScriptIndex);
   assert.ok(appScriptIndex > limitsScriptIndex);
@@ -39,6 +42,7 @@ test("loads helper models before the main app script", () => {
   assert.ok(appScriptIndex > siteScriptIndex);
   assert.ok(appScriptIndex > regionSearchScriptIndex);
   assert.ok(appScriptIndex > apiClientScriptIndex);
+  assert.ok(appScriptIndex > criteriaScriptIndex);
 });
 
 test("does not expose socioenvironmental risk as a score criterion or map layer", () => {
@@ -167,6 +171,25 @@ test("summary view explains score interpretation, examples and estimated criteri
   assert.match(html, /data-example="bad-site"/);
   assert.match(html, /Critérios estimados/);
   assert.doesNotMatch(html, /risco socioambiental/i);
+});
+
+test("separates evaluation criteria into resource and estimated-feasibility groups", () => {
+  const html = fs.readFileSync(path.join(rootDir, "index.html"), "utf8");
+  const app = fs.readFileSync(path.join(rootDir, "app.js"), "utf8");
+  const css = fs.readFileSync(path.join(rootDir, "styles.css"), "utf8");
+
+  assert.match(html, /id="weights" class="criteria-groups"/);
+  assert.match(html, /id="selectedScoreGroups"/);
+  assert.match(html, /Scores separados por grupo de avaliação/);
+  assert.match(app, /EvaluationCriteria\.GROUPS/);
+  assert.match(app, /EvaluationCriteria\.calculateGroupScores/);
+  assert.match(app, /data-criteria-group=/);
+  assert.match(app, /data-metric-group=/);
+  assert.match(app, /data-score-group=/);
+  assert.match(app, /function renderLocalScoreSummary[\s\S]*#selectedScoreGroups/);
+  assert.match(css, /\.criteria-group\s*{/);
+  assert.match(css, /\.criteria-score-grid\s*{/);
+  assert.match(css, /\.criteria-metric-group\s*{/);
 });
 
 test("information tooltips are positioned against the viewport to avoid clipping", () => {

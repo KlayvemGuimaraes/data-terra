@@ -134,6 +134,11 @@ test("calculates site impact and scores from local resources", () => {
   assert.equal(analysis.impact.state, "SP");
   assert.equal(analysis.scores.renewables, 100);
   assert.ok(analysis.scores.water > 70);
+  assert.deepEqual(analysis.groupScores, {
+    resources: 93,
+    feasibility: 91,
+    territorial: 49,
+  });
   assert.ok(analysis.overallScore >= 80);
 });
 

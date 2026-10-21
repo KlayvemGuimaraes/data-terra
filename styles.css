@@ -434,8 +434,48 @@ input {
   height: 14px;
 }
 
+.criteria-groups {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.criteria-group {
+  padding: 12px;
+  background: var(--panel-soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.criteria-group[data-criteria-group="feasibility"] {
+  background: #fffaf0;
+  border-color: #ead8ad;
+}
+
+.criteria-group-heading h3,
+.criteria-metric-heading h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.criteria-group-heading p,
+.criteria-metric-heading p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.criteria-group-controls {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
 .weight-control {
-  margin-top: 14px;
+  margin: 0;
 }
 
 .weight-head {
@@ -843,6 +883,94 @@ select,
 .metrics {
   display: grid;
   gap: 10px;
+}
+
+.criteria-score-summary {
+  margin-top: 14px;
+}
+
+.criteria-score-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.site-analysis > .criteria-score-grid {
+  margin-top: -2px;
+}
+
+.criteria-score-card {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 10px;
+  background: #edf7f2;
+  border: 1px solid #cbe1d7;
+  border-radius: 7px;
+}
+
+.criteria-score-card[data-score-group="feasibility"] {
+  background: #fffaf0;
+  border-color: #ead8ad;
+}
+
+.criteria-score-card > span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 760;
+  line-height: 1.25;
+}
+
+.criteria-score-card > strong {
+  flex: 0 0 auto;
+  color: var(--accent-dark);
+  font-size: 17px;
+  font-weight: 880;
+  font-variant-numeric: tabular-nums;
+}
+
+.criteria-score-card > strong small {
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.criteria-metrics {
+  gap: 12px;
+}
+
+.criteria-metric-group {
+  padding: 11px;
+  background: var(--panel-soft);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+}
+
+.criteria-metric-group[data-metric-group="feasibility"] {
+  background: #fffaf0;
+  border-color: #ead8ad;
+}
+
+.criteria-metric-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.criteria-metric-heading > strong {
+  flex: 0 0 auto;
+  color: var(--accent-dark);
+  font-size: 12px;
+  font-weight: 860;
+  font-variant-numeric: tabular-nums;
+}
+
+.criteria-metric-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
 }
 
 .renewable-mix {
@@ -1270,7 +1398,8 @@ select,
   }
 
   .range-row,
-  .resource-grid {
+  .resource-grid,
+  .criteria-score-grid {
     grid-template-columns: 1fr;
   }
 
