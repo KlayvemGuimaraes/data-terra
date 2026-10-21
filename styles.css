@@ -1,18 +1,20 @@
 :root {
   color-scheme: light;
-  --bg: #eef3f0;
+  --bg: #f8f9f3;
   --panel: #ffffff;
-  --panel-soft: #f7faf8;
-  --ink: #17231d;
-  --muted: #627268;
-  --line: #d9e2dd;
-  --accent: #0c6b58;
-  --accent-dark: #084d41;
+  --panel-soft: #f3f5ec;
+  --ink: #203c31;
+  --muted: #53624f;
+  --line: #dfe5d9;
+  --accent: #174b3c;
+  --accent-dark: #123e31;
   --high: #1f9d63;
   --medium: #c58a14;
   --low: #c54532;
   --blue: #2970a8;
-  --shadow: 0 18px 42px rgba(23, 35, 29, 0.12);
+  --shadow: 0 4px 24px rgba(32, 60, 49, 0.04);
+  --sage: #719052;
+  --terra: #ae603e;
 }
 
 * {
@@ -25,7 +27,7 @@ body {
   color: var(--ink);
   background: var(--bg);
   font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Poppins", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
 }
 
@@ -1413,3 +1415,137 @@ select,
 .territorial-details p, .territorial-details li { font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
 .territorial-details a { color: #0c6b58; }
 .territorial-details button { margin-top: 8px; }
+
+/* Shared visual language with nuvemnove/dataterra-landingpage. */
+@font-face { font-family: "Montserrat"; src: url("./assets/fonts/montserrat-latin-variable.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "Poppins"; src: url("./assets/fonts/poppins-latin-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Poppins"; src: url("./assets/fonts/poppins-latin-500.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Poppins"; src: url("./assets/fonts/poppins-latin-600.woff2") format("woff2"); font-weight: 600 900; font-display: swap; }
+html { scroll-padding-top: 20px; }
+body { -webkit-font-smoothing: antialiased; }
+::selection { background: #d5e7bb; }
+h1, h2, h3, .score-value, .wui-score, .criteria-score-card > strong { font-family: "Montserrat", sans-serif; }
+a, button, input, select, summary { -webkit-tap-highlight-color: transparent; }
+a, button, summary { touch-action: manipulation; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible { outline: 3px solid var(--terra); outline-offset: 3px; }
+.skip-link { position: fixed; top: -80px; left: 20px; z-index: 10001; padding: 12px 20px; background: var(--accent); color: white; border-radius: 8px; }
+.skip-link:focus { top: 12px; }
+.topbar { flex-shrink: 0; height: 86px; padding: 16px 28px; background: var(--bg); color: var(--ink); border-color: var(--line); gap: 28px; }
+.brand-lockup { width: 190px; min-width: 190px; height: 48px; }
+.brand-lockup img { object-fit: cover; mix-blend-mode: multiply; }
+.topbar-copy { padding-left: 28px; border-left: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+.topbar .eyebrow { color: var(--accent); font-size: 9px; letter-spacing: 1.6px; margin-bottom: 5px; }
+.topbar-actions { gap: 22px; }
+.method-link { color: var(--muted); text-decoration: none; font-size: 12px; white-space: nowrap; }
+.method-link span { color: var(--terra); margin-left: 5px; }
+.manual-link { min-height: 42px; padding: 0 18px; color: #fff; background: var(--accent); border-radius: 7px; font-weight: 500; font-size: 12px; }
+.manual-link:hover { background: #28624b; }
+.workspace-intro { display: flex; align-items: center; justify-content: space-between; padding: 16px 28px 4px; gap: 16px; }
+.workspace-intro > div { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; }
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--sage); box-shadow: 0 0 0 4px #71905216; }
+.intro-tag { font-size: 10px; color: var(--muted); font-weight: 400; border-left: 1px solid var(--line); padding-left: 10px; }
+.workflow-nav { display: flex; align-items: center; gap: 22px; }
+.workflow-nav a { font-size: 10px; color: var(--muted); text-decoration: none; }
+.workflow-nav a:hover { color: var(--terra); }
+.workflow-nav a span { color: var(--terra); font-size: 10px; margin-right: 6px; }
+.workspace { grid-template-columns: 290px minmax(340px, 1fr) 340px; gap: 16px; padding: 20px 24px 24px; }
+.panel, .map-area { border-radius: 14px; min-width: 0; }
+.panel { scrollbar-width: thin; scrollbar-color: #c5cfbc transparent; }
+.panel-tabs { background: #fff; padding: 9px; gap: 4px; border-bottom-color: #e9ece2; }
+.tab-button { min-height: 38px; font-size: 10px; font-weight: 500; border-radius: 7px; }
+.tab-button.is-active { color: var(--accent); background: #eaf0df; border-color: #dce5d0; }
+.tab-button:hover { background: #f0f3e9; }
+.panel-section { padding: 20px 18px; }
+.panel h2 { font-size: 15px; font-weight: 650; letter-spacing: -.35px; }
+.eyebrow { font-weight: 600; font-size: 9px; letter-spacing: 1.4px; }
+.check-row { min-height: 34px; margin-top: 6px; gap: 8px; font-size: 12px; }
+.layer-title { font-weight: 500; }
+.check-row.sub { min-height: 28px; font-size: 11px; margin-top: 0; }
+.check-row input { accent-color: var(--accent); flex-shrink: 0; }
+.sub-filters { border-left: 1px solid var(--line); margin: 2px 0 10px 8px; }
+.check-row.sub { margin-left: 18px; }
+.info-hint { color: #607555; background: #f0f3e9; border-color: #dce5d0; font-weight: 500; }
+.map-toolbar { flex-direction: column; align-items: stretch; gap: 12px; padding: 18px 20px; background: #fff; }
+.map-toolbar h2 { font-size: 20px; font-weight: 600; letter-spacing: -.6px; }
+.map-toolbar .eyebrow { margin-bottom: 6px; color: var(--sage); }
+.legend { gap: 7px 12px; font-size: 9px; line-height: 1.6; }
+.map-canvas { min-height: 400px; background: #e5ecdf; }
+.leaflet-container { font-family: "Poppins", sans-serif; background: #e5ecdf !important; }
+.map-note { pointer-events: none; z-index: 450; left: 12px; bottom: 22px; max-width: 290px; padding: 9px 12px; font-size: 10px; background: #fffffff0; border-radius: 9px; }
+.map-note strong { color: var(--accent); }
+#mapCandidateNote { text-align: left; font-size: 9px; margin-top: 5px; font-weight: 500; }
+.score-value { font-weight: 650; letter-spacing: -2px; }
+.site-score-card { background: #f0f4e8; border-color: #dce5d0; border-radius: 12px; padding: 18px; }
+.site-score-card .score-value { font-size: 44px; }
+.criteria-score-grid { gap: 7px; }
+.criteria-score-card { border-radius: 9px; padding: 10px; background: #f5f7ef; border-color: #e3e9db; }
+.criteria-score-card[data-score-group="feasibility"] { background: #faf3ed; border-color: #ebddd2; }
+.criteria-score-card[data-score-group="territorial"] { grid-column: 1 / -1; background: #f2f5f0; }
+.criteria-score-card > span { font-size: 10px; font-weight: 500; }
+.criteria-score-card > strong { font-weight: 650; }
+.score-guide { border-radius: 10px; }
+.territorial-details { border: 1px solid var(--line); border-radius: 10px; padding: 12px; background: #fdfefb; }
+.territorial-details summary { font-size: 11px; font-weight: 500; }
+.territorial-details p, .territorial-details li { font-size: 11px; line-height: 1.65; }
+.territorial-source { padding: 10px 0; }
+.territorial-source[open] { background: #f4f7ee; }
+.territorial-details a { color: var(--accent); text-underline-offset: 3px; }
+#retryTerritory { min-height: 36px; padding: 7px 12px; border: 1px solid #bac8b8; border-radius: 6px; color: var(--accent); background: #fff; cursor: pointer; font-size: 11px; }
+select, .number-input, #regionSearch { border-radius: 8px; background: #fbfcf8; min-height: 42px; }
+input[type="range"] { accent-color: var(--accent); }
+.primary-button, .ghost-button { border-radius: 8px; font-weight: 500; }
+.primary-button { background: var(--accent); }
+.ranking li { padding: 12px 4px; border-radius: 6px; }
+.ranking li:hover { background: var(--panel-soft); }
+.ranking-name { font-weight: 500; }
+.field-note, .section-note { line-height: 1.6; }
+@media (min-width: 1181px) {
+  .app-shell { height: 100dvh; min-height: 680px; }
+  .workspace { overflow: hidden; }
+  .panel { overscroll-behavior: contain; }
+  .map-canvas { min-height: 0; }
+}
+@media (max-width: 1180px) {
+  .workspace { grid-template-columns: 280px minmax(0, 1fr); }
+  .panel-right { grid-column: 1 / -1; display: block; }
+  .panel-right .panel-section { border-right: 0; }
+  .panel-left { max-height: 720px; }
+  .map-canvas { min-height: 500px; }
+  .topbar-copy { display: none; }
+  .workspace-intro { flex-wrap: wrap; }
+}
+@media (max-width: 780px) {
+  .topbar { flex-direction: row; align-items: center; gap: 12px; padding: 14px 16px; height: 76px; }
+  .brand-lockup { width: 145px; min-width: 145px; height: 40px; }
+  .topbar-actions { width: auto; }
+  .manual-link { width: auto; min-height: 40px; padding: 0 12px; font-size: 10px; }
+  .method-link { display: none; }
+  .workspace-intro { padding: 12px 16px 0; gap: 14px; }
+  .workspace-intro > div { font-size: 12px; }
+  .intro-tag { font-size: 9px; }
+  .workflow-nav { width: 100%; justify-content: space-between; gap: 6px; }
+  .workflow-nav a { font-size: 9px; padding-block: 9px; }
+  .workflow-nav a span { display: block; margin-bottom: 3px; }
+  .workspace { display: flex; flex-direction: column; gap: 16px; padding: 14px 12px 24px; }
+  .map-area { order: -1; }
+  .map-toolbar { padding: 16px; }
+  .map-toolbar h2 { font-size: 18px; }
+  .map-canvas { flex: auto; height: 420px; min-height: 420px; }
+  .panel-left { max-height: none; }
+  .panel-right { display: block; }
+  .panel-tabs { position: sticky; }
+  .tab-button { font-size: 11px; min-height: 42px; }
+  .map-note { max-width: 240px; font-size: 9px; }
+  .criteria-score-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .resource-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #analysis-controls, #analysis-results, #territory-map { scroll-margin-top: 16px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+  .tab-button, .manual-link, .primary-button, .ranking li { transition: background .18s ease, color .18s ease, border-color .18s ease; }
+  .tab-panel.is-active { animation: panel-enter .22s ease-out; }
+  .bar > span { transition: width .3s ease-out; }
+  @keyframes panel-enter { from { opacity: .7; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+}
+
+.selected-region > p:not(.eyebrow) { font-size: 12px; line-height: 1.65; }

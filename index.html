@@ -8,24 +8,31 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
+    <a class="skip-link" href="#territory-map">Ir para o mapa</a>
     <main class="app-shell">
       <header class="topbar">
         <a class="brand-lockup" href="#" aria-label="DataTerra">
           <img src="./assets/dataterra-logo-header.png" alt="DataTerra" />
         </a>
-        <p class="topbar-copy">
-          Avalie onde instalar um data center: escolha o local, defina o raio e
-          veja recursos disponíveis, impacto hídrico e conectividade.
-        </p>
+        <div class="topbar-copy"><span class="eyebrow">Inteligência territorial</span><p>Boas decisões começam pelo território.</p></div>
         <div class="topbar-actions">
+          <a class="method-link" href="./docs/manual-dataterra.html#calculo-score" target="_blank" rel="noreferrer">Como calculamos <span aria-hidden="true">↗</span></a>
           <a class="manual-link" href="./docs/manual-dataterra.pdf" target="_blank" rel="noreferrer">
             Manual da banca
           </a>
         </div>
       </header>
 
+      <div class="workspace-intro">
+        <div><span class="live-dot" aria-hidden="true"></span><span>Explorar o território</span><span class="intro-tag">Simulador · Brasil</span></div>
+        <nav class="workflow-nav" aria-label="Etapas da análise">
+          <a href="#analysis-controls" data-workspace-tab="controls-region"><span>01</span> Escolha o local</a>
+          <a href="#analysis-controls" data-workspace-tab="controls-site"><span>02</span> Defina o raio</a>
+          <a href="#analysis-results" data-workspace-tab="result-site"><span>03</span> Avalie o resultado</a>
+        </nav>
+      </div>
       <section class="workspace">
-        <aside class="panel panel-left" aria-label="Controles de análise">
+        <aside id="analysis-controls" tabindex="-1" class="panel panel-left" aria-label="Controles de análise">
           <nav class="panel-tabs" aria-label="Seções de controle">
             <button class="tab-button is-active" type="button" data-tab-target="controls-layers">Camadas</button>
             <button class="tab-button" type="button" data-tab-target="controls-weights">Critérios</button>
@@ -291,12 +298,12 @@
           </div>
         </aside>
 
-        <section class="map-area" aria-label="Mapa de aptidão territorial">
+        <section id="territory-map" tabindex="-1" class="map-area" aria-label="Mapa de aptidão territorial">
           <div class="map-toolbar">
             <div>
-              <p class="eyebrow">Brasil</p>
+              <p class="eyebrow">Potencial e contexto</p>
               <h2>
-                Hotspots para data centers verdes
+                Um olhar sobre o território
                 <button class="info-hint" type="button" data-info-key="map-overview" aria-label="Informação sobre o mapa" title="Mapa principal com candidatos, infraestrutura, recursos renováveis agregados e raio de simulação.">
                   i
                   <span class="info-tooltip" role="tooltip">Mapa principal com candidatos, infraestrutura, recursos renováveis agregados e raio de simulação.</span>
@@ -315,7 +322,7 @@
           </div>
 
           <div class="map-canvas">
-            <div id="map" style="width: 100%; height: 100%; background: #0f172a;"></div>
+            <div id="map" style="width: 100%; height: 100%;"></div>
             <div class="map-note">
               <strong>Leitura territorial:</strong>
               quadrados agregam energia renovável; pontos mostram regiões candidatas;
@@ -326,7 +333,7 @@
           </div>
         </section>
 
-        <aside class="panel panel-right" aria-label="Resultado da análise">
+        <aside id="analysis-results" tabindex="-1" class="panel panel-right" aria-label="Resultado da análise">
           <nav class="panel-tabs" aria-label="Seções de resultado">
             <button class="tab-button is-active" type="button" data-tab-target="result-summary">Resumo</button>
             <button class="tab-button" type="button" data-tab-target="result-water">Água</button>

@@ -353,3 +353,17 @@ A base CNUC municipal é uma reserva aproximada. A análise detalhada usa políg
 - `npm test` cobre furos de polígonos, múltiplos polígonos, dados ausentes, limites preventivos, validação da API, cache e concorrência de seleção.
 - `node scripts/ingest-transmission.js`: atualiza o snapshot nacional de 1.817 geometrias oficiais, validando contagem e unicidade antes de substituir o arquivo. Transmissão não depende de chamada remota durante a simulação.
 - Limites: 400 feições CNUC consultadas; mapa exibe até 30 UCs/40 linhas simplificadas. Avaliação usa os polígonos originais retornados. Geometrias visualmente omitidas por tamanho não invalidam atributos já consultados.
+
+## Identidade visual do simulador
+
+O simulador compartilha a paleta e a tipografia da
+[nossa landing page](https://github.com/nuvemnove/dataterra-landingpage): verde-floresta
+`#174b3c`, marfim `#f8f9f3`, sálvia `#719052` e terracota `#ae603e`.
+Montserrat é usada nos títulos e Poppins nos textos; arquivos e licenças ficam
+em `assets/fonts/`, sem depender de requisições a um serviço externo de fontes.
+
+O desktop mantém mapa e painéis em uma área de trabalho com rolagem independente.
+Em telas pequenas, o mapa aparece primeiro e os painéis são empilhados. Os atalhos
+“Escolha o local”, “Defina o raio” e “Avalie o resultado” abrem a seção correspondente.
+Foco visível, estado das abas e preferência por movimento reduzido são respeitados.
+As cores de classificação do score continuam separadas das cores decorativas.
