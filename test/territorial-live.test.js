@@ -60,7 +60,7 @@ test('source outage and invalid payload are unavailable, not an empty healthy te
 test('service caches successes but retries failures', async () => {
     let calls = 0;
     const service = createService(async () => { calls++; return { ok: calls !== 1, status: 503, json: async () => ({ features: [] }) }; });
-    const q = { kind: 'transmission', lat: -23, lng: -46, radius: 100 };
+    const q = { kind: 'environment', lat: -23, lng: -46, radius: 100 };
     assert.equal((await service(q)).status, 'unavailable');
     assert.equal((await service(q)).status, 'ok');
     await service(q); assert.equal(calls, 2);
@@ -80,5 +80,31 @@ test('client discards old location responses even if the fetch ignores abort', a
     await new Promise(r => setTimeout(r, 5));
     assert.equal(updates.length, 4);
     assert.equal(updates.at(-1).basin.marker, 'new');
+    client.dispose();
+});
+test('official transmission snapshot stays available without external network', async () => {
+    const data = await createService(async () => { throw Error('offline'); })({ kind: 'transmission', lat: -23.86191, lng: -46.46209, radius: 30 });
+    assert.equal(data.status, 'ok');
+    assert.ok(data.count > 0);
+    assert.ok(data.sourceRetrievedAt);
+    assert.ok(data.nearestDistanceKm < 1);
+});
+test('retry preserves known protection alerts on a failed refresh of the same point', async () => {
+    let fail = false;
+    const client = create({ delay: 0, fetchImpl: async () => {
+        if (fail) throw Error('offline');
+        return { ok: true, json: async () => ({ status: 'ok', items: [{ atPoint: true, group: 'Proteção Integral' }] }) };
+    } });
+    const site = { lat: -23, lng: -46 };
+    client.request(site, 30);
+    await new Promise(r => setTimeout(r, 10));
+    fail = true;
+    const refresh = client.request(site, 30, true);
+    assert.equal(Model.assess(refresh, base).cap, 39);
+    await new Promise(r => setTimeout(r, 10));
+    assert.equal(refresh.environment.status, 'partial');
+    assert.equal(Model.assess(refresh, base).cap, 39);
+    const changed = client.request({ lat: -24, lng: -47 }, 30);
+    assert.equal(changed.environment.items, undefined);
     client.dispose();
 });

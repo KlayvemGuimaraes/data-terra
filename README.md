@@ -278,7 +278,7 @@ O simulador e o ranking usam sete critérios em três grupos. Os novos pesos pad
 - Atualizar contagens em `data/summary.json` após ingest (ou executar `npm run export:static-api` com o banco local disponível).
 - `npm test` e `npm run build` verificam regressões e contrato estático antes do deploy.
 
-A base CNUC municipal é uma reserva aproximada. A análise detalhada usa polígonos CNUC publicados, transmissão ANEEL/SIGEL, balanço por microbacia ANA (2020), climatologia NASA POWER e regras federais de diligência. Normas locais específicas e licenciamento definitivo exigem validação externa.
+A base CNUC municipal é uma reserva aproximada. A análise detalhada usa polígonos CNUC publicados, snapshot de transmissão ANEEL/SIGEL, balanço por microbacia ANA (2020), climatologia NASA POWER e regras federais de diligência. Normas locais específicas e licenciamento definitivo exigem validação externa.
 
 ### API territorial
 
@@ -290,4 +290,5 @@ A base CNUC municipal é uma reserva aproximada. A análise detalhada usa políg
 - `territorial-model.js` faz interseções, distâncias e regras; `territorial-client.js` descarta respostas antigas e oferece nova tentativa.
 - A API estática anterior permanece; `/api/territory` requer servidor ou função Vercel. Abrir apenas com servidor de arquivos não habilita a consulta detalhada.
 - `npm test` cobre furos de polígonos, múltiplos polígonos, dados ausentes, limites preventivos, validação da API, cache e concorrência de seleção.
-- Limites: 400 feições consultadas; mapa exibe até 30 UCs/40 linhas simplificadas. Avaliação usa os polígonos originais retornados. Geometrias visualmente omitidas por tamanho não invalidam atributos já consultados.
+- `node scripts/ingest-transmission.js`: atualiza o snapshot nacional de 1.817 geometrias oficiais, validando contagem e unicidade antes de substituir o arquivo. Transmissão não depende de chamada remota durante a simulação.
+- Limites: 400 feições CNUC consultadas; mapa exibe até 30 UCs/40 linhas simplificadas. Avaliação usa os polígonos originais retornados. Geometrias visualmente omitidas por tamanho não invalidam atributos já consultados.

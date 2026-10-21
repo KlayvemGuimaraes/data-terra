@@ -73,14 +73,15 @@ function createService(fetchImpl = fetch) {
             } catch { /* Os atributos consultados no ponto continuam válidos sem a geometria visual. */ }
             return { ...metadata, status: 'ok', code: row.COBACIA, region: row.UGRH, river: String(row.NORIOCOMP || '').trim(), class: String(row.CLASSE).trim(), commitmentPercent: row.BAL_PERC, availability: row.DISP_Q95, accumulatedDemand: row.DEM_ACM, intersectingBasins: rows.length, features, geometryStatus };
         }
-        const features = []; let complete = false;
+        const snapshot = q.kind === 'transmission' ? require('../data/transmission.json') : null;
+        const features = snapshot ? snapshot.features : []; let complete = Boolean(snapshot);
+        if (snapshot) { metadata.edition = `Snapshot oficial de ${snapshot.retrievedAt}`; metadata.sourceRetrievedAt = snapshot.retrievedAt; }
+
         const envelope = bbox(q);
-        for (let page = 0; page < 4; page++) {
+        for (let page = 0; q.kind === 'environment' && page < 4; page++) {
             const count = 100;
-            const params = q.kind === 'environment'
-                ? { service: 'WFS', version: '2.0.0', request: 'GetFeature', typeNames: source.layer, outputFormat: 'application/json', srsName: 'urn:ogc:def:crs:OGC:1.3:CRS84', bbox: `${envelope.join(',')},urn:ogc:def:crs:OGC:1.3:CRS84`, count, startIndex: page * count }
-                : { f: 'geojson', where: '1=1', geometry: envelope.join(','), geometryType: 'esriGeometryEnvelope', inSR: 4326, outSR: 4326, spatialRel: 'esriSpatialRelIntersects', outFields: 'OID,Name', returnGeometry: true, orderByFields: 'OID', resultOffset: page * count, resultRecordCount: count };
-            const d = await json(queryUrl(q.kind === 'environment' ? source.url : `${source.url}/query`, params), signal);
+            const params = { service: 'WFS', version: '2.0.0', request: 'GetFeature', typeNames: source.layer, outputFormat: 'application/json', srsName: 'urn:ogc:def:crs:OGC:1.3:CRS84', bbox: `${envelope.join(',')},urn:ogc:def:crs:OGC:1.3:CRS84`, count, startIndex: page * count };
+            const d = await json(queryUrl(source.url, params), signal);
             if (!Array.isArray(d.features)) throw new Error('Resposta geográfica inválida');
             features.push(...d.features);
             if (d.features.length < count || (Number.isFinite(d.numberMatched) && features.length >= d.numberMatched)) { complete = true; break; }

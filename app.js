@@ -658,10 +658,10 @@ function renderTerritorialDetails() {
         <summary>Consulta territorial e próximos passos</summary>
         <div aria-live="polite">${Object.entries(labels).map(([kind, label]) => {
             const data = liveTerritory[kind] || { status: 'loading' };
-            return `<details class="territorial-source" data-territory-section="${kind}"><summary>${label} · ${statusText[data.status] || 'Sem dado'}</summary>
+            return `<details class="territorial-source" data-territory-section="${kind}"><summary>${label} · ${data.refreshing ? 'Atualizando (resultado anterior)' : statusText[data.status] || 'Sem dado'}</summary>
                 <p>${escapeText(data.status === 'ok' || data.status === 'partial' ? summaries[kind](data) : data.message || 'Aguardando consulta à fonte oficial.')}</p>
                 ${data.items ? `<ul>${data.items.filter(i => i.atPoint).map(i => `<li>${escapeText(i.name)} · ${escapeText(i.group)} · plano de manejo: ${escapeText(i.managementPlan || 'não informado')}. Gestor: ${escapeText(i.manager || 'não informado')}.</li>`).join('')}</ul>` : ''}
-                <p class="field-note">${escapeText(data.edition || '')}${data.fetchedAt ? ` · consultado em ${escapeText(new Date(data.fetchedAt).toLocaleString('pt-BR'))}` : ''}${data.displayLimited ? ' · mapa mostra apenas as feições mais próximas; contagem inclui todas as consultadas.' : ''}${data.geometryStatus && data.geometryStatus !== 'ok' ? ' · geometria indisponível para exibição.' : ''}</p>
+                <p class="field-note">${escapeText(data.message || '')} ${escapeText(data.edition || '')}${data.fetchedAt ? ` · consultado em ${escapeText(new Date(data.fetchedAt).toLocaleString('pt-BR'))}` : ''}${data.displayLimited ? ' · mapa mostra apenas as feições mais próximas; contagem inclui todas as consultadas.' : ''}${data.geometryStatus && data.geometryStatus !== 'ok' ? ' · geometria indisponível para exibição.' : ''}</p>
             </details>`;
         }).join('')}</div>
         <details data-territory-section="rules"><summary>Regras de triagem e diligências</summary><ul>${siteAnalysis.territorial.rules.map(r => `<li><strong>${escapeText(r.title)}:</strong> ${escapeText(r.text)} <a href="${r.url}" target="_blank" rel="noopener">Fonte oficial</a></li>`).join('')}</ul></details>

@@ -29,6 +29,7 @@ function exportStaticApi() {
   writeJson("water.json", water);
   writeJson("energy.json", energy);
   writeJson("summary.json", {
+    transmission: JSON.parse(fs.readFileSync(path.join(dataDir, "transmission.json"), "utf8")).features.length,
     substations: JSON.parse(fs.readFileSync(path.join(dataDir, "substations.json"), "utf8")).length,
     envRisk: JSON.parse(fs.readFileSync(path.join(dataDir, "environmental-risk.json"), "utf8")).length,
     cables: cables.length,

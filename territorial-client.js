@@ -9,10 +9,11 @@
         function request(site, radius, retry = false) {
             const key = `${Number(site.lat).toFixed(5)},${Number(site.lng).toFixed(5)},${radius}`;
             if (key === activeKey && !retry) return state;
+            const previous = key === activeKey ? state : null;
             activeKey = key; clearTimeout(timer); controller?.abort();
             controller = new AbortController(); const signal = controller.signal;
             const cached = cache.get(key);
-            state = !retry && cached && Date.now() - cached.time < 3600000 ? cached.state : Object.fromEntries(KINDS.map(k => [k, { status: 'loading' }]));
+            state = !retry && cached && Date.now() - cached.time < 3600000 ? cached.state : Object.fromEntries(KINDS.map(k => [k, retry && previous?.[k]?.status === 'ok' ? { ...previous[k], refreshing: true } : { status: 'loading' }]));
             if (state === cached?.state) return state;
             const current = state;
             timer = setTimeout(() => {
@@ -29,7 +30,10 @@
                         if (signal.aborted || key !== activeKey) return;
                         current[kind] = { status: 'unavailable', message: 'Não foi possível consultar esta fonte.' };
                     }
-                    if (KINDS.every(k => current[k].status === 'ok')) {
+                    if (retry && previous?.[kind]?.status === 'ok' && current[kind].status !== 'ok') {
+                        current[kind] = { ...previous[kind], status: 'partial', refreshing: false, message: 'Falha na atualização: preservado o resultado anterior deste mesmo ponto e raio.' };
+                    }
+                    if (KINDS.every(k => current[k].status === 'ok' && !current[k].refreshing)) {
                         if (cache.size >= 20) cache.delete(cache.keys().next().value);
                         cache.set(key, { time: Date.now(), state: current });
                     }

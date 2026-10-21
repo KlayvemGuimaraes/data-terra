@@ -126,6 +126,7 @@ app.get('/api/summary', (req, res) => {
     const energyCount = db.prepare('SELECT COUNT(*) as count FROM energy_plants').get().count;
     
     res.json({
+        transmission: require("../data/transmission.json").features.length,
         substations: require("../data/substations.json").length,
         envRisk: require("../data/environmental-risk.json").length,
         cables: cableCount,

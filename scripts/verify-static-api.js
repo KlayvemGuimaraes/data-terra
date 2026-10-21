@@ -48,6 +48,8 @@ function verifyStaticApi() {
   assert(summary.water === water.length, "summary.water does not match data/water.json");
   assert(summary.energy === energy.length, "summary.energy does not match data/energy.json");
 
+  const transmission = readJson("data/transmission.json");
+  assert(transmission.features.length > 0 && summary.transmission === transmission.features.length, "invalid transmission snapshot");
   const substations = readJson("data/substations.json");
   const environmental = readJson("data/environmental-risk.json");
   assert(substations.length > 0 && substations.every(s => Number.isFinite(s.lat) && Number.isFinite(s.lng) && s.voltageKv >= 69), "invalid ONS dataset");
