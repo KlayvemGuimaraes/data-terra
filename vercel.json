@@ -43,5 +43,10 @@
         }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "api/territory.js": {
+      "maxDuration": 60
+    }
+  }
 }

@@ -45,14 +45,14 @@ test("loads helper models before the main app script", () => {
   assert.ok(appScriptIndex > criteriaScriptIndex);
 });
 
-test("does not expose socioenvironmental risk as a score criterion or map layer", () => {
+test("does not reintroduce the retired synthetic risk layer", () => {
   const html = fs.readFileSync(path.join(rootDir, "index.html"), "utf8");
   const app = fs.readFileSync(path.join(rootDir, "app.js"), "utf8");
 
   assert.doesNotMatch(html, /data-layer="risk"/);
   assert.doesNotMatch(html, /risk-model\.js/);
   assert.doesNotMatch(html, /Risco socioambiental/);
-  assert.doesNotMatch(app, /environment:/);
+  assert.match(html, /data-layer="protectedAreas"/);
   assert.doesNotMatch(app, /renderRisk/);
   assert.doesNotMatch(app, /RiskModel/);
 });

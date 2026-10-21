@@ -1407,3 +1407,9 @@ select,
     width: 100%;
   }
 }
+
+.territorial-source { padding: 8px 0; border-bottom: 1px solid var(--line, #d9e2dd); }
+.territorial-details summary { cursor: pointer; font-size: 12px; font-weight: 600; line-height: 1.5; }
+.territorial-details p, .territorial-details li { font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.territorial-details a { color: #0c6b58; }
+.territorial-details button { margin-top: 8px; }

@@ -133,13 +133,14 @@ test("calculates site impact and scores from local resources", () => {
   assert.equal(analysis.impact.annualWaterMegaliters, 438);
   assert.equal(analysis.impact.state, "SP");
   assert.equal(analysis.scores.renewables, 100);
-  assert.ok(analysis.scores.water > 70);
+  assert.equal(analysis.scores.water, 61);
   assert.deepEqual(analysis.groupScores, {
-    resources: 93,
-    feasibility: 91,
+    resources: 81,
+    feasibility: 64,
     territorial: 49,
   });
-  assert.ok(analysis.overallScore >= 80);
+  assert.equal(analysis.overallScore, 67);
+  assert.equal(analysis.territorial.complete, false);
 });
 
 test("scores fiber proximity from the nearest cable route", () => {

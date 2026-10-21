@@ -1,10 +1,10 @@
 (function (root, factory) {
     if (typeof module === "object" && module.exports) {
-        module.exports = factory(require("./wui-model"), require("./evaluation-criteria"));
+        module.exports = factory(require("./wui-model"), require("./evaluation-criteria"), require("./territorial-model"));
     } else {
-        root.SiteAnalysis = factory(root.WuiModel, root.EvaluationCriteria);
+        root.SiteAnalysis = factory(root.WuiModel, root.EvaluationCriteria, root.TerritorialModel);
     }
-})(typeof globalThis !== "undefined" ? globalThis : this, function (WuiModel, EvaluationCriteria) {
+})(typeof globalThis !== "undefined" ? globalThis : this, function (WuiModel, EvaluationCriteria, TerritorialModel) {
     const TYPE_ORDER = ["Hidro", "Solar", "Biomassa", "Eólica"];
 
     function toNumber(value, fallback = 0) {
@@ -494,7 +494,9 @@
         const water = summarizeWater(waterRows);
         const cables = summarizeCables(data.cables || [], site, radiusKm);
         const fiber = summarizeFiberProximity(data.cables || [], site, radiusKm);
-        const scores = buildScores(energy, water, cables, fiber, impact, itLoadMw, substations, envRisk, site, municipality, radiusKm);
+        const baseScores = buildScores(energy, water, cables, fiber, impact, itLoadMw, substations, envRisk, site, municipality, radiusKm);
+        const territorial = TerritorialModel.assess(options.territory || {}, baseScores);
+        const scores = territorial.scores;
         const scoreWeights = options.weights || EvaluationCriteria.getDefaultWeights();
         const envSummary = summarizeEnvironmental(envRisk, municipality);
         const substationSummary = summarizeNearestSubstation(substations, site);
@@ -529,7 +531,9 @@
             nearestSubstation: substationSummary,
             scores,
             groupScores: EvaluationCriteria.calculateGroupScores(scores, scoreWeights),
-            overallScore: EvaluationCriteria.calculateWeightedScore(scores, scoreWeights),
+            territorial,
+            rawScore: EvaluationCriteria.calculateWeightedScore(scores, scoreWeights),
+            overallScore: Math.min(territorial.cap, EvaluationCriteria.calculateWeightedScore(scores, scoreWeights)),
         };
     }
 

@@ -96,17 +96,20 @@ O score combina:
 - infraestrutura elétrica estimada;
 - segurança hídrica/WUI;
 - conectividade e mercado;
-- segurança regulatória preliminar.
+- diligência regulatória preliminar;
+- ambiente;
+- distância de subestação ONS.
 
 Para deixar a avaliação mais transparente, a interface separa esses critérios
-em dois grupos e mostra um subtotal de 0 a 100 para cada um:
+em três grupos e mostra um subtotal de 0 a 100 para cada um:
 
 - **Recursos e impacto:** energia renovável e segurança hídrica/WUI;
 - **Viabilidade estimada:** infraestrutura elétrica, conectividade/mercado e
-  segurança regulatória.
+  diligência regulatória;
+- **Riscos territoriais:** ambiente e subestação ONS.
 
 Os subtotais ajudam a entender os pontos fortes e fracos do local. O score geral
-continua sendo a média ponderada dos cinco critérios, portanto o ranking e as
+continua sendo a média ponderada dos sete critérios, portanto o ranking e as
 faixas de aptidão mantêm a mesma regra de cálculo.
 
 ## Como funciona o impacto hídrico
@@ -135,14 +138,12 @@ Dados reais usados:
 - coordenadas de municípios brasileiros;
 - referência de estresse hídrico WRI Aqueduct.
 
-Indicadores estimados:
+Indicadores de triagem:
 
-- **infraestrutura elétrica:** derivada de polos de geração renovável e centros
-  de demanda, não de uma base oficial de subestações ou transmissão;
-- **linhas de transmissão no mapa:** aproximação visual entre polos elétricos
-  estimados;
-- **segurança regulatória:** leitura preliminar para compor triagem;
-- **WUI por UF:** estimativa territorial, não estudo de bacia hidrográfica.
+- No ranking regional, infraestrutura e água ainda usam as bases locais de referência.
+- Na simulação local, transmissão oficial ANEEL/SIGEL, microbacia ANA, climatologia NASA e polígonos CNUC alteram o cálculo.
+- Os pesos, fórmulas, limites preventivos e regras de diligência são premissas do MVP, documentadas na interface e no manual; não representam aprovação dos órgãos.
+- A camada elétrica estimada permanece opcional e desligada inicialmente.
 
 ## Arquitetura resumida
 
@@ -261,8 +262,8 @@ A DataTerra é uma ferramenta de triagem. Ela não substitui:
 
 ## Próximos passos recomendados
 
-- Integrar base oficial de subestações e linhas de transmissão.
-- Melhorar granularidade hídrica para bacia ou município, não só UF.
+- Integrar capacidade disponível de conexão elétrica.
+- Atualizar balanços hídricos e incluir séries INMET e riscos físicos.
 - Separar `app.js` em módulos menores depois da apresentação.
 - Adicionar cenários de carga por tipo de data center.
 - Criar relatório exportável por local analisado.
@@ -277,4 +278,16 @@ O simulador e o ranking usam sete critérios em três grupos. Os novos pesos pad
 - Atualizar contagens em `data/summary.json` após ingest (ou executar `npm run export:static-api` com o banco local disponível).
 - `npm test` e `npm run build` verificam regressões e contrato estático antes do deploy.
 
-CNUC não representa sobreposição no terreno/raio; a sede municipal mais próxima é uma referência aproximada. Distância ONS é geodésica, não rota ou garantia de conexão. Clima, bacias, transmissão oficial e regras de licenciamento continuam pendentes.
+A base CNUC municipal é uma reserva aproximada. A análise detalhada usa polígonos CNUC publicados, transmissão ANEEL/SIGEL, balanço por microbacia ANA (2020), climatologia NASA POWER e regras federais de diligência. Normas locais específicas e licenciamento definitivo exigem validação externa.
+
+### API territorial
+
+`GET /api/territory?kind=environment|basin|transmission|climate&lat=-23.86&lng=-46.46&radius=30`
+
+- Implementação em `api/territory.js` e `server/territory-service.js`, compartilhada pelo Express e pela função Node do Vercel (60 s). Não requer chave das fontes.
+- Parâmetros restritos ao recorte brasileiro e raio de 10–300 km; hosts oficiais fixos, sem URL arbitrária.
+- Fontes independentes, timeout de 40 s por consulta, cache de sucessos por 1 h, dados ausentes nunca equivalem a ausência de risco.
+- `territorial-model.js` faz interseções, distâncias e regras; `territorial-client.js` descarta respostas antigas e oferece nova tentativa.
+- A API estática anterior permanece; `/api/territory` requer servidor ou função Vercel. Abrir apenas com servidor de arquivos não habilita a consulta detalhada.
+- `npm test` cobre furos de polígonos, múltiplos polígonos, dados ausentes, limites preventivos, validação da API, cache e concorrência de seleção.
+- Limites: 400 feições consultadas; mapa exibe até 30 UCs/40 linhas simplificadas. Avaliação usa os polígonos originais retornados. Geometrias visualmente omitidas por tamanho não invalidam atributos já consultados.

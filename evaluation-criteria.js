@@ -17,7 +17,7 @@
             groupId: "feasibility",
         },
         water: {
-            label: "Segurança hídrica (WUI)",
+            label: "Água, bacia e clima",
             defaultWeight: 5,
             groupId: "resources",
         },
@@ -27,7 +27,7 @@
             groupId: "feasibility",
         },
         licensing: {
-            label: "Segurança regulatória",
+            label: "Diligência regulatória",
             defaultWeight: 4,
             groupId: "feasibility",
         },
@@ -47,19 +47,19 @@
         {
             id: "resources",
             label: "Recursos e impacto",
-            description: "Indicadores de geração renovável e impacto hídrico estimado.",
+            description: "Geração renovável, impacto hídrico estimado, balanço por microbacia e condições climáticas.",
             criteria: ["renewables", "water"],
         },
         {
             id: "feasibility",
             label: "Viabilidade estimada",
-            description: "Estimativas preliminares de infraestrutura, conectividade e contexto regulatório.",
+            description: "Proximidade de transmissão oficial, conectividade e regras preliminares de diligência regulatória.",
             criteria: ["grid", "connectivity", "licensing"],
         },
         {
             id: "territorial",
             label: "Riscos territoriais",
-            description: "Distância geodésica a subestações ONS e presença municipal de UCs de proteção integral (CNUC). Cobertura parcial; não comprova sobreposição nem substitui licenciamento.",
+            description: "Distância geodésica a subestações ONS e interseção do ponto com polígonos CNUC. A referência municipal é usada apenas como reserva; cobertura não substitui licenciamento.",
             criteria: ["environmental", "substation"],
         },
     ];

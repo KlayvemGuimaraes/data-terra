@@ -80,6 +80,7 @@ function normalizeText(value) {
 }
 
 // API Endpoints
+app.get('/api/territory', require('../api/territory'));
 app.get('/api/substations', (req, res) => res.sendFile(path.join(__dirname, '../data/substations.json')));
 app.get('/api/environmental', (req, res) => res.sendFile(path.join(__dirname, '../data/environmental-risk.json')));
 

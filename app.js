@@ -9,11 +9,15 @@ let layers = {
     electric: L.layerGroup(),
     substations: L.layerGroup(),
     environmental: L.layerGroup(),
+    protectedAreas: L.layerGroup(),
+    transmission: L.layerGroup(),
+    basins: L.layerGroup(),
+    climate: L.layerGroup(),
     regions: L.layerGroup(),
     site: L.layerGroup()
 };
 
-let activeLayers = new Set(["energy", "electric", "cables", "water", "substations"]);
+let activeLayers = new Set(["energy", "cables", "water", "substations", "protectedAreas", "transmission", "basins"]);
 let territorialScoreCache = new WeakMap();
 let weights = EvaluationCriteria.getDefaultWeights();
 
@@ -32,6 +36,12 @@ let regionsData = [];
 let regionSearchOptions = [];
 let simulatedSite = null;
 let siteAnalysis = null;
+let liveTerritory = {};
+const territoryClient = TerritorialClient.create({ onUpdate(data) {
+    liveTerritory = data;
+    renderSiteAnalysis();
+    renderLiveLayers();
+} });
 let currentData = {
     cables: [],
     water: [],
@@ -82,7 +92,7 @@ function initMap() {
     energyRenderer = L.canvas({ pane: "energyGridPane", padding: 0.5 });
     electricRenderer = L.canvas({ pane: "electricPane", padding: 0.5 });
     regionRenderer = L.canvas({ pane: "regionPane", padding: 0.5 });
-    Object.entries(layers).forEach(([key, layer]) => { if (key !== "environmental") layer.addTo(map); });
+    Object.entries(layers).forEach(([key, layer]) => { if (!["environmental", "electric", "climate"].includes(key)) layer.addTo(map); });
     map.on("zoomend", () => {
         if (map.hasLayer(layers.energy)) renderEnergy();
     });
@@ -505,6 +515,7 @@ function selectRegion(id) {
 function setSimulatedSite(latlng, options = {}) {
     if (!latlng || !Number.isFinite(Number(latlng.lat)) || !Number.isFinite(Number(latlng.lng))) return;
 
+    if (selectedRegion && (Math.abs(selectedRegion.lat - Number(latlng.lat)) > 0.00001 || Math.abs(selectedRegion.lng - Number(latlng.lng)) > 0.00001)) selectedRegion = null;
     simulatedSite = {
         lat: Number(latlng.lat),
         lng: Number(latlng.lng),
@@ -613,6 +624,60 @@ function renderSiteControls() {
     `;
 }
 
+function renderLiveLayers() {
+    const mapping = { environment: 'protectedAreas', transmission: 'transmission', basin: 'basins', climate: 'climate' };
+    const colors = { environment: '#be185d', transmission: '#b45309', basin: '#0284c7' };
+    for (const [kind, layerName] of Object.entries(mapping)) {
+        layers[layerName].clearLayers();
+        const data = liveTerritory[kind];
+        if (!data) continue;
+        if (kind === 'climate') {
+            if (data.status === 'ok' && simulatedSite) L.circleMarker([simulatedSite.lat, simulatedSite.lng], { radius: 9, color: '#ea580c', fillOpacity: 0.2 }).bindPopup(`NASA POWER · referência em grade<br>Máxima climatológica: ${escapeText(data.maxTemperature)} °C<br>${escapeText(data.edition)}`).addTo(layers.climate);
+            continue;
+        }
+        L.geoJSON(data.features || [], {
+            style: { color: colors[kind], weight: kind === 'transmission' ? 2 : 1.5, fillOpacity: 0.1 },
+            onEachFeature(feature, layer) {
+                const p = feature.properties || {};
+                layer.bindPopup(`<strong>${escapeText(p.name || data.source)}</strong><br>${escapeText(p.category || p.class || '')}<br>${escapeText(data.source)} · geometria visual simplificada${p.atPoint ? '<br>Interseção com o ponto selecionado' : ''}`);
+            },
+        }).addTo(layers[layerName]);
+    }
+}
+
+function renderTerritorialDetails() {
+    const statusText = { loading: 'Consultando', ok: 'Consultado', partial: 'Cobertura parcial', unavailable: 'Indisponível', 'no-data': 'Sem dado no ponto' };
+    const labels = { environment: 'Áreas protegidas · CNUC', transmission: 'Linhas oficiais · ANEEL/ONS', basin: 'Microbacia · ANA', climate: 'Clima · NASA POWER' };
+    const summaries = {
+        environment: data => `${data.count ?? 0} UC(s) no raio; ${data.items?.filter(i => i.atPoint).length ?? 0} no ponto.`,
+        transmission: data => data.nearestDistanceKm == null ? 'Nenhuma linha identificada no raio consultado.' : `${data.nearestName} · distância aproximada ${formatKm(data.nearestDistanceKm)} ao traçado.`,
+        basin: data => `${data.code} · ${data.region} · classe ${data.class}. Comprometimento: ${data.commitmentPercent == null ? 'não informado' : Number(data.commitmentPercent).toFixed(1) + '%'}.`,
+        climate: data => `Máxima climatológica ${data.maxTemperature} °C · umidade média ${data.humidity}% · ${data.dryMonths} mês(es) com precipitação média inferior a 1 mm/dia. Indicador climático: ${data.score}/100.`,
+    };
+    return `<details class="methodology-block territorial-details" data-territory-section="main" open>
+        <summary>Consulta territorial e próximos passos</summary>
+        <div aria-live="polite">${Object.entries(labels).map(([kind, label]) => {
+            const data = liveTerritory[kind] || { status: 'loading' };
+            return `<details class="territorial-source" data-territory-section="${kind}"><summary>${label} · ${statusText[data.status] || 'Sem dado'}</summary>
+                <p>${escapeText(data.status === 'ok' || data.status === 'partial' ? summaries[kind](data) : data.message || 'Aguardando consulta à fonte oficial.')}</p>
+                ${data.items ? `<ul>${data.items.filter(i => i.atPoint).map(i => `<li>${escapeText(i.name)} · ${escapeText(i.group)} · plano de manejo: ${escapeText(i.managementPlan || 'não informado')}. Gestor: ${escapeText(i.manager || 'não informado')}.</li>`).join('')}</ul>` : ''}
+                <p class="field-note">${escapeText(data.edition || '')}${data.fetchedAt ? ` · consultado em ${escapeText(new Date(data.fetchedAt).toLocaleString('pt-BR'))}` : ''}${data.displayLimited ? ' · mapa mostra apenas as feições mais próximas; contagem inclui todas as consultadas.' : ''}${data.geometryStatus && data.geometryStatus !== 'ok' ? ' · geometria indisponível para exibição.' : ''}</p>
+            </details>`;
+        }).join('')}</div>
+        <details data-territory-section="rules"><summary>Regras de triagem e diligências</summary><ul>${siteAnalysis.territorial.rules.map(r => `<li><strong>${escapeText(r.title)}:</strong> ${escapeText(r.text)} <a href="${r.url}" target="_blank" rel="noopener">Fonte oficial</a></li>`).join('')}</ul></details>
+        <p class="field-note">${escapeText(siteAnalysis.territorial.warnings.join(' '))}</p>
+        <button type="button" id="retryTerritory" class="secondary-button">Atualizar consultas</button>
+    </details>`;
+}
+
+document.addEventListener('click', event => {
+    if (event.target.closest('#retryTerritory') && simulatedSite) {
+        liveTerritory = territoryClient.request(simulatedSite, siteConfig.radiusKm, true);
+        renderLiveLayers();
+        renderSiteAnalysis();
+    }
+});
+
 function renderSiteAnalysis() {
     const container = document.querySelector("#siteAnalysis");
     if (!simulatedSite || currentData.energy.length === 0) {
@@ -623,7 +688,10 @@ function renderSiteAnalysis() {
         return;
     }
 
+    const nextTerritory = territoryClient.request(simulatedSite, siteConfig.radiusKm);
+    if (nextTerritory !== liveTerritory) { liveTerritory = nextTerritory; renderLiveLayers(); }
     siteAnalysis = SiteAnalysis.analyzeSiteResources(currentData, simulatedSite, {
+        territory: liveTerritory,
         radiusKm: siteConfig.radiusKm,
         regions: allRegionsData,
         wuiConfig,
@@ -632,6 +700,7 @@ function renderSiteAnalysis() {
     const status = getClass(siteAnalysis.overallScore);
     const coverage = siteAnalysis.load.renewableCoveragePercentage;
     const groupScores = siteAnalysis.groupScores;
+    const expandedTerritory = new Map([...container.querySelectorAll("[data-territory-section]")].map(el => [el.dataset.territorySection, el.open]));
 
     container.innerHTML = `
         <div class="site-score-card">
@@ -644,7 +713,8 @@ function renderSiteAnalysis() {
         </div>
 
         ${renderScoreGroupSummary(groupScores)}
-
+        <p class="field-note">${siteAnalysis.territorial.complete ? 'Consulta das quatro fontes concluída.' : 'Consulta incompleta ou em andamento; score provisório.'} Média: ${siteAnalysis.rawScore}/100${siteAnalysis.rawScore > siteAnalysis.overallScore ? ` · limite preventivo: ${siteAnalysis.territorial.cap}` : ''}.</p>
+        ${renderTerritorialDetails()}
         <div class="site-location-grid">
             <span>Coordenadas</span>
             <strong>lat ${formatCoordinate(siteAnalysis.site.lat)} / lng ${formatCoordinate(siteAnalysis.site.lng)}</strong>
@@ -676,7 +746,7 @@ function renderSiteAnalysis() {
         </div>
 
         <details class="methodology-block">
-            <summary>Riscos territoriais · detalhes e próximos passos</summary>
+            <summary>Subestação ONS e referência municipal de reserva</summary>
             <p><strong>Subestação ONS:</strong> ${siteAnalysis.nearestSubstation.nearestName ? `${escapeText(siteAnalysis.nearestSubstation.nearestName)} · ${formatKm(siteAnalysis.nearestSubstation.nearestDistanceKm)} em linha geodésica · ${siteAnalysis.nearestSubstation.nearestVoltageKv} kV` : "Sem dados disponíveis (40 pontos)"}. Validar capacidade e acesso com o agente responsável.</p>
             <p><strong>Ambiental:</strong> ${siteAnalysis.environmental.label}. Referência: ${escapeText(siteAnalysis.environmental.municipality || "indisponível")}.</p>
             <p>${siteAnalysis.environmental.source} Consultar limites, planos de manejo e órgão licenciador antes de selecionar o terreno.</p>
@@ -705,7 +775,8 @@ function renderSiteAnalysis() {
         </p>
     `;
 
-    if (!selectedRegion) renderLocalScoreSummary(siteAnalysis);
+    container.querySelectorAll("[data-territory-section]").forEach(el => { if (expandedTerritory.has(el.dataset.territorySection)) el.open = expandedTerritory.get(el.dataset.territorySection); });
+    renderLocalScoreSummary(siteAnalysis);
     renderSiteControls();
 }
 
@@ -818,6 +889,7 @@ function renderDetails() {
     document.querySelector("#conditions").innerHTML = selectedRegion.conditions
         .map((condition) => `<span class="condition">${condition}</span>`)
         .join("");
+    if (siteAnalysis) renderLocalScoreSummary(siteAnalysis);
 }
 
 function renderWuiResult(assessment) {
@@ -951,7 +1023,8 @@ function renderMethodology(region, assessment) {
             </ul>
         </div>
         <div class="methodology-block">
-            <h3>Premissas da triagem</h3>
+            <h3>Premissas das bases regionais</h3>
+            <p>A simulação local incorpora as consultas oficiais descritas em Novas fontes e premissas territoriais.</p>
             <ul>
                 ${assumptionNotes.map(note => `<li>${note}</li>`).join("")}
                 <li>WUI é uma estimativa por UF baseada em The Green Grid WUI e WRI Aqueduct 4.0; não substitui estudo por bacia, outorga ou disponibilidade local.</li>
@@ -973,6 +1046,7 @@ function renderRanking() {
     document.querySelector("#rankingNote").textContent = ranked.hiddenCount > 0
         ? `Mostrando ${ranked.regions.length} de ${ranked.totalCount} regiões. Filtre por estado para investigar mais candidatos.`
         : `${ranked.totalCount} regiões candidatas neste recorte.`;
+    document.querySelector("#rankingNote").textContent += " Ranking preliminar das bases locais; consulte o score detalhado na aba Local.";
     document.querySelector("#ranking").innerHTML = ranked.regions
         .map((region, index) => {
             const score = getScore(region);
@@ -1288,6 +1362,15 @@ function renderLocalScoreSummary(analysis) {
         ? getClass(analysis.overallScore)
         : { label: "Simulação local", className: "medium" };
 
+    if (!selectedRegion) {
+        document.querySelector("#selectedName").textContent = "Local simulado";
+        document.querySelector("#selectedSummary").textContent = "Triagem do ponto e raio escolhidos. Consulte cobertura, regras e próximos passos na aba Local.";
+    }
+    if (analysis) {
+        document.querySelector("#metrics").innerHTML = renderMetricGroups(analysis.scores, analysis.groupScores);
+        document.querySelector("#recommendation").textContent = analysis.territorial.warnings.join(' ');
+        document.querySelector("#conditions").innerHTML = analysis.territorial.rules.map(rule => `<span class="condition">${escapeText(rule.title)}</span>`).join('');
+    }
     document.querySelector("#selectedScore").textContent = analysis?.overallScore || 0;
     document.querySelector("#selectedScoreGroups").innerHTML = analysis
         ? renderScoreGroupSummary(analysis.groupScores)
