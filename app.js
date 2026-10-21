@@ -402,7 +402,7 @@ function renderRegions() {
     });
 
     ordered.forEach(region => {
-        const score = getScore(region);
+        const score = region.id === selectedRegion?.id && siteAnalysis ? siteAnalysis.overallScore : getScore(region);
         const status = getClass(score);
         const isSelected = region.id === selectedRegion?.id;
         const marker = L.circleMarker([region.lat, region.lng], {
@@ -778,6 +778,7 @@ function renderSiteAnalysis() {
     container.querySelectorAll("[data-territory-section]").forEach(el => { if (expandedTerritory.has(el.dataset.territorySection)) el.open = expandedTerritory.get(el.dataset.territorySection); });
     renderLocalScoreSummary(siteAnalysis);
     renderSiteControls();
+    renderRegions();
 }
 
 function renderEnergyBreakdownRows(types) {
@@ -1366,6 +1367,7 @@ function renderLocalScoreSummary(analysis) {
         document.querySelector("#selectedName").textContent = "Local simulado";
         document.querySelector("#selectedSummary").textContent = "Triagem do ponto e raio escolhidos. Consulte cobertura, regras e próximos passos na aba Local.";
     }
+    document.querySelector("#selectedCoverage").textContent = analysis?.territorial.complete ? "Consulta territorial concluída; consulte limites e diligências na aba Local." : "Resultado provisório: consulta territorial incompleta ou em andamento.";
     if (analysis) {
         document.querySelector("#metrics").innerHTML = renderMetricGroups(analysis.scores, analysis.groupScores);
         document.querySelector("#recommendation").textContent = analysis.territorial.warnings.join(' ');
