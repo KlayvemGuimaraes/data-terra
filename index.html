@@ -36,7 +36,7 @@
         <nav class="workflow-nav" aria-label="Etapas da análise">
           <a href="#analysis-controls" data-workspace-tab="controls-region"><span>01</span> Escolha o local</a>
           <a href="#analysis-controls" data-workspace-tab="controls-site"><span>02</span> Defina o raio</a>
-          <a href="#analysis-results" data-workspace-tab="result-site"><span>03</span> Avalie o resultado</a>
+          <a href="#analysis-results" data-workspace-tab="result-site"><span>03</span> Avalie os pilares</a>
         </nav>
       </div>
       <section class="workspace">
@@ -182,10 +182,10 @@
           <div class="panel-section tab-panel" data-tab-panel="controls-weights" hidden>
             <div class="section-heading">
               <h2>
-                Prioridades
-                <button class="info-hint" type="button" data-info-key="controls-weights" aria-label="Informação sobre prioridades" title="Ajusta o peso dos critérios, organizados entre recursos e impacto e viabilidade estimada, no score final de aptidão territorial.">
+                Pesos por pilar
+                <button class="info-hint" type="button" data-info-key="controls-weights" aria-label="Informação sobre pesos por pilar" title="Ajusta a contribuição dos critérios somente dentro de cada pilar. Zero desativa o critério; não há peso entre pilares.">
                   i
-                  <span class="info-tooltip" role="tooltip">Ajusta o peso dos critérios, organizados entre recursos e impacto e viabilidade estimada, no score final de aptidão territorial.</span>
+                  <span class="info-tooltip" role="tooltip">Ajusta a contribuição dos critérios somente dentro de cada pilar. Zero desativa o critério; não há peso entre pilares.</span>
                 </button>
               </h2>
               <button id="resetWeights" class="ghost-button" type="button">
@@ -193,8 +193,10 @@
               </button>
             </div>
             <p class="field-note">
-              Os grupos organizam a leitura da avaliação. O score geral continua
-              combinando todos os critérios conforme os pesos definidos.
+              Os quatro pilares são independentes. Os pesos atuam apenas na média interna
+              de cada pilar; não existe média entre pilares. Se todos os seus pesos forem zero,
+              o pilar fica sem avaliação (—). Água e conectividade têm um único critério:
+              variar seu peso positivo não muda a nota.
             </p>
             <div id="weights" class="criteria-groups"></div>
           </div>
@@ -306,7 +308,7 @@
           </div>
         </aside>
 
-        <section id="territory-map" tabindex="-1" class="map-area" aria-label="Mapa de aptidão territorial">
+        <section id="territory-map" tabindex="-1" class="map-area" aria-label="Mapa de recursos e contexto territorial">
           <div class="map-toolbar">
             <div>
               <p class="eyebrow">Potencial e contexto</p>
@@ -319,9 +321,8 @@
               </h2>
             </div>
             <div class="legend" aria-label="Legenda">
-              <span><i class="dot high"></i> Alta aptidão</span>
-              <span><i class="dot medium"></i> Condicionada</span>
-              <span><i class="dot low"></i> Alto risco</span>
+              <span><i class="dot candidate"></i> Região candidata</span>
+              <span><i class="dot selected-location"></i> Região selecionada</span>
               <span><i class="fiber-proximity-dot"></i> Proximidade da fibra</span>
               <span><i class="electric-substation-dot"></i> Subestações</span>
               <span><i class="electric-transmission-line"></i> Linhas de transmissão</span>
@@ -347,72 +348,63 @@
             <button class="tab-button" type="button" data-tab-target="result-water">Água</button>
             <button class="tab-button" type="button" data-tab-target="result-site">Local</button>
             <button class="tab-button" type="button" data-tab-target="result-method">Fontes</button>
-            <button class="tab-button" type="button" data-tab-target="result-ranking">Ranking</button>
+            <button class="tab-button" type="button" data-tab-target="result-ranking">Comparar</button>
           </nav>
 
           <div class="tab-panel is-active" data-tab-panel="result-summary">
             <div class="panel-section selected-region">
               <p class="eyebrow">
-                Região selecionada
-                <button class="info-hint" type="button" data-info-key="result-summary" aria-label="Informação sobre resumo da região" title="Resume o local ativo, seu score de aptidão e a classificação territorial.">
+                Local selecionado
+                <button class="info-hint" type="button" data-info-key="result-summary" aria-label="Informação sobre resumo do local" title="Mostra os quatro pilares independentes do ponto e raio selecionados, sem nota única do local.">
                   i
-                  <span class="info-tooltip" role="tooltip">Resume o local ativo, seu score de aptidão e a classificação territorial.</span>
+                  <span class="info-tooltip" role="tooltip">Mostra os quatro pilares independentes do ponto e raio selecionados, sem nota única do local.</span>
                 </button>
               </p>
               <h2 id="selectedName">-</h2>
               <p id="selectedSummary" class="muted"></p>
-              <div class="score-block">
-                <div>
-                  <span id="selectedScore" class="score-value">0</span>
-                  <span class="score-total">/100</span>
-                </div>
-                <span id="selectedClass" class="status-pill"></span>
-              </div>
               <div
                 id="selectedScoreGroups"
                 class="criteria-score-summary"
-                aria-label="Scores separados por grupo de avaliação"
+                aria-label="Quatro pilares de avaliação independentes"
               ></div>
               <p id="selectedCoverage" class="field-note" aria-live="polite"></p>
               <div id="selectedFiber"></div>
             </div>
 
-            <div id="scoreGuide" class="panel-section score-guide">
+            <div id="pillarGuide" class="panel-section pillar-guide">
               <h2>
-                Como interpretar o score
-                <button class="info-hint" type="button" data-info-key="result-score-guide" aria-label="Informação sobre interpretação do score" title="Explica a escala de aptidão e reforça quais critérios são indicadores estimados de triagem.">
+                Como ler os pilares
+                <button class="info-hint" type="button" data-info-key="result-pillar-guide" aria-label="Informação sobre interpretação dos pilares" title="Notas heurísticas de 0 a 100: maior é mais favorável em cada pilar. Não representam probabilidades nem autorizações.">
                   i
-                  <span class="info-tooltip" role="tooltip">Explica a escala de aptidão e reforça quais critérios são indicadores estimados de triagem.</span>
+                  <span class="info-tooltip" role="tooltip">Notas heurísticas de 0 a 100: maior é mais favorável em cada pilar. Não representam probabilidades nem autorizações.</span>
                 </button>
               </h2>
-              <div class="score-guide-scale" aria-label="Escala do score territorial">
-                <span><i class="dot high"></i><strong>80-100</strong> Alta aptidão</span>
-                <span><i class="dot medium"></i><strong>60-79</strong> Condicionada</span>
-                <span><i class="dot low"></i><strong>0-59</strong> Alto risco</span>
-              </div>
+              <p class="field-note">De 0 a 100, <strong>maior é mais favorável</strong> em cada pilar,
+                inclusive em Estresse hídrico e Risco social/territorial. Os quatro valores
+                não são somados ou convertidos em classificação do local. — indica pilar sem avaliação.</p>
               <div class="site-example-grid">
-                <div class="site-example" data-example="good-site">
-                  <span>Local bom</span>
-                  <p>Alta renovável no raio, menor impacto WUI, água/esgoto registrados e conectividade próxima.</p>
+                <div class="site-example">
+                  <span>Leitura independente</span>
+                  <p>Capacidade energética favorável não compensa pressão hídrica ou restrição ambiental.</p>
                 </div>
-                <div class="site-example" data-example="bad-site">
-                  <span>Local ruim</span>
-                  <p>Pouca geração renovável, maior pressão hídrica, sem saneamento no raio e fibra distante.</p>
+                <div class="site-example">
+                  <span>Atenção ao WUI</span>
+                  <p>O índice de impacto hídrico é separado: nele, menor é melhor. Não confundir com a nota do pilar.</p>
                 </div>
               </div>
               <p class="assumption-note">
-                <strong>Critérios estimados:</strong> infraestrutura elétrica, conectividade e diligência regulatória
-                são leituras preliminares. Eles orientam a triagem, mas não substituem
-                laudos, outorgas, análise de rede ou licenciamento.
+                <strong>Limites da triagem:</strong> todos os critérios são heurísticas, não probabilidades.
+                Os indicadores orientam a comparação, mas não substituem laudos, outorgas,
+                análise de rede ou licenciamento. Alertas e cobertura devem ser lidos mesmo com notas elevadas.
               </p>
             </div>
 
             <div class="panel-section">
               <h2>
                 Indicadores
-                <button class="info-hint" type="button" data-info-key="result-indicators" aria-label="Informação sobre indicadores" title="Mostra a pontuação dos critérios usados para compor o score final.">
+                <button class="info-hint" type="button" data-info-key="result-indicators" aria-label="Informação sobre indicadores" title="Mostra os sete critérios e sua contribuição dentro de cada um dos quatro pilares.">
                   i
-                  <span class="info-tooltip" role="tooltip">Mostra a pontuação dos critérios usados para compor o score final.</span>
+                  <span class="info-tooltip" role="tooltip">Mostra os sete critérios e sua contribuição dentro de cada um dos quatro pilares.</span>
                 </button>
               </h2>
               <div id="metrics" class="metrics criteria-metrics"></div>
@@ -463,7 +455,7 @@
                 </button>
               </h2>
               <details class="methodology-block"><summary>Novas fontes e premissas territoriais</summary><h3>Critérios territoriais e cobertura</h3>
-<p>O score local combina sete critérios com pesos ajustáveis: energia 5, infraestrutura 4, água 5, conectividade 3, diligência regulatória 4, ambiente 3 e subestação 3. Os três grupos têm médias próprias; o total usa a média ponderada dos critérios, arredondada. Os indicadores e limites a seguir são premissas do MVP, não notas emitidas pelos órgãos oficiais.</p>
+<p>Os sete critérios mantêm seus cálculos e pesos padrão: energia renovável 5, infraestrutura elétrica 4, água 5, conectividade 3, diligência regulatória 4, ambiente 3 e subestação 3. Estresse hídrico usa água; Capacidade energética combina renováveis, infraestrutura e subestação; Conectividade usa seu próprio critério; Risco social/territorial combina diligência e ambiente. Cada pilar usa somente a média ponderada arredondada dos seus critérios ativos. Não há nota, média ou classificação entre pilares. Peso zero desativa o critério; um pilar sem pesos ativos fica sem avaliação. São heurísticas de 0 a 100, sempre com maior nota mais favorável, não probabilidades ou notas emitidas pelos órgãos oficiais.</p>
 <ul>
 <li><strong>Subestação:</strong> <a href="https://dados.ons.org.br/dataset/subestacao">ONS</a>, 1.684 instalações com coordenadas e tensão ≥69 kV na base versionada. Distância geodésica à instalação mais próxima: até 20 km = 90; de 20 a 50 km = 89 a 60; acima de 50 km dentro do raio = 59 a 40; fora dessas faixas = 32. Bônus de 5 para tensão ≥230 kV; sem dados = 40. Não comprova capacidade disponível.</li>
 <li><strong>Infraestrutura:</strong> snapshot versionado de 1.817 geometrias oficiais <a href="https://sigel.aneel.gov.br/arcgis/rest/services/PORTAL/Transmiss%C3%A3o/MapServer/1">ANEEL/SIGEL - ONS</a>. Distância aproximada ao segmento de linha mais próximo dentro do raio: até 5 km = 90; até 20 = 75; até 50 = 55; demais = 35. Nenhuma linha no raio = 25; consulta indisponível ou parcial = 40. Não é rota de conexão nem análise de capacidade.</li>
@@ -473,10 +465,10 @@
 <li><strong>Ambiente:</strong> <a href="https://geoservicos.inde.gov.br/geoserver/MMA/ows?service=WFS&amp;version=2.0.0&amp;request=GetCapabilities">MMA/CNUC, camada cnuc_26_07_31</a>. Cruza o ponto com polígonos publicados e identifica UCs dentro do raio. Ponto em proteção integral = 15; em outra UC = 40; consulta completa sem interseção no ponto = 70, sem certificar ausência de outras restrições. Se o serviço falhar, usa a reserva municipal (38 com proteção integral registrada; 58 nos demais casos). A sede mais próxima é apenas referência de reserva e pode pertencer a outro município. A qualidade do polígono depende da declaração da fonte.</li>
 <li><strong>Diligência regulatória:</strong> 20 com interseção em proteção integral, 40 em outra UC, 60 nos demais casos. O motor relaciona a localização à consulta ao gestor/plano de manejo (<a href="https://www.planalto.gov.br/ccivil_03/leis/l9985.htm">SNUC</a>), à verificação de competência federal em UC federal não APA (<a href="https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp140.htm">LC 140/2011</a>) e à consulta de enquadramento, uso do solo e <a href="https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15190.htm">Lei 15.190/2025</a>. Para captação própria/lançamento, orienta a verificação de outorga. Regras revisadas em 20/10/2026; não determina aprovação, dispensa ou competência definitiva. Zoneamento e normas estaduais/municipais específicas exigem confirmação externa.</li>
 </ul>
-<h3>Classificação, cobertura e uso do mapa</h3>
-<p>Faixas: Alta aptidão ≥80; Condicionada 60–79; Alto risco &lt;60. Por precaução, o score local fica limitado a 39 em proteção integral, 59 em outra UC e 79 enquanto alguma das quatro consultas estiver incompleta. A interface mostra a média antes do limite. Esses limites não são proibições legais automáticas e independem dos pesos escolhidos.</p>
+<h3>Cobertura, alertas e uso do mapa</h3>
+<p>Interseções com unidades de conservação e consultas incompletas continuam gerando alertas e diligências, independentemente dos pesos. Esses avisos não impõem um teto aos pilares nem representam proibições legais automáticas. Não se deve inferir autorização a partir de uma nota. O pilar social/territorial tem cobertura parcial: não é uma avaliação completa de conflitos sociais ou direitos territoriais.</p>
 <p>As camadas oficiais são carregadas ao escolher o ponto e mudar o raio. O CNUC consulta até 400 feições; se esse limite for atingido sem comprovar fim da lista, a cobertura fica parcial. A transmissão usa o inventário oficial completo de 1.817 linhas baixado em 20/10/2026, com data de aquisição informada. Para manter o mapa leve, exibe até 30 UCs e 40 linhas mais próximas, com geometrias simplificadas; a avaliação usa as geometrias originais consultadas. A bacia exibida é a do ponto, não a de toda a área de consumo. O marcador climático representa a referência em grade, não uma estação.</p>
-<p>O ranking regional permanece uma comparação preliminar de bases locais. A aba Local e o resumo do ponto usam as consultas detalhadas; os dois resultados podem diferir. Cada fonte informa sucesso, ausência, cobertura parcial ou indisponibilidade e a data da consulta. Trocar o local descarta respostas antigas; o botão Atualizar consultas permite tentar novamente. As consultas válidas ficam em cache por até uma hora. Na atualização do mesmo local, resultados anteriores são preservados se a fonte falhar, com aviso de cobertura parcial.</p>
+<p>A comparação regional usa bases locais preliminares e pode ser ordenada por um único pilar identificado, inicialmente Estresse hídrico. Mostra os quatro valores, sem vencedor geral. A aba Local e o resumo do ponto usam consultas detalhadas, portanto os valores podem diferir. Marcadores do mapa não codificam notas; o recorte de candidatos e a seleção inicial são alfabéticos. Cada fonte informa seu estado e data. Trocar o local descarta respostas antigas; Atualizar consultas solicita nova consulta. O cache completo pode ser reutilizado por até uma hora ao retornar a um ponto; permanecer no ponto ativo não dispara atualização automática. Em uma nova tentativa no mesmo ponto e raio, um resultado anterior com status OK pode ser preservado como parcial se a fonte falhar; essa preservação não é garantida nas tentativas seguintes.</p>
 <p>FUNAI, INCRA, APPs, zonas de amortecimento, embargos, riscos SGB e normas locais específicas não têm cobertura geométrica nesta versão. A pesquisa continua sendo referência para ampliação. Mesmo com as quatro fontes disponíveis, não se deve inferir liberação ambiental do imóvel. O sistema avalia um ponto e um raio, sem delimitar o lote nem as obras associadas.</p>
 </details>
               <div id="methodology" class="methodology"></div>
@@ -497,12 +489,15 @@
 
           <div class="panel-section tab-panel" data-tab-panel="result-ranking" hidden>
             <h2>
-              Ranking
-              <button class="info-hint" type="button" data-info-key="result-ranking" aria-label="Informação sobre ranking" title="Ordena as regiões candidatas pelo score calculado com os critérios atuais.">
+              Comparação regional
+              <button class="info-hint" type="button" data-info-key="result-ranking" aria-label="Informação sobre comparação regional" title="Ordena por um único pilar escolhido e mostra os quatro valores, sem nota ou vencedor geral.">
                 i
-                <span class="info-tooltip" role="tooltip">Ordena as regiões candidatas pelo score calculado com os critérios atuais.</span>
+                <span class="info-tooltip" role="tooltip">Ordena por um único pilar escolhido e mostra os quatro valores, sem nota ou vencedor geral.</span>
               </button>
             </h2>
+            <label class="select-label" for="rankingPillar">Ordenar pelo pilar</label>
+            <select id="rankingPillar" aria-describedby="rankingNote"></select>
+            <p class="field-note">Notas de 0 a 100: maior é mais favorável em cada pilar, inclusive água e risco social/territorial.</p>
             <p id="rankingNote" class="field-note"></p>
             <ol id="ranking" class="ranking"></ol>
           </div>

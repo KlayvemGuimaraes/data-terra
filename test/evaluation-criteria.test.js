@@ -1,15 +1,25 @@
 const assert = require("node:assert/strict");
 const test = require("node:test");
 
+const EvaluationCriteria = require("../evaluation-criteria");
 const {
   CRITERIA,
   GROUPS,
   calculateGroupScores,
-  calculateWeightedScore,
   getDefaultWeights,
-} = require("../evaluation-criteria");
+} = EvaluationCriteria;
 
-test("catalogs the seven criteria in three evaluation groups", () => {
+const scores = {
+  renewables: 90,
+  grid: 80,
+  water: 50,
+  connectivity: 40,
+  licensing: 20,
+  environmental: 70,
+  substation: 10,
+};
+
+test("catalogs the seven criteria in four ordered evaluation pillars", () => {
   assert.deepEqual(Object.keys(CRITERIA), [
     "renewables",
     "grid",
@@ -20,30 +30,31 @@ test("catalogs the seven criteria in three evaluation groups", () => {
     "substation",
   ]);
   assert.deepEqual(
-    GROUPS.map(({ id, label, criteria }) => ({ id, label, criteria })),
+    GROUPS.map(({ id, criteria }) => ({ id, criteria })),
     [
       {
-        id: "resources",
-        label: "Recursos e impacto",
-        criteria: ["renewables", "water"],
+        id: "water",
+        criteria: ["water"],
       },
       {
-        id: "feasibility",
-        label: "Viabilidade estimada",
-        criteria: ["grid", "connectivity", "licensing"],
+        id: "energy",
+        criteria: ["renewables", "grid", "substation"],
+      },
+      {
+        id: "connectivity",
+        criteria: ["connectivity"],
       },
       {
         id: "territorial",
-        label: "Riscos territoriais",
-        criteria: ["environmental", "substation"],
+        criteria: ["licensing", "environmental"],
       },
     ],
   );
-  assert.equal(CRITERIA.water.groupId, "resources");
-  assert.equal(CRITERIA.grid.groupId, "feasibility");
-  assert.equal(CRITERIA.environmental.groupId, "territorial");
-  assert.equal(CRITERIA.substation.groupId, "territorial");
-  assert.ok(GROUPS.every((group) => group.description.length > 0));
+  GROUPS.forEach((group) => {
+    group.criteria.forEach((criterion) => {
+      assert.equal(CRITERIA[criterion].groupId, group.id);
+    });
+  });
 });
 
 test("returns a fresh copy of the current default weights", () => {
@@ -66,61 +77,153 @@ test("returns a fresh copy of the current default weights", () => {
   assert.equal(CRITERIA.renewables.defaultWeight, 5);
 });
 
-test("calculates the rounded overall weighted score", () => {
-  const score = calculateWeightedScore(
-    {
-      renewables: 100,
-      grid: 80,
-      water: 60,
-      connectivity: 40,
-      licensing: 20,
-    },
-    getDefaultWeights(),
-  );
-
-  assert.equal(score, 49);
+test("exports pillar scoring without an overall weighted score", () => {
+  assert.equal(Object.hasOwn(EvaluationCriteria, "calculateWeightedScore"), false);
 });
 
-test("calculates independent weighted scores for both groups", () => {
-  const groupScores = calculateGroupScores(
-    {
-      renewables: 90,
-      grid: 80,
-      water: 50,
-      connectivity: 40,
-      licensing: 20,
-    },
-    getDefaultWeights(),
+test("rounds each pillar's weighted mean using only its own criteria", () => {
+  assert.deepEqual(calculateGroupScores(scores, getDefaultWeights()), {
+    water: 50,
+    energy: 67,
+    connectivity: 40,
+    territorial: 41,
+  });
+  assert.deepEqual(
+    calculateGroupScores(
+      { ...scores, unknown: 100 },
+      { ...getDefaultWeights(), unknown: 100 },
+    ),
+    { water: 50, energy: 67, connectivity: 40, territorial: 41 },
   );
+});
 
-  assert.deepEqual(groupScores, {
-    resources: 70,
-    feasibility: 47,
-    territorial: 0,
+test("changing any criterion score affects only its own pillar", () => {
+  const weights = getDefaultWeights();
+  const baseline = calculateGroupScores(scores, weights);
+
+  GROUPS.forEach((group) => {
+    group.criteria.forEach((criterion) => {
+      const changed = calculateGroupScores(
+        { ...scores, [criterion]: scores[criterion] + 10 },
+        weights,
+      );
+
+      assert.notEqual(changed[group.id], baseline[group.id], criterion);
+      assert.deepEqual(
+        changed,
+        { ...baseline, [group.id]: changed[group.id] },
+        criterion,
+      );
+    });
   });
 });
 
-test("handles invalid inputs and zero denominators safely", () => {
-  assert.equal(calculateWeightedScore(null, null), 0);
-  assert.equal(
-    calculateWeightedScore(
-      { renewables: "invalid", water: 80 },
-      { renewables: 5, water: 5 },
-      ["renewables", "water", "unknown"],
+test("disabling any criterion weight affects only its own pillar", () => {
+  const weights = getDefaultWeights();
+  const baseline = calculateGroupScores(scores, weights);
+
+  GROUPS.forEach((group) => {
+    group.criteria.forEach((criterion) => {
+      const changed = calculateGroupScores(scores, {
+        ...weights,
+        [criterion]: 0,
+      });
+
+      assert.notEqual(changed[group.id], baseline[group.id], criterion);
+      assert.deepEqual(
+        changed,
+        { ...baseline, [group.id]: changed[group.id] },
+        criterion,
+      );
+    });
+  });
+});
+
+test("positive water and connectivity weights do not change single-criterion pillars", () => {
+  const weights = getDefaultWeights();
+  const baseline = calculateGroupScores(scores, weights);
+
+  for (const criterion of ["water", "connectivity"]) {
+    for (const weight of [0.25, 1, 10, 100]) {
+      assert.deepEqual(
+        calculateGroupScores(scores, { ...weights, [criterion]: weight }),
+        baseline,
+        `${criterion}: ${weight}`,
+      );
+    }
+  }
+});
+
+test("returns null for every pillar when all weights are zero", () => {
+  const weights = Object.fromEntries(Object.keys(CRITERIA).map((key) => [key, 0]));
+
+  assert.deepEqual(calculateGroupScores(scores, weights), {
+    water: null,
+    energy: null,
+    connectivity: null,
+    territorial: null,
+  });
+});
+
+test("counts active zero scores while excluding disabled weights", () => {
+  assert.deepEqual(
+    calculateGroupScores(
+      {
+        renewables: 0,
+        grid: 100,
+        water: 0,
+        connectivity: 0,
+        licensing: 0,
+        environmental: 100,
+        substation: 100,
+      },
+      { ...getDefaultWeights(), connectivity: 0, substation: 0 },
     ),
-    40,
+    { water: 0, energy: 44, connectivity: null, territorial: 43 },
   );
-  assert.equal(
-    calculateWeightedScore(
-      { renewables: 100, water: 100 },
-      { renewables: 0, water: "invalid" },
-      ["renewables", "water"],
-    ),
-    0,
-  );
-  assert.deepEqual(calculateGroupScores({}, {}), {
-    resources: 0,
-    feasibility: 0,
+});
+
+test("uses numeric score fallbacks and default weights for absent input", () => {
+  assert.deepEqual(calculateGroupScores(null, null), {
+    water: 0,
+    energy: 0,
+    connectivity: 0,
     territorial: 0,
   });
+  assert.deepEqual(
+    calculateGroupScores(
+      {
+        renewables: "invalid",
+        grid: "80",
+        water: NaN,
+        connectivity: "40",
+        licensing: undefined,
+        environmental: null,
+        substation: Infinity,
+      },
+      getDefaultWeights(),
+    ),
+    { water: 0, energy: 27, connectivity: 40, territorial: 0 },
+  );
+});
+
+test("does not activate missing, invalid or nonpositive weights", () => {
+  assert.deepEqual(calculateGroupScores(scores, {}), {
+    water: null,
+    energy: null,
+    connectivity: null,
+    territorial: null,
+  });
+  assert.deepEqual(
+    calculateGroupScores(scores, {
+      renewables: "invalid",
+      grid: "4",
+      water: NaN,
+      connectivity: Infinity,
+      licensing: null,
+      environmental: undefined,
+      substation: -3,
+    }),
+    { water: null, energy: 80, connectivity: null, territorial: null },
+  );
 });

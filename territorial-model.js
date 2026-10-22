@@ -73,13 +73,13 @@
         if (overlaps.length) rules.push({ title: 'Unidade de conservação no ponto', text: 'Consultar categoria, ato de criação, plano de manejo e gestor das UCs identificadas. Compatibilidade de uso precisa de avaliação específica (SNUC).', url: 'https://www.planalto.gov.br/ccivil_03/leis/l9985.htm' });
         if (overlaps.some(x => normalize(x.sphere) === 'federal' && normalize(x.category) !== 'area de protecao ambiental')) rules.push({ title: 'Verificação de competência federal', text: 'Localização em UC federal, exceto APA, exige verificar competência da União conforme art. 7º, XIV, d, da LC 140. Consultar o Ibama.', url: 'https://www.gov.br/ibama/pt-br/assuntos/laf/sobre' });
         const warnings = [];
-        if (!complete) warnings.push('Consulta territorial incompleta: não é possível classificar como Alta aptidão até validar as quatro fontes.');
-        if (integral) warnings.push('Ponto em UC de proteção integral: o score de triagem é limitado a 39. Não representa decisão legal sobre o empreendimento.');
-        else if (overlaps.length) warnings.push('Ponto em UC: score limitado a 59 até verificar compatibilidade com categoria e plano de manejo.');
+        if (!complete) warnings.push('Consulta territorial incompleta ou em andamento: verifique a cobertura de cada fonte e os valores de reserva antes de decidir.');
+        if (integral) warnings.push('Ponto em UC de proteção integral: consultar gestor, categoria e plano de manejo. A interseção exige diligência específica e não representa decisão legal sobre o empreendimento.');
+        else if (overlaps.length) warnings.push('Ponto em UC: verificar compatibilidade com a categoria, o plano de manejo e o órgão competente.');
         warnings.push('FUNAI, INCRA, APPs, zonas de amortecimento, embargos e regras municipais específicas não têm cobertura geométrica nesta versão.');
         return {
             scores: { ...baseScores, grid: lineScore, water: Math.round((baseScores.water ?? 50) * 0.3 + basin * 0.5 + climate * 0.2), environmental: environmentScore, licensing },
-            complete, cap: integral ? 39 : overlaps.length ? 59 : complete ? 100 : 79,
+            complete,
             rules, warnings, overlaps,
         };
     }

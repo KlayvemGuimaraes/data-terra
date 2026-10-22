@@ -532,8 +532,6 @@
             scores,
             groupScores: EvaluationCriteria.calculateGroupScores(scores, scoreWeights),
             territorial,
-            rawScore: EvaluationCriteria.calculateWeightedScore(scores, scoreWeights),
-            overallScore: Math.min(territorial.cap, EvaluationCriteria.calculateWeightedScore(scores, scoreWeights)),
         };
     }
 

@@ -16,10 +16,10 @@ qual impacto hídrico/territorial ele pode gerar?
   capacidade, UF, município e coordenadas. Usada para energia renovável,
   composição energética e polos de infraestrutura elétrica estimada.
   Fonte: https://dadosabertos.aneel.gov.br/dataset/siga-sistema-de-informacoes-de-geracao-da-aneel/resource/2f65a1b0-19b8-4360-8238-b34ab4693d55
-- **SNIS/SINISA - Água e Esgoto:** registros de abastecimento de água,
-  esgotamento sanitário, prestadores e população atendida. Usada para leitura
-  preliminar de segurança hídrica local.
-  Fonte: https://www.gov.br/cidades/pt-br/acesso-a-informacao/acoes-e-programas/saneamento/snis
+- **Água e esgoto — snapshot local atribuído ao SNIS/AE2021:** registros de
+  prestadores, serviços e população usados como aproximação de saneamento.
+  Não comprova abastecimento do terreno nem integração com edições recentes do SINISA.
+  Referência institucional: https://www.gov.br/cidades/pt-br/acesso-a-informacao/acoes-e-programas/saneamento/snis
 - **WRI Aqueduct 4.0:** referência de estresse hídrico. Usada para estimar o
   impacto WUI por UF.
   Fonte: https://www.wri.org/data/aqueduct-global-maps-40-data
@@ -37,9 +37,9 @@ Fontes adicionais da análise territorial local:
 
 | Fonte | Uso no cálculo | Referência da versão |
 | --- | --- | --- |
-| [ONS](https://dados.ons.org.br/dataset/subestacao) | Distância e tensão da subestação mais próxima | 1.684 instalações válidas, ≥69 kV |
+| [ONS](https://dados.ons.org.br/dataset/subestacao) | Distância e tensão da subestação mais próxima | 1.684 registros válidos, ≥69 kV; não necessariamente instalações distintas |
 | [ANEEL/SIGEL - ONS](https://sigel.aneel.gov.br/arcgis/rest/services/PORTAL/Transmiss%C3%A3o/MapServer/1) | Distância ao traçado de transmissão | Snapshot de 1.817 geometrias adquirido em 20/10/2026 |
-| [MMA/CNUC](https://geoservicos.inde.gov.br/geoserver/MMA/ows?service=WFS&version=2.0.0&request=GetCapabilities) | Interseção com UC, ambiente, diligência e tetos | Polígonos `cnuc_26_07_31`; tabela municipal apenas como reserva |
+| [MMA/CNUC](https://geoservicos.inde.gov.br/geoserver/MMA/ows?service=WFS&version=2.0.0&request=GetCapabilities) | Interseção com UC, ambiente, diligência e alertas | Polígonos `cnuc_26_07_31`; tabela municipal apenas como reserva |
 | [ANA/SNIRH](https://www.snirh.gov.br/arcgis/rest/services/INDE/Camadas/MapServer/47) | Classe da microbacia no ponto | Balanço quantitativo 2020 |
 | [NASA POWER](https://power.larc.nasa.gov/docs/services/api/temporal/climatology/) | Temperatura, precipitação e umidade climatológicas | Período informado pela resposta, exibido na interface |
 
@@ -80,7 +80,7 @@ outorga ou conexão elétrica. Ela é útil para:
 4. Defina o raio de consumo.
 5. Observe os recursos e as novas camadas oficiais no entorno; aguarde os estados
    das quatro consultas territoriais na aba Local.
-6. Analise score, WUI, indicadores, ranking e premissas.
+6. Analise os quatro pilares separadamente, o WUI, as fontes e as pendências.
 
 ## O que a tela mostra
 
@@ -88,82 +88,60 @@ outorga ou conexão elétrica. Ela é útil para:
 - **Camadas:** energia, cabos, saneamento, subestações ONS, transmissão ANEEL/SIGEL,
   polígonos CNUC, microbacia ANA e referência climática NASA. A infraestrutura
   estimada e a referência municipal ambiental são camadas opcionais de reserva.
-- **Critérios:** pesos em recursos/impacto, viabilidade estimada e riscos territoriais.
+- **Critérios:** pesos usados somente entre critérios do mesmo pilar.
 - **WUI:** simulação de impacto hídrico do data center.
-- **Local:** ponto manual no mapa e raio de consumo.
-- **Resumo:** score, classificação e indicadores principais.
+- **Local:** ponto manual no mapa, raio e quatro indicadores independentes.
+- **Resumo:** estresse hídrico, capacidade energética, conectividade e risco social/territorial.
 - **Água:** impacto WUI e leitura hídrica do local.
-- **Premissas:** fontes, dados reais, estimativas e limitações.
-- **Ranking:** comparação das regiões candidatas.
+- **Premissas:** fontes, dados observados, estimativas e limitações.
+- **Comparação regional:** candidatos ordenados por um pilar explicitamente selecionado, nunca por média geral.
 
-## Como interpretar o score
+## Como interpretar os quatro pilares
 
-O score vai de 0 a 100. Quanto maior, melhor a aptidão preliminar.
+Cada pilar tem um indicador próprio de 0 a 100. **Quanto maior a nota, mais
+favorável a condição segundo as heurísticas do MVP**, inclusive nos pilares
+denominados estresse hídrico e risco social/territorial. O impacto WUI é um
+indicador separado: nele, menor é melhor.
 
-- `80-100`: alta aptidão.
-- `60-79`: condicionada.
-- `0-59`: alto risco.
+Não existe pontuação média entre os pilares nem classificação geral de aptidão.
+As sete fórmulas individuais de Klayvem foram preservadas e reorganizadas:
 
-O score combina:
+| Pilar | Critérios e pesos padrão | Composição do indicador |
+| --- | --- | --- |
+| Estresse hídrico | Água, bacia e clima (A: 5) | A |
+| Capacidade energética | Energia renovável (E: 5), transmissão (T: 4), subestação (S: 3) | round((5E + 4T + 3S) / 12) |
+| Conectividade | Conectividade (C: 3) | C |
+| Risco social/territorial | Diligência regulatória (L: 4), ambiente (U: 3) | round((4L + 3U) / 7) |
 
-- energia renovável;
-- proximidade da transmissão oficial;
-- água, bacia e clima;
-- conectividade e mercado;
-- diligência regulatória preliminar;
-- ambiente;
-- distância de subestação ONS.
+Os pesos atuam **somente dentro do respectivo pilar**. Não tornam um pilar
+mais importante que outro e não produzem uma ordenação geral. Em um pilar de
+critério único, qualquer peso positivo mantém a mesma nota. Peso zero desativa
+o critério; se todos os pesos de um pilar forem zero, ele fica sem avaliação
+(`—`), não recebe nota zero.
 
-Para deixar a avaliação mais transparente, a interface separa esses critérios
-em três grupos e mostra um subtotal de 0 a 100 para cada um:
+Interseções com UCs e consultas incompletas continuam gerando alertas e
+orientações de diligência. Os antigos tetos da nota global não são transferidos
+para os pilares. Uma nota energética favorável não anula um alerta territorial.
 
-- **Recursos e impacto:** energia renovável e água/bacia/clima;
-- **Viabilidade estimada:** infraestrutura elétrica, conectividade/mercado e
-  diligência regulatória;
-- **Riscos territoriais:** ambiente e subestação ONS.
+**Exemplo didático:** com E=100, T=90, A=77, C=96, L=20, U=15 e S=90,
+os resultados independentes são:
 
-Os subtotais usam os pesos de cada grupo. O total **não é a média simples dos
-três grupos**: usa diretamente as sete notas e, na análise local, recebe um
-limite preventivo após o arredondamento.
+| Estresse hídrico | Capacidade energética | Conectividade | Risco social/territorial |
+| ---: | ---: | ---: | ---: |
+| 77 | 94 | 96 | 18 |
 
-| Critério | Peso padrão |
-| --- | ---: |
-| Energia renovável (E) | 5 |
-| Infraestrutura elétrica (T) | 4 |
-| Água, bacia e clima (A) | 5 |
-| Conectividade e mercado (C) | 3 |
-| Diligência regulatória (L) | 4 |
-| Restrições ambientais (U) | 3 |
-| Distância de subestação (S) | 3 |
+O [manual em inglês](docs/manual-dataterra.html) detalha as fontes, cada fórmula,
+unidade, arredondamento e reserva para dados ausentes.
+[Versão PDF em inglês](docs/manual-dataterra.pdf).
 
-```text
-Média = round((5E + 4T + 5A + 3C + 4L + 3U + 3S) / 27)
-Score local final = min(média, limite preventivo)
-```
+**Comparação regional versus análise local:** os candidatos regionais usam
+bases municipais e indicadores preliminares. A aba Local e o resumo do ponto
+usam as consultas territoriais detalhadas. Por isso, os resultados podem diferir;
+uma boa posição no pilar escolhido não valida o imóvel.
 
-Com pesos personalizados, dividir pela soma dos pesos positivos ativos. Peso
-zero exclui o critério da média; todos zero resultam em zero. Os tetos continuam
-ativos independentemente dos pesos: 39 em UC de proteção integral; 59 em outra
-UC; 79 enquanto alguma consulta territorial estiver incompleta; 100 nos demais
-casos. Uma interseção conhecida tem precedência sobre a incompletude.
-
-**Exemplo didático:** notas E=100, T=90, A=77, C=96, L=20, U=15 e S=90 dão
-1.928/27, arredondado para 71. Se o ponto estiver em proteção integral,
-o resultado final é 39 (Alto risco), mesmo com bons indicadores de energia.
-Os subtotais desse exemplo são 89, 66 e 53.
-
-O [manual, capítulos 8 a 12](docs/manual-dataterra.html#calculo-score) detalha
-cada fórmula, unidade, faixa, arredondamento, reserva para dado ausente e a
-reprodução completa desse exemplo. [Versão PDF](docs/manual-dataterra.pdf).
-
-**Ranking versus análise local:** o ranking usa bases municipais e indicadores
-preliminares, sem as quatro consultas detalhadas nem seus tetos. A aba Local e
-o resumo do ponto usam o cálculo territorial. Por isso, os resultados podem
-diferir; uma boa posição no ranking não valida o imóvel.
-
-Todas as notas e cortes são heurísticas do MVP, não notas oficiais, probabilidades
-de aprovação ou estimativas de redução de CO₂. No grupo Riscos territoriais,
-assim como nos demais, uma nota maior indica condição mais favorável.
+As notas continuam sendo heurísticas não calibradas, não notas oficiais,
+probabilidades de aprovação ou estimativas de redução de CO₂. Não foi
+introduzido aprendizado de máquina nem um modelo multicritério validado.
 
 ## Como funciona o impacto hídrico
 
@@ -200,7 +178,7 @@ Indicadores de triagem:
 
 - No ranking regional, infraestrutura e água ainda usam as bases locais de referência.
 - Na simulação local, transmissão oficial ANEEL/SIGEL, microbacia ANA, climatologia NASA e polígonos CNUC alteram o cálculo.
-- Os pesos, fórmulas, limites preventivos e regras de diligência são premissas do MVP, documentadas na interface e no manual; não representam aprovação dos órgãos.
+- Os pesos internos aos pilares, fórmulas, valores de reserva e regras de diligência são premissas do MVP, documentadas na interface e no manual; não representam aprovação dos órgãos.
 - A camada elétrica estimada permanece opcional e desligada inicialmente.
 
 ## Arquitetura resumida
@@ -228,7 +206,7 @@ Componentes principais:
 - `styles.css`: layout e identidade visual.
 - `app.js`: orquestra mapa, estado da UI, seleção de região e renderizações.
 - `site-analysis.js`: cálculo de recursos dentro do raio.
-- `evaluation-criteria.js`: catálogo, grupos, pesos e agregação dos critérios.
+- `evaluation-criteria.js`: catálogo, quatro pilares e ponderação restrita a cada pilar.
 - `wui-model.js`: cálculo de impacto hídrico/WUI.
 - `region-options.js`: construção das regiões candidatas.
 - `electric-infrastructure.js`: infraestrutura elétrica estimada.
@@ -299,16 +277,25 @@ npm test
 Os testes cobrem:
 
 - modelos de WUI, energia, busca, ranking e análise local;
-- contrato visual da interface;
-- presença do manual;
 - contrato de deploy estático na Vercel;
 - consistência dos JSONs usados por `/api/*`.
 
 ## Como calculamos
 
-- [Manual HTML: uso e metodologia completa](docs/manual-dataterra.html)
-- [Manual PDF para a banca](docs/manual-dataterra.pdf)
-- Capítulos 8–12: pesos, fórmulas, limites, exemplo numérico e rastreabilidade.
+- [Manual HTML em inglês: uso e metodologia dos quatro pilares](docs/manual-dataterra.html)
+- [Manual PDF em inglês para a banca](docs/manual-dataterra.pdf)
+- Fontes ativas e futuras, fórmulas preservadas, limites de interpretação e exemplo reproduzível sem média geral.
+
+## Pesquisa técnica das bases
+
+O [levantamento dos quatro pilares](docs/pesquisa-tecnica-quatro-pilares.md)
+documenta fontes oficiais, dados disponíveis, lacunas, limites de uso, a
+contribuição do BEN 2025 e uma proposta de critérios GIS-MCDA.
+O documento distingue consultas verificadas de propostas ainda não integradas;
+não altera nem valida os pesos e as notas atuais da aplicação.
+
+A pesquisa registra o levantamento e propostas da sua época; o comportamento
+da versão atual, com quatro indicadores independentes, está descrito no manual.
 
 ## Limitações
 
@@ -331,7 +318,7 @@ A DataTerra é uma ferramenta de triagem. Ela não substitui:
 
 ## Critérios territoriais (outubro/2026)
 
-O simulador e o ranking usam sete critérios em três grupos. Os novos pesos padrão são 3 para ambiente e 3 para proximidade ONS. As premissas e faixas completas estão na interface e em `docs/manual-dataterra.html` / `.pdf`.
+O simulador e a comparação regional usam sete critérios organizados nos quatro pilares acima. Os pesos internos padrão são preservados; não há total entre pilares. As premissas completas estão no manual em inglês (`docs/manual-dataterra.html` e `.pdf`).
 
 - `node scripts/ingest-substations.js`: ONS, coordenadas válidas e tensão ≥69 kV.
 - `node scripts/ingest-environmental.js [CSV-local]`: CNUC julho/2026, presença municipal de proteção integral; parser CSV com aspas. Falhas preservam a base anterior.
@@ -350,13 +337,13 @@ A base CNUC municipal é uma reserva aproximada. A análise detalhada usa políg
 - Fontes independentes, timeout de 40 s por consulta, cache de sucessos por 1 h, dados ausentes nunca equivalem a ausência de risco.
 - `territorial-model.js` faz interseções, distâncias e regras; `territorial-client.js` descarta respostas antigas e oferece nova tentativa.
 - A API estática anterior permanece; `/api/territory` requer servidor ou função Vercel. Abrir apenas com servidor de arquivos não habilita a consulta detalhada.
-- `npm test` cobre furos de polígonos, múltiplos polígonos, dados ausentes, limites preventivos, validação da API, cache e concorrência de seleção.
+- `npm test` cobre os modelos de análise, geometria, estados das fontes, validação da API, cache e concorrência de seleção.
 - `node scripts/ingest-transmission.js`: atualiza o snapshot nacional de 1.817 geometrias oficiais, validando contagem e unicidade antes de substituir o arquivo. Transmissão não depende de chamada remota durante a simulação.
 - Limites: 400 feições CNUC consultadas; mapa exibe até 30 UCs/40 linhas simplificadas. Avaliação usa os polígonos originais retornados. Geometrias visualmente omitidas por tamanho não invalidam atributos já consultados.
 
 ## Identidade visual do simulador
 
-O link “Como calculamos” abre o PDF da metodologia. O botão de tema alterna
+O link “Como calculamos” abre o PDF em inglês. O botão de tema alterna
 entre claro e escuro, inicia conforme o dispositivo e guarda a escolha no navegador.
 O PDF mantém fundo claro para leitura e impressão; o tema não altera os cálculos.
 
@@ -370,4 +357,4 @@ O desktop mantém mapa e painéis em uma área de trabalho com rolagem independe
 Em telas pequenas, o mapa aparece primeiro e os painéis são empilhados. Os atalhos
 “Escolha o local”, “Defina o raio” e “Avalie o resultado” abrem a seção correspondente.
 Foco visível, estado das abas e preferência por movimento reduzido são respeitados.
-As cores de classificação do score continuam separadas das cores decorativas.
+As cores dos indicadores por pilar continuam separadas das cores decorativas.

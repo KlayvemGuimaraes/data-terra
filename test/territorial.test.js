@@ -17,15 +17,33 @@ test('CNUC municipal matching handles accents and distinguishes states and missi
     assert.equal(scoreEnvironmental(records, { name: 'Sao Paulo', state: 'RN' }), 58);
     assert.equal(scoreEnvironmental([], { name: 'Sao Paulo', state: 'SP' }), 58);
 });
-test('territorial data changes final score using municipality reference rather than candidate region', () => {
+test('municipal protection evidence changes only the territorial pillar, not the candidate reference', () => {
     const data = { municipalities: [{ ...site, name: 'São Paulo', state: 'SP' }], substations: [{ ...site, name: 'ONS', voltageKv: 230 }] };
-    const clean = analyzeSiteResources(data, site);
-    const flagged = analyzeSiteResources({ ...data, envRisk: [{ nome: 'SAO PAULO', uf: 'SP', has_uc_protection: true }] }, site);
-    assert.equal(flagged.scores.environmental, 38);
+    const options = { regions: [{ id: 'Guarulhos-SP', name: 'Guarulhos', state: 'SP', lat: -23.45, lng: -46.53 }] };
+    const clean = analyzeSiteResources(data, site, options);
+    const flagged = analyzeSiteResources({ ...data, envRisk: [{ nome: 'SAO PAULO', uf: 'SP', has_uc_protection: true }] }, site, options);
+    assert.equal(clean.scores.environmental, 58);
+    assert.deepEqual(flagged.scores, { ...clean.scores, environmental: 38 });
     assert.equal(flagged.scores.substation, 95);
-    assert.ok(flagged.overallScore < clean.overallScore);
+    assert.deepEqual(flagged.groupScores, { ...clean.groupScores, territorial: 51 });
+    assert.ok(flagged.groupScores.territorial < clean.groupScores.territorial);
+    assert.equal(flagged.site.nearestRegion.name, 'Guarulhos');
     assert.equal(flagged.environmental.municipality, 'São Paulo/SP');
+    assert.equal(flagged.environmental.status, 'atencao');
     assert.equal(flagged.nearestSubstation.nearestName, 'ONS');
+});
+
+test('substation evidence changes only the energy pillar', () => {
+    const data = { municipalities: [{ ...site, name: 'São Paulo', state: 'SP' }] };
+    const missing = analyzeSiteResources(data, site);
+    const nearby = analyzeSiteResources({ ...data, substations: [{ ...site, name: 'ONS', voltageKv: 230 }] }, site);
+    assert.equal(missing.scores.substation, 40);
+    assert.deepEqual(nearby.scores, { ...missing.scores, substation: 95 });
+    assert.ok(nearby.groupScores.energy > missing.groupScores.energy);
+    assert.deepEqual(nearby.groupScores, { ...missing.groupScores, energy: nearby.groupScores.energy });
+    assert.equal(nearby.nearestSubstation.nearestName, 'ONS');
+    assert.equal(nearby.nearestSubstation.nearestDistanceKm, 0);
+    assert.equal(nearby.nearestSubstation.nearestVoltageKv, 230);
 });
 test('CSV accepts quoted separators, escaped quotes and embedded newlines', () => {
     assert.deepEqual(parseDelimited('a;b\n"a;b";"c""d\ne"\n'), [['a', 'b'], ['a;b', 'c"d\ne']]);

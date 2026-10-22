@@ -30,7 +30,7 @@
             lng: region.lng,
             label: `${region.name} - ${region.state}`,
             source: "candidate",
-            description: "Região candidata com score territorial",
+            description: "Região candidata para comparação por pilares",
             searchText: normalizeSearchText(`${region.name} ${region.state} ${region.name} - ${region.state}`),
         };
     }
