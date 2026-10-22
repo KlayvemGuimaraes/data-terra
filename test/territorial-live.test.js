@@ -1,6 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const Model = require('../territorial-model');
+const { calculateGroupScores } = require('../evaluation-criteria');
 const { validateQuery, createService } = require('../server/territory-service');
 const { create } = require('../territorial-client');
 const polygon = { type: 'Polygon', coordinates: [[[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]], [[4, 4], [6, 4], [6, 6], [4, 6], [4, 4]]] };
@@ -18,22 +19,109 @@ test('point-in-polygon respects holes, boundaries and multipolygons', () => {
 test('line distance uses closest segment rather than endpoints', () => {
     assert.ok(Model.distance([0, 0], { type: 'LineString', coordinates: [[-1, 0.1], [1, 0.1]] }) < 12);
 });
-test('a protected point caps the score independently of favorable weights', () => {
-    const assessed = Model.assess({ ...complete, environment: { status: 'ok', items: [{ atPoint: true, group: 'Proteção Integral', sphere: 'Federal', category: 'Parque' }] } }, base);
-    assert.equal(assessed.cap, 39);
-    assert.equal(assessed.scores.environmental, 15);
-    assert.equal(assessed.scores.licensing, 20);
-    assert.ok(assessed.rules.some(r => r.title.includes('federal')));
-    assert.equal(Model.assess({ ...complete, environment: { status: 'ok', items: [{ atPoint: false, group: 'Proteção Integral' }] } }, base).cap, 100);
+test('a protected point retains evidence and affects only the territorial pillar', () => {
+    const protection = { atPoint: true, group: 'Proteção Integral', sphere: 'Federal', category: 'Parque' };
+    const unprotected = Model.assess(complete, base);
+    const assessed = Model.assess({ ...complete, environment: { status: 'ok', items: [protection] } }, base);
+    assert.equal(assessed.complete, true);
+    assert.equal(Object.hasOwn(assessed, 'cap'), false);
+    assert.deepEqual(assessed.overlaps, [protection]);
+    assert.deepEqual(assessed.scores, { ...unprotected.scores, environmental: 15, licensing: 20 });
+    assert.deepEqual(calculateGroupScores(assessed.scores), {
+        ...calculateGroupScores(unprotected.scores),
+        territorial: 18,
+    });
+    assert.equal(calculateGroupScores(assessed.scores).connectivity, 100);
+    assert.ok(assessed.rules.length > unprotected.rules.length);
+    assert.ok(assessed.rules.every(rule => [rule.title, rule.text, rule.url].every(value => typeof value === 'string' && value.length > 0)));
+    assert.ok(assessed.warnings.length > unprotected.warnings.length);
+    assert.ok(assessed.warnings.every(warning => typeof warning === 'string' && warning.length > 0));
+    const stateProtection = Model.assess({ ...complete, environment: { status: 'ok', items: [{ ...protection, sphere: 'Estadual' }] } }, base);
+    assert.equal(assessed.rules.length, stateProtection.rules.length + 1);
 });
-test('missing or partial data never supports high aptitude; basin and climate alter water score', () => {
-    assert.equal(Model.assess({}, base).cap, 79);
-    assert.equal(Model.assess({ ...complete, environment: { status: 'partial', items: [] } }, base).cap, 79);
+
+test('other conservation overlaps retain their own criterion effects without a cap', () => {
+    const protection = { atPoint: true, group: 'Uso Sustentável' };
+    const unprotected = Model.assess(complete, base);
+    const assessed = Model.assess({ ...complete, environment: { status: 'ok', items: [protection] } }, base);
+    assert.equal(Object.hasOwn(assessed, 'cap'), false);
+    assert.deepEqual(assessed.overlaps, [protection]);
+    assert.deepEqual(assessed.scores, { ...unprotected.scores, environmental: 40, licensing: 40 });
+    assert.deepEqual(calculateGroupScores(assessed.scores), {
+        ...calculateGroupScores(unprotected.scores),
+        territorial: 40,
+    });
+    assert.ok(assessed.rules.length > unprotected.rules.length);
+    assert.ok(assessed.warnings.length > unprotected.warnings.length);
+});
+
+test('nearby protection without a point intersection does not change criterion scores', () => {
+    const unprotected = Model.assess(complete, base);
+    const nearby = Model.assess({ ...complete, environment: { status: 'ok', items: [{ atPoint: false, group: 'Proteção Integral' }] } }, base);
+    assert.deepEqual(nearby.overlaps, []);
+    assert.deepEqual(nearby.scores, unprotected.scores);
+    assert.deepEqual(nearby.rules, unprotected.rules);
+    assert.deepEqual(nearby.warnings, unprotected.warnings);
+    assert.equal(Object.hasOwn(nearby, 'cap'), false);
+});
+
+test('missing and partial consultations retain completeness warnings without a global ceiling', () => {
     const good = Model.assess(complete, base);
-    const bad = Model.assess({ ...complete, basin: { status: 'ok', class: 'crítico' }, climate: { status: 'ok', score: 10 } }, base);
-    assert.ok(bad.scores.water < good.scores.water);
-    assert.equal(good.scores.grid, 90);
+    const missing = Model.assess({}, base);
+    assert.equal(good.complete, true);
+    assert.equal(Object.hasOwn(good, 'cap'), false);
+    assert.equal(missing.complete, false);
+    assert.equal(Object.hasOwn(missing, 'cap'), false);
+    assert.deepEqual(missing.scores, { ...base, grid: 40, water: 62, licensing: 60 });
+    assert.deepEqual(missing.overlaps, []);
+    assert.ok(missing.warnings.length > good.warnings.length);
+    assert.ok(missing.warnings.every(warning => typeof warning === 'string' && warning.length > 0));
+    assert.equal(calculateGroupScores(missing.scores).connectivity, 100);
+
+    const baseline = calculateGroupScores(good.scores);
+    for (const [source, pillar] of [
+        ['environment', 'territorial'],
+        ['basin', 'water'],
+        ['climate', 'water'],
+        ['transmission', 'energy'],
+    ]) {
+        const partial = Model.assess({ ...complete, [source]: { ...complete[source], status: 'partial' } }, base);
+        const groups = calculateGroupScores(partial.scores);
+        assert.equal(partial.complete, false, source);
+        assert.equal(Object.hasOwn(partial, 'cap'), false, source);
+        assert.ok(partial.warnings.length > good.warnings.length, source);
+        assert.deepEqual(partial.rules, good.rules, source);
+        assert.notEqual(groups[pillar], baseline[pillar], source);
+        assert.deepEqual(groups, { ...baseline, [pillar]: groups[pillar] }, source);
+    }
+});
+
+test('basin and climate change only the water criterion and pillar', () => {
+    const good = Model.assess(complete, base);
+    for (const { sources, water } of [
+        { sources: { basin: { status: 'ok', class: 'crítico' } }, water: 53 },
+        { sources: { climate: { status: 'ok', score: 10 } }, water: 74 },
+        { sources: { basin: { status: 'ok', class: 'crítico' }, climate: { status: 'ok', score: 10 } }, water: 37 },
+    ]) {
+        const assessed = Model.assess({ ...complete, ...sources }, base);
+        assert.deepEqual(assessed.scores, { ...good.scores, water });
+        assert.deepEqual(calculateGroupScores(assessed.scores), {
+            ...calculateGroupScores(good.scores),
+            water,
+        });
+    }
     assert.equal(Model.basinScore({ class: 'muito alto\n  ' }), 30);
+});
+
+test('transmission distance changes only the grid criterion and energy pillar', () => {
+    const nearby = Model.assess(complete, base);
+    const distant = Model.assess({ ...complete, transmission: { status: 'ok', nearestDistanceKm: 60 } }, base);
+    assert.equal(nearby.scores.grid, 90);
+    assert.deepEqual(distant.scores, { ...nearby.scores, grid: 35 });
+    assert.deepEqual(calculateGroupScores(distant.scores), {
+        ...calculateGroupScores(nearby.scores),
+        energy: 77,
+    });
 });
 test('climate rejects missing months, nulls and sentinel values', () => {
     const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
@@ -91,19 +179,29 @@ test('official transmission snapshot stays available without external network', 
 });
 test('retry preserves known protection alerts on a failed refresh of the same point', async () => {
     let fail = false;
+    const protection = { atPoint: true, group: 'Proteção Integral' };
     const client = create({ delay: 0, fetchImpl: async () => {
         if (fail) throw Error('offline');
-        return { ok: true, json: async () => ({ status: 'ok', items: [{ atPoint: true, group: 'Proteção Integral' }] }) };
+        return { ok: true, json: async () => ({ status: 'ok', items: [protection] }) };
     } });
     const site = { lat: -23, lng: -46 };
     client.request(site, 30);
     await new Promise(r => setTimeout(r, 10));
     fail = true;
     const refresh = client.request(site, 30, true);
-    assert.equal(Model.assess(refresh, base).cap, 39);
+    const duringRefresh = Model.assess(refresh, base);
     await new Promise(r => setTimeout(r, 10));
     assert.equal(refresh.environment.status, 'partial');
-    assert.equal(Model.assess(refresh, base).cap, 39);
+    const afterFailure = Model.assess(refresh, base);
+    for (const assessed of [duringRefresh, afterFailure]) {
+        assert.equal(Object.hasOwn(assessed, 'cap'), false);
+        assert.deepEqual(assessed.overlaps, [protection]);
+        assert.equal(assessed.scores.environmental, 15);
+        assert.equal(assessed.scores.licensing, 20);
+    }
+    assert.equal(afterFailure.complete, false);
+    assert.deepEqual(afterFailure.rules, duringRefresh.rules);
+    assert.ok(afterFailure.warnings.length > duringRefresh.warnings.length);
     const changed = client.request({ lat: -24, lng: -47 }, 30);
     assert.equal(changed.environment.items, undefined);
     client.dispose();

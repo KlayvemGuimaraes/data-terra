@@ -333,7 +333,7 @@
                     summary: `Cidade com ${group.population.toLocaleString("pt-BR")} habitantes. Serviços de ${serviceLabel} registrados para ${providerLabel || "prestador não informado"}.`,
                     scores,
                     tags: [serviceLabel, group.state, ...buildFiberTags(fiber)],
-                    recommendation: "Aptidão preliminar baseada em dados reais de saneamento, geração renovável e premissas territoriais declaradas.",
+                    recommendation: "Leitura preliminar dos quatro pilares baseada em saneamento, geração renovável e premissas territoriais declaradas, sem conclusão única sobre o local.",
                     conditions: ["Validar rede elétrica local", "Confirmar disponibilidade de fibra", "Checar licenciamento ambiental municipal"],
                     methodology: {
                         dataBasis: [

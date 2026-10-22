@@ -2,6 +2,7 @@ const assert = require("node:assert/strict");
 const test = require("node:test");
 
 const { analyzeSiteResources, distanceKm } = require("../site-analysis");
+const { getDefaultWeights } = require("../evaluation-criteria");
 
 const center = { lat: -23.55, lng: -46.63 };
 
@@ -132,15 +133,72 @@ test("calculates site impact and scores from local resources", () => {
 
   assert.equal(analysis.impact.annualWaterMegaliters, 438);
   assert.equal(analysis.impact.state, "SP");
-  assert.equal(analysis.scores.renewables, 100);
-  assert.equal(analysis.scores.water, 61);
-  assert.deepEqual(analysis.groupScores, {
-    resources: 81,
-    feasibility: 64,
-    territorial: 49,
+  assert.deepEqual(analysis.scores, {
+    renewables: 100,
+    grid: 40,
+    water: 61,
+    connectivity: 100,
+    licensing: 60,
+    environmental: 58,
+    substation: 40,
   });
-  assert.equal(analysis.overallScore, 67);
+  assert.deepEqual(analysis.groupScores, {
+    water: 61,
+    energy: 65,
+    connectivity: 100,
+    territorial: 59,
+  });
+  assert.equal(Object.hasOwn(analysis, "rawScore"), false);
+  assert.equal(Object.hasOwn(analysis, "overallScore"), false);
   assert.equal(analysis.territorial.complete, false);
+});
+
+test("site weights affect only their pillar and preserve all criterion scores", () => {
+  const options = {
+    radiusKm: 35,
+    regions,
+    wuiConfig: { waterUseIntensityLPerKwh: 1, itLoadMw: 50 },
+  };
+  const baseline = analyzeSiteResources(fixtures, center, options);
+  const reweighted = analyzeSiteResources(fixtures, center, {
+    ...options,
+    weights: { ...getDefaultWeights(), renewables: 0 },
+  });
+
+  assert.deepEqual(reweighted.scores, baseline.scores);
+  assert.deepEqual(reweighted.groupScores, {
+    ...baseline.groupScores,
+    energy: 40,
+  });
+});
+
+test("disabled pillars remain null without removing resource or criterion evidence", () => {
+  const options = {
+    radiusKm: 35,
+    regions,
+    wuiConfig: { waterUseIntensityLPerKwh: 1, itLoadMw: 50 },
+  };
+  const baseline = analyzeSiteResources(fixtures, center, options);
+  const disabled = analyzeSiteResources(fixtures, center, {
+    ...options,
+    weights: Object.fromEntries(
+      Object.keys(getDefaultWeights()).map((criterion) => [criterion, 0]),
+    ),
+  });
+
+  assert.deepEqual(disabled.groupScores, {
+    water: null,
+    energy: null,
+    connectivity: null,
+    territorial: null,
+  });
+  assert.deepEqual(disabled.scores, baseline.scores);
+  assert.deepEqual(disabled.energy, baseline.energy);
+  assert.deepEqual(disabled.water, baseline.water);
+  assert.deepEqual(disabled.cables, baseline.cables);
+  assert.deepEqual(disabled.territorial, baseline.territorial);
+  assert.equal(Object.hasOwn(disabled, "rawScore"), false);
+  assert.equal(Object.hasOwn(disabled, "overallScore"), false);
 });
 
 test("scores fiber proximity from the nearest cable route", () => {

@@ -1,447 +1,520 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Como calculamos | DataTerra</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="DataTerra's four-pillar screening methodology: implemented calculations, source provenance, uncertainty and limits." />
+    <title>How the four pillars are calculated | DataTerra</title>
     <style>
       @font-face { font-family: "Montserrat"; src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2"); font-weight: 100 900; font-display: block; }
       @font-face { font-family: "Poppins"; src: url("../assets/fonts/poppins-latin-400.woff2") format("woff2"); font-weight: 400; font-display: block; }
-      @font-face { font-family: "Poppins"; src: url("../assets/fonts/poppins-latin-600.woff2") format("woff2"); font-weight: 500 900; font-display: block; }
-      h1, h2, h3 { font-family: "Montserrat", sans-serif; }
-      .document-brand { display: flex; align-items: center; font-family: "Montserrat", sans-serif; font-weight: 750; font-size: 28px; letter-spacing: -1.3px; color: #203c31; }
-      .document-brand svg { color: #174b3c; margin-right: 9px; flex-shrink: 0; }
-      .document-brand .brand-light { font-weight: 400; }
-      .document-brand .brand-period { color: #a15c3b; }
-      .doc-kicker { color: #719052; letter-spacing: 1.4px; text-transform: uppercase; font-size: 10px; margin-bottom: 8px; }
-
-      @page { size: A4; margin: 10mm; }
+      @font-face { font-family: "Poppins"; src: url("../assets/fonts/poppins-latin-600.woff2") format("woff2"); font-weight: 600 900; font-display: block; }
+      @page { size: A4; margin: 15mm 14mm 16mm; }
       :root {
         --ink: #203c31;
-        --muted: #5f7167;
+        --muted: #53675c;
         --accent: #174b3c;
-        --accent-dark: #174b3c;
-        --line: #dfe5d9;
+        --line: #dbe3d5;
         --soft: #f3f5ec;
-        --gold: #c58a14;
-        --low: #c54532;
+        --warm: #a15c3b;
       }
-
-      * {
-        box-sizing: border-box;
+      * { box-sizing: border-box; }
+      body { margin: 0; color: var(--ink); background: #fff; font-family: "Poppins", Arial, sans-serif; font-size: 14px; line-height: 1.6; }
+      .page { max-width: 920px; margin: 0 auto; padding: 36px 42px 48px; }
+      header { padding-bottom: 22px; border-bottom: 3px solid var(--accent); }
+      .document-brand { display: flex; align-items: center; margin-bottom: 24px; font-family: "Montserrat", sans-serif; font-weight: 750; font-size: 28px; letter-spacing: -1.3px; }
+      .document-brand svg { color: var(--accent); margin-right: 9px; flex-shrink: 0; }
+      .brand-light { font-weight: 400; }
+      .brand-period { color: var(--warm); }
+      .doc-kicker { margin-bottom: 8px; color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; }
+      h1, h2, h3, h4 { color: var(--accent); font-family: "Montserrat", Arial, sans-serif; line-height: 1.25; }
+      h1 { margin: 0 0 14px; font-size: 32px; }
+      h2 { margin: 0 0 14px; font-size: 23px; }
+      h3 { margin: 22px 0 10px; font-size: 17px; }
+      h4 { margin: 16px 0 8px; font-size: 15px; }
+      p { margin: 0 0 12px; }
+      .subtitle, .muted, footer { color: var(--muted); }
+      .subtitle { margin-bottom: 8px; }
+      .edition { margin: 0; font-size: 12px; }
+      a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; overflow-wrap: anywhere; }
+      .section { padding: 25px 0; border-bottom: 1px solid var(--line); }
+      .question { margin-bottom: 16px; padding-left: 12px; border-left: 3px solid var(--warm); font-weight: 600; }
+      .answer, .warning, .note { margin: 14px 0; padding: 13px 16px; border-radius: 6px; }
+      .answer { color: #fff; background: var(--accent); font-weight: 600; }
+      .warning { background: #fff7ed; border: 1px solid #e6c7ad; }
+      .note { background: var(--soft); border: 1px solid var(--line); }
+      .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
+      .card { padding: 13px 15px; border: 1px solid var(--line); border-radius: 6px; }
+      .card strong { display: block; margin-bottom: 5px; }
+      .card p { margin: 0; }
+      ul, ol { margin: 10px 0 14px; padding-left: 23px; }
+      li { margin: 6px 0; }
+      nav { margin-top: 18px; font-size: 12px; }
+      nav p { margin-bottom: 6px; }
+      table { width: 100%; margin: 14px 0; border-collapse: collapse; font-size: 12.5px; }
+      caption { margin-bottom: 7px; text-align: left; font-weight: 600; }
+      th, td { padding: 8px 9px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+      th { background: var(--soft); font-weight: 600; }
+      .source-list { margin: 12px 0 18px; }
+      .source-list > div { margin: 0 0 14px; }
+      dt { margin-bottom: 5px; font-weight: 600; }
+      dd { margin: 0; }
+      code, .formula { font-family: ui-monospace, "DejaVu Sans Mono", monospace; }
+      code { font-size: 0.91em; overflow-wrap: anywhere; }
+      .formula { margin: 12px 0 15px; padding: 12px 14px; background: var(--soft); border-left: 3px solid var(--accent); font-size: 12px; line-height: 1.65; }
+      .formula .line { display: block; }
+      .formula-label { display: block; margin-bottom: 6px; font-family: "Poppins", Arial, sans-serif; font-weight: 600; }
+      footer { padding-top: 20px; font-size: 11px; }
+      @media screen and (max-width: 640px) {
+        .page { padding: 24px 18px 32px; }
+        h1 { font-size: 27px; }
+        h2 { font-size: 21px; }
+        .cards { grid-template-columns: 1fr; }
+        th, td { padding: 7px 6px; }
+        .formula { font-size: 11px; overflow-wrap: anywhere; }
       }
-
-      body {
-        margin: 0;
-        color: var(--ink);
-        background: #fff;
-        font-family: "Poppins", Arial, sans-serif;
-        font-size: 14px;
-        line-height: 1.45;
-      }
-
-      .page {
-        max-width: 880px;
-        margin: 0 auto;
-        padding: 34px 42px 44px;
-      }
-
-      header {
-        display: grid;
-        grid-template-columns: 200px 1fr;
-        align-items: center;
-        gap: 26px;
-        padding-bottom: 20px;
-        border-bottom: 3px solid var(--accent);
-      }
-
-      .logo {
-        width: 210px;
-        display: block;
-      }
-
-      h1,
-      h2,
-      p {
-        margin-top: 0;
-      }
-
-      h1 {
-        margin-bottom: 8px;
-        color: var(--accent-dark);
-        font-size: 27px;
-        line-height: 1.1;
-      }
-
-      h2 {
-        margin-bottom: 9px;
-        color: var(--accent-dark);
-        font-size: 20px;
-      }
-
-      .subtitle,
-      .muted,
-      table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
-      th, td { border: 1px solid var(--line); padding: 7px; text-align: left; }
-      th { background: var(--soft); }
-      tr { break-inside: avoid; }
-      .formula { background: var(--soft); padding: 10px; font-family: monospace; overflow-wrap: anywhere; }
-      h2, h3 { break-after: avoid; }
-      footer {
-        color: var(--muted);
-      }
-
-      h3 { color: var(--accent-dark); }
-      a { color: var(--accent); overflow-wrap: anywhere; }
-      li { break-inside: avoid; }
-      .section {
-        padding: 18px 0;
-        border-bottom: 1px solid var(--line);
-      }
-
-      ul,
-      ol {
-        margin: 8px 0 0;
-        padding-left: 22px;
-      }
-
-      li {
-        margin: 4px 0;
-      }
-
-      .answer {
-        padding: 14px 16px;
-        color: #fff;
-        background: var(--accent-dark);
-        border-radius: 8px;
-        font-weight: 700;
-      }
-
-      .flow {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 8px;
-        margin-top: 10px;
-      }
-
-      .flow span,
-      .card,
-      .warning {
-        padding: 11px 12px;
-        border-radius: 8px;
-      }
-
-      .flow span {
-        background: var(--soft);
-        border: 1px solid var(--line);
-        font-weight: 700;
-        text-align: center;
-      }
-
-      .cards,
-      .scale {
-        display: grid;
-        gap: 8px;
-        margin-top: 10px;
-      }
-
-      .cards {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .scale {
-        grid-template-columns: repeat(3, 1fr);
-      }
-
-      .card {
-        border: 1px solid var(--line);
-      }
-
-      .card strong {
-        display: block;
-        margin-bottom: 4px;
-        color: var(--accent-dark);
-      }
-
-      .scale div {
-        padding: 10px;
-        color: #fff;
-        border-radius: 8px;
-        font-weight: 700;
-      }
-
-      .high {
-        background: #1f9d63;
-      }
-
-      .medium {
-        background: var(--gold);
-      }
-
-      .low {
-        background: var(--low);
-      }
-
-      .warning {
-        background: #fff7ed;
-        border: 1px solid #fed7aa;
-      }
-
-      table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
-      th, td { border: 1px solid var(--line); padding: 7px; text-align: left; }
-      th { background: var(--soft); }
-      tr { break-inside: avoid; }
-      .formula { background: var(--soft); padding: 10px; font-family: monospace; overflow-wrap: anywhere; }
-      h2, h3 { break-after: avoid; }
-      footer {
-        padding-top: 16px;
-        font-size: 12px;
-      }
-
       @media print {
-        body {
-          print-color-adjust: exact;
-          -webkit-print-color-adjust: exact;
-        }
-
-        .page {
-          max-width: none;
-          padding: 24px 30px;
-        }
-
-        .section { break-inside: avoid; }
-        .territorial-overview { break-inside: auto; break-before: page; }
-        .calculation-page { break-before: page; break-inside: auto; font-size: 11.7px; }
-        #auditoria-modelo, #auditoria-modelo table { font-size: 11px; }
-        .calculation-page table { font-size: 11.7px; }
-        .coverage-heading { break-before: page; }
-        h3 { break-after: avoid; }
+        body { font-size: 10pt; line-height: 1.48; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+        .page { max-width: none; margin: 0; padding: 0; }
+        header { position: static; padding-bottom: 6mm; break-inside: avoid; }
+        .document-brand { margin-bottom: 6mm; font-size: 25pt; }
+        h1 { font-size: 25pt; }
+        h2 { font-size: 17pt; }
+        h3 { margin-top: 5mm; font-size: 12.5pt; }
+        h4 { font-size: 11pt; }
+        h2, h3, h4, dt, caption { break-after: avoid-page; page-break-after: avoid; }
+        p, li, dd { orphans: 3; widows: 3; }
+        p { margin-bottom: 3mm; }
+        .section { padding: 6mm 0; break-inside: auto; }
+        .section:last-of-type { padding-bottom: 0; border-bottom: 0; }
+        .cards { display: block; }
+        .card { margin: 3mm 0; padding: 3mm 4mm; }
+        .card, .formula, .answer, .warning, .note, .source-list > div { break-inside: avoid-page; page-break-inside: avoid; }
+        .formula { padding: 3mm 3.5mm; font-size: 9pt; line-height: 1.6; overflow-wrap: normal; }
+        table { font-size: 9pt; }
+        thead { display: table-header-group; }
+        tr { break-inside: avoid-page; page-break-inside: avoid; }
+        th, td { padding: 2mm; }
+        a { color: var(--ink); text-decoration: underline; }
+        nav, .edition { font-size: 9pt; }
+        footer { position: static; padding-top: 3mm; font-size: 8.5pt; break-inside: avoid; }
       }
     </style>
   </head>
   <body>
     <main class="page">
       <header>
-<div class="document-brand" aria-label="DataTerra"><svg class="brand-icon" xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <div class="document-brand" aria-label="DataTerra">
+          <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
             <path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" />
             <path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" />
             <path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" />
-          </svg><span>data<span class="brand-light">terra</span><span class="brand-period">.</span></span></div>
-        <div>
-          <p class="doc-kicker">Metodologia · MVP</p><h1>Como calculamos</h1>
-          <p class="subtitle">
-            Dados, critérios e limites do score de aptidão territorial.
-            Guia para entender e reproduzir os resultados da DataTerra.
-          </p>
+          </svg>
+          <span>data<span class="brand-light">terra</span><span class="brand-period">.</span></span>
         </div>
+        <p class="doc-kicker">Methodology · Four-pillar screening</p>
+        <h1>How the four pillars are calculated</h1>
+        <p class="subtitle">A practical guide to DataTerra's implemented data, formulas, evidence and limitations for preliminary data-center location screening in Brazil.</p>
+        <p class="edition">English manual · October 2026 · Application interface: Brazilian Portuguese</p>
+        <nav aria-label="Manual contents">
+          <p><a href="#purpose">Purpose</a> · <a href="#workflow">Workflow</a> · <a href="#pillar-calculation">Weights and calculation</a></p>
+          <p><a href="#water">Water stress</a> · <a href="#energy">Energy capacity</a> · <a href="#connectivity">Connectivity</a> · <a href="#territorial">Social/territorial risk</a></p>
+          <p><a href="#coverage">Coverage and distance</a> · <a href="#regional">Regional comparison</a> · <a href="#example">Worked example</a> · <a href="#research">Research context</a> · <a href="#reproducibility">Reproducibility</a></p>
+        </nav>
       </header>
 
-      <section class="section">
-        <h2>1. Objetivo da solução</h2>
-        <p class="answer">
-          A DataTerra estima o impacto territorial de instalar um data center em
-          uma região, cruzando recursos disponíveis, impacto hídrico e
-          conectividade.
-        </p>
-        <p>
-          A pergunta central da plataforma é: se um data center for instalado
-          neste local, quais recursos existem ao redor e quais alertas precisam
-          ser considerados antes de avançar?
-        </p>
-      </section>
-
-      <section class="section">
-        <h2>2. Quando será utilizada</h2>
-        <p>
-          A plataforma deve ser usada na triagem inicial de locais. Ela ajuda a
-          escolher quais regiões merecem estudo técnico mais profundo.
-        </p>
-        <ul>
-          <li>Comparar municípios ou regiões candidatas.</li>
-          <li>Visualizar energia renovável, água, esgoto e conectividade.</li>
-          <li>Simular o raio de consumo de um data center.</li>
-          <li>Explicar para a banca por que um local parece melhor ou pior.</li>
-        </ul>
-      </section>
-
-      <section class="section">
-        <h2>3. Como usar a plataforma</h2>
-        <div class="flow" aria-label="Fluxo principal de uso">
-          <span>1. Escolher local</span>
-          <span>2. Definir raio</span>
-          <span>3. Ver recursos</span>
-          <span>4. Calcular impacto</span>
-        </div>
-        <ol>
-          <li>Selecione um estado e busque um município ou região candidata.</li>
-          <li>Clique no mapa ou use o local selecionado como ponto do data center.</li>
-          <li>Ajuste o raio para medir recursos próximos.</li>
-          <li>Leia o resumo, o impacto hídrico, as premissas e o ranking.</li>
-          <li>Use os atalhos para escolher local, definir raio e avaliar o resultado. O botão de tema alterna entre claro e escuro e guarda a preferência neste navegador.</li>
-        </ol>
-      </section>
-
-      <section class="section">
-        <h2>4. Como interpretar o score</h2>
-        <p>
-          O score vai de 0 a 100. Quanto maior, melhor a aptidão preliminar do
-          local para receber um data center.
-        </p>
-        <div class="scale">
-          <div class="high">80-100<br />Alta aptidão</div>
-          <div class="medium">60-79<br />Condicionada</div>
-          <div class="low">0-59<br />Alto risco</div>
-        </div>
-        <p>
-          O cálculo combina energia renovável, infraestrutura elétrica,
-          segurança hídrica, conectividade, diligência regulatória preliminar,
-          interseções com unidades de conservação e distância de subestação oficial.
-        </p>
-      </section>
-
-      <section class="section">
-        <h2>5. O que observar na avaliação</h2>
+      <section class="section" id="purpose">
+        <h2>1. Purpose and interpretation</h2>
+        <p class="answer">DataTerra presents four separate screening perspectives. It does not calculate an overall score, an overall suitability class or an average across pillars.</p>
+        <p>The practical question is: <strong>what resources and warning signs are visible around this candidate location, and what must be investigated before proceeding?</strong> The application supports initial comparison and technical due diligence, not a decision to approve construction.</p>
         <div class="cards">
-          <div class="card">
-            <strong>Mapa</strong>
-            Mostra pontos candidatos, quadrados de geração renovável, água,
-            esgoto, fibra e o raio escolhido.
-          </div>
-          <div class="card">
-            <strong>Impacto hídrico</strong>
-            Usa uma estimativa WUI. Maior consumo de água e maior estresse
-            hídrico elevam o impacto.
-          </div>
-          <div class="card">
-            <strong>Recursos no raio</strong>
-            Resume quais fontes renováveis, registros de saneamento e conexões
-            aparecem perto do local.
-          </div>
-          <div class="card">
-            <strong>Fontes</strong>
-            Separa dados reais de indicadores estimados usados apenas para
-            orientar a triagem.
-          </div>
+          <div class="card"><strong>1 · Water stress</strong><p>How favourable are the implemented water-use, basin-balance and climate indicators?</p></div>
+          <div class="card"><strong>2 · Energy capacity</strong><p>What do nearby nominal renewable generation, transmission routes and substation records indicate?</p></div>
+          <div class="card"><strong>3 · Connectivity</strong><p>How close are the cable routes represented in the current inventory?</p></div>
+          <div class="card"><strong>4 · Social/territorial risk</strong><p>What conservation overlaps and preliminary regulatory questions are visible in the available records?</p></div>
         </div>
+        <p>Each evaluated pillar is a <strong>heuristic value from 0 to 100; higher means more favourable under its formula</strong>. This direction also applies to the pillars named “Water stress” and “Social/territorial risk”: a higher number does not mean more stress or more risk. The separate <strong>WUI impact indicator has the opposite direction: lower impact is better</strong>.</p>
+        <p>The formulas are deterministic, use no machine learning and have not been empirically validated as predictors of site success, cost, approval, water security or emissions. An official input does not make DataTerra's derived value an official assessment. There are no pillar suitability bands or overall winner.</p>
+        <p class="warning">The application does not establish grid-access capacity, a water-supply commitment, a commercial fibre connection, land-use compatibility or legal clearance. It does not replace environmental licensing, water-use authorisation, engineering studies, property due diligence or consultation with affected rights-holders.</p>
       </section>
 
-      <section class="section">
-        <h2>6. Limitações e próximos passos</h2>
-        <p class="warning">
-          A DataTerra não substitui estudo ambiental, outorga de água,
-          licenciamento, análise elétrica real ou parecer técnico final.
-        </p>
-        <p>
-          Próximos passos: integrar direitos territoriais, APPs, zonas de amortecimento,
-          regras locais específicas, riscos físicos e informações de capacidade elétrica.
-        </p>
+      <section class="section" id="workflow">
+        <h2>2. Using the application</h2>
+        <ol>
+          <li>Select a state and a candidate municipality, or choose a point on the map. The selected coordinate is a reference point, not a delineated property.</li>
+          <li>Set the search radius, IT load in MW and water-use intensity in L/kWh. These are scenario assumptions, not measured facility operation.</li>
+          <li>Inspect resources within the radius and the four separate pillar values. Open the local analysis to examine the point-specific sources, warnings and assumptions.</li>
+          <li>Review the source status, edition and query date before interpreting a value. A number can include a fallback even when some evidence is missing.</li>
+          <li>Open the comparison tab and choose <strong>one named sorting pillar</strong>. Water stress is the default. Read all four values; ordering by one does not establish overall superiority.</li>
+          <li>Adjust criterion weights only within their pillar. A weight of zero disables that criterion; disabling every criterion in a pillar leaves that pillar unevaluated.</li>
+        </ol>
+        <p>The map uses neutral candidate markers, not colours or sizes derived from an overall rating. Candidate display limits and initial selection use alphabetical order rather than a hidden score. The selected candidate remains visible. Resource layers, the search circle and source-specific indicators remain aids to interpretation.</p>
+        <p>The theme control switches between light and dark and stores the preference in the browser. This manual uses a separate light print layout; the application's interface remains in Brazilian Portuguese.</p>
       </section>
 
-      <section class="section territorial-overview"><h3>7. Critérios territoriais e cobertura</h3>
-<p>O score local combina sete critérios com pesos ajustáveis: energia 5, infraestrutura 4, água 5, conectividade 3, diligência regulatória 4, ambiente 3 e subestação 3. Os três grupos têm médias próprias; o total usa a média ponderada dos critérios, arredondada. Os indicadores e limites a seguir são premissas do MVP, não notas emitidas pelos órgãos oficiais.</p>
-<ul>
-<li><strong>Subestação:</strong> <a href="https://dados.ons.org.br/dataset/subestacao">ONS</a>, 1.684 instalações com coordenadas e tensão ≥69 kV na base versionada. Distância geodésica à instalação mais próxima: até 20 km = 90; de 20 a 50 km = 89 a 60; acima de 50 km dentro do raio = 59 a 40; fora dessas faixas = 32. Bônus de 5 para tensão ≥230 kV; sem dados = 40. Não comprova capacidade disponível.</li>
-<li><strong>Infraestrutura:</strong> snapshot versionado de 1.817 geometrias oficiais <a href="https://sigel.aneel.gov.br/arcgis/rest/services/PORTAL/Transmiss%C3%A3o/MapServer/1">ANEEL/SIGEL - ONS</a>. Distância aproximada ao segmento de linha mais próximo dentro do raio: até 5 km = 90; até 20 = 75; até 50 = 55; demais = 35. Nenhuma linha no raio = 25; consulta indisponível ou parcial = 40. Não é rota de conexão nem análise de capacidade.</li>
-<li><strong>Água, bacia e clima:</strong> 30% do indicador anterior de WUI/saneamento + 50% da classe da microbacia ANA + 20% do indicador climático. O impacto WUI usa intensidade de consumo e Aqueduct por UF. A carga de TI altera o volume anual de água, mas não a nota de impacto WUI; a climatologia também não altera esse volume.</li>
-<li><strong>Microbacia:</strong> <a href="https://www.snirh.gov.br/arcgis/rest/services/INDE/Camadas/MapServer/47">ANA/SNIRH, balanço quantitativo 2020</a>, consulta espacial do ponto. Classes baixo, mediano/moderado, alto, muito alto, crítico e intermitente recebem 90, 75, 50, 30, 15 e 20 pontos; sem classe válida = 50. Exibe código, região, classe e comprometimento percentual. Na borda entre bacias, adota a classe mais conservadora das retornadas. Não substitui outorga ou estudo hídrico atualizado.</li>
-<li><strong>Clima:</strong> <a href="https://power.larc.nasa.gov/docs/services/api/temporal/climatology/">NASA POWER/MERRA-2</a>, climatologia em grade, com período e data de consulta informados na interface. Usa máxima climatológica T2M_MAX, umidade RH2M e precipitação PRECTOTCORR, não observação meteorológica do dia. Indicador = 100 − 4 × excesso da máxima sobre 28 °C − 3 × meses abaixo de 1 mm/dia − 0,5 × excesso da umidade média sobre 75%; limitado a 10–100. Dados ausentes/inválidos = 50. É heurística de triagem térmica/hídrica; não é projeto de refrigeração. INMET ainda não foi integrado.</li>
-<li><strong>Ambiente:</strong> <a href="https://geoservicos.inde.gov.br/geoserver/MMA/ows?service=WFS&amp;version=2.0.0&amp;request=GetCapabilities">MMA/CNUC, camada cnuc_26_07_31</a>. Cruza o ponto com polígonos publicados e identifica UCs dentro do raio. Ponto em proteção integral = 15; em outra UC = 40; consulta completa sem interseção no ponto = 70, sem certificar ausência de outras restrições. Se o serviço falhar, usa a reserva municipal (38 com proteção integral registrada; 58 nos demais casos). A sede mais próxima é apenas referência de reserva e pode pertencer a outro município. A qualidade do polígono depende da declaração da fonte.</li>
-<li><strong>Diligência regulatória:</strong> 20 com interseção em proteção integral, 40 em outra UC, 60 nos demais casos. O motor relaciona a localização à consulta ao gestor/plano de manejo (<a href="https://www.planalto.gov.br/ccivil_03/leis/l9985.htm">SNUC</a>), à verificação de competência federal em UC federal não APA (<a href="https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp140.htm">LC 140/2011</a>) e à consulta de enquadramento, uso do solo e <a href="https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15190.htm">Lei 15.190/2025</a>. Para captação própria/lançamento, orienta a verificação de outorga. Regras revisadas em 20/10/2026; não determina aprovação, dispensa ou competência definitiva. Zoneamento e normas estaduais/municipais específicas exigem confirmação externa.</li>
-</ul>
-<h3 class="coverage-heading">Classificação, cobertura e uso do mapa</h3>
-<p>Faixas: Alta aptidão ≥80; Condicionada 60–79; Alto risco &lt;60. Por precaução, o score local fica limitado a 39 em proteção integral, 59 em outra UC e 79 enquanto alguma das quatro consultas estiver incompleta. A interface mostra a média antes do limite. Esses limites não são proibições legais automáticas e independem dos pesos escolhidos.</p>
-<p>As camadas oficiais são carregadas ao escolher o ponto e mudar o raio. O CNUC consulta até 400 feições; se esse limite for atingido sem comprovar fim da lista, a cobertura fica parcial. A transmissão usa o inventário oficial completo de 1.817 linhas baixado em 20/10/2026, com data de aquisição informada. Para manter o mapa leve, exibe até 30 UCs e 40 linhas mais próximas, com geometrias simplificadas; a avaliação usa as geometrias originais consultadas. A bacia exibida é a do ponto, não a de toda a área de consumo. O marcador climático representa a referência em grade, não uma estação.</p>
-<p>O ranking regional permanece uma comparação preliminar de bases locais. A aba Local e o resumo do ponto usam as consultas detalhadas; os dois resultados podem diferir. Cada fonte informa sucesso, ausência, cobertura parcial ou indisponibilidade e a data da consulta. Trocar o local descarta respostas antigas; o botão Atualizar consultas permite tentar novamente. As consultas válidas ficam em cache por até uma hora. Na atualização do mesmo local, resultados anteriores são preservados se a fonte falhar, com aviso de cobertura parcial.</p>
-<p>FUNAI, INCRA, APPs, zonas de amortecimento, embargos, riscos SGB e normas locais específicas não têm cobertura geométrica nesta versão. A pesquisa continua sendo referência para ampliação. Mesmo com as quatro fontes disponíveis, não se deve inferir liberação ambiental do imóvel. O sistema avalia um ponto e um raio, sem delimitar o lote nem as obras associadas.</p>
-</section>
+      <section class="section chapter" id="pillar-calculation">
+        <h2>3. Seven criteria, four independent calculations</h2>
+        <p>The existing seven criterion calculations are retained. The grouping changes how they are presented and combined, not their individual formulas.</p>
+        <table>
+          <caption>Fixed pillar membership and default weights</caption>
+          <thead><tr><th scope="col">Pillar</th><th scope="col">Criterion and code</th><th scope="col">Weight</th></tr></thead>
+          <tbody>
+            <tr><td>Water stress</td><td>Water, basin and climate · A (<code>water</code>)</td><td>5</td></tr>
+            <tr><td rowspan="3">Energy capacity</td><td>Renewable generation · E (<code>renewables</code>)</td><td>5</td></tr>
+            <tr><td>Transmission infrastructure · T (<code>grid</code>)</td><td>4</td></tr>
+            <tr><td>Substation proximity · S (<code>substation</code>)</td><td>3</td></tr>
+            <tr><td>Connectivity</td><td>Cable proximity · C (<code>connectivity</code>)</td><td>3</td></tr>
+            <tr><td rowspan="2">Social/territorial risk</td><td>Preliminary regulatory diligence · L (<code>licensing</code>)</td><td>4</td></tr>
+            <tr><td>Conservation constraints · U (<code>environmental</code>)</td><td>3</td></tr>
+          </tbody>
+        </table>
+        <p>For a pillar g, include only its own criteria with positive weights. Let s be a criterion value and w its selected weight:</p>
+        <div class="formula" aria-label="Pillar calculation">
+          <span class="line">P(g) = round(Σ(w × s) / Σw), using active criteria in g only</span>
+          <span class="line">If Σw = 0: no evaluation (null; displayed as —)</span>
+        </div>
+        <div class="formula" aria-label="Default pillar formulas">
+          <strong class="formula-label">With default weights</strong>
+          <span class="line">Water stress = A</span>
+          <span class="line">Energy capacity = round((5E + 4T + 3S) / 12)</span>
+          <span class="line">Connectivity = C</span>
+          <span class="line">Social/territorial risk = round((4L + 3U) / 7)</span>
+        </div>
+        <p>Weights operate <strong>only within a pillar</strong>. Increasing the weight of A or C while it remains positive does not change its single-criterion pillar. Setting it to zero produces “—”, not zero and not a favourable assessment. In multi-criterion pillars, removing a criterion removes both its weighted value and its weight from the denominator.</p>
+        <p>The fixed 30%/50%/20% composition inside A is part of the existing water criterion; it is not a set of user-adjustable pillar weights. Missing source data and disabled weights are different: the formulas below retain their documented fallback values, whereas a pillar with no active weight has no evaluation.</p>
+        <p><strong>No cross-pillar compensation:</strong> DataTerra does not sum or average the four values, assign an overall class, apply an overall ceiling, or use an overall score for ordering or map appearance. Conservation and incomplete-coverage warnings remain visible independently of weights. A favourable energy value cannot cancel a known territorial overlap.</p>
+        <p><strong>Notation:</strong> <code>round</code> rounds to the nearest integer, with positive halves rounded up; <code>clamp(x, a, b)</code> confines x to [a, b]. Decimal points use English notation. Distances are in kilometres. Intermediate rounding explicitly described below is part of the implementation.</p>
+      </section>
 
-<section class="section calculation-page" id="calculo-score">
-<h2>8. Como o cálculo funciona, passo a passo</h2>
-<p><strong>Referência:</strong> implementação do MVP publicada em 20/10/2026. Este capítulo descreve a análise do ponto na aba Local e no resumo do ponto. As notas são heurísticas próprias de triagem, sem calibração como probabilidade de sucesso, custo ou redução de emissões de CO₂.</p>
-<ol><li>Definir coordenadas, raio, carga de TI, intensidade de água e pesos.</li><li>Recortar usinas e saneamento pelo raio; encontrar fibra e subestação mais próximas; consultar transmissão, CNUC, microbacia e clima.</li><li>Converter os dados em sete notas de 0 a 100, conforme as fórmulas seguintes.</li><li>Calcular a média ponderada dos critérios e os três subtotais.</li><li>Aplicar o limite preventivo; só então classificar o resultado final.</li></ol>
-<table><thead><tr><th>Grupo</th><th>Critério / símbolo</th><th>Peso padrão</th></tr></thead><tbody>
-<tr><td rowspan="2">Recursos e impacto</td><td>Energia renovável / E</td><td>5</td></tr><tr><td>Água, bacia e clima / A</td><td>5</td></tr>
-<tr><td rowspan="3">Viabilidade estimada</td><td>Infraestrutura elétrica / T</td><td>4</td></tr><tr><td>Conectividade e mercado / C</td><td>3</td></tr><tr><td>Diligência regulatória / L</td><td>4</td></tr>
-<tr><td rowspan="2">Riscos territoriais</td><td>Restrições ambientais / U</td><td>3</td></tr><tr><td>Distância de subestação / S</td><td>3</td></tr>
-</tbody></table>
-<p class="formula">Média padrão = round((5E + 4T + 5A + 3C + 4L + 3U + 3S) / 27)<br>Score final = min(média ponderada, limite preventivo)</p>
-<p>Com pesos personalizados, o denominador é a soma dos pesos positivos ativos. Peso zero retira o critério da média; se todos forem zero, a média é zero. Os limites preventivos continuam ativos mesmo com peso ambiental zero.</p>
-<p class="formula">Recursos = round((5E + 5A) / 10)<br>Viabilidade = round((4T + 3C + 4L) / 11)<br>Riscos territoriais = round((3U + 3S) / 6)</p>
-<p>Os grupos usam os pesos escolhidos, sem receber o limite preventivo. <strong>O total não é a média simples dos três grupos</strong>, nem a média dos subtotais já arredondados. Mesmo no grupo “Riscos territoriais”, nota maior significa condição mais favorável.</p>
-<p><strong>Notação:</strong> round é arredondamento ao inteiro mais próximo (metade positiva para cima); clamp(x, a, b) limita x ao intervalo [a, b]. Distâncias estão em km. Os arredondamentos intermediários descritos fazem parte do cálculo.</p>
-</section>
-<section class="section calculation-page" id="formulas-energia-rede">
-<h2>9. Fórmulas: energia, transmissão, fibra e subestação</h2>
-<h3>Energia renovável (E)</h3>
-<p class="formula">E = clamp(round(100 × capacidade renovável no raio / carga de TI), 0, 100)</p>
-<p>Capacidade e carga em MW. Soma as potências nominais não negativas das usinas da base ANEEL dentro do raio; o total é arredondado a duas casas antes da nota. Uma oferta nominal igual à carga já gera 100 pontos. Não aplica fator de capacidade, simultaneidade, PUE, contratos ou disponibilidade de conexão. Ausência de usinas na base do recorte gera 0, sem provar inexistência física.</p>
-<h3>Transmissão oficial (T)</h3>
-<p>Menor distância ao traçado ANEEL/SIGEL dentro do raio: d ≤ 5: <strong>90</strong>; 5 &lt; d ≤ 20: <strong>75</strong>; 20 &lt; d ≤ 50: <strong>55</strong>; d &gt; 50, ainda no raio: <strong>35</strong>. Consulta completa sem linha no raio: <strong>25</strong>. Fonte parcial ou indisponível: <strong>40</strong>.</p>
-<p>Distância aproximada por projeção local sobre segmentos (111,32 km por grau de latitude; longitude corrigida pelo cosseno da latitude), arredondada a duas casas na API antes das faixas. Não mede percurso de obra, acesso à rede nem capacidade elétrica.</p>
-<h3>Conectividade e mercado (C)</h3>
-<p>Apesar do nome, o cálculo local usa proximidade de cabos e sua quantidade; não há variável econômica de mercado. Seja d a distância ao cabo mais próximo da base, inclusive fora do raio, e n o número de cabos no raio.</p>
-<p class="formula">F(d) = 100, se d ≤ 5<br>F(d) = clamp(round(95 − 15 × (d − 5)/20), 80, 95), se 5 &lt; d ≤ 25<br>F(d) = clamp(round(79 − 29 × (d − 25)/50), 50, 79), se 25 &lt; d ≤ 75<br>F(d) = clamp(round(49 − min(29, 0,3 × (d − 75))), 20, 49), se d &gt; 75<br>C = clamp(F(d) + 2 × min(n, 5), 0, 100)</p>
-<p>Sem geometria válida de cabo: F = 0 e C = 35. A distância usa segmentos e extremidades das rotas. Proximidade de cabo submarino não garante ponto de acesso, fibra terrestre, latência ou contratação.</p>
-<h3>Subestação oficial (S)</h3>
-<p>Seleciona a ONS mais próxima entre coordenadas válidas da base (tensão ≥69 kV), usando Haversine, raio terrestre de 6.371 km. Seja d a distância sem arredondamento e r o raio selecionado. Aplicar nesta ordem:</p>
-<p class="formula">S₀ = 90, se d ≤ 20<br>S₀ = clamp(round(89 − 29 × (d − 20)/30), 60, 89), se 20 &lt; d ≤ 50<br>S₀ = clamp(round(59 − 19 × (d − 50)/max(1, r − 50)), 40, 59), se 50 &lt; d ≤ r<br>S₀ = 32, nos demais casos<br>S = clamp(S₀ + bônus de tensão, 0, 100)</p>
-<p>Bônus = 5 se tensão ≥230 kV, senão 0. Sem subestação válida: S = 40, sem bônus. As faixas até 50 km prevalecem mesmo quando a instalação está fora de um raio menor. O bônus também se aplica à faixa 32. São regras do modelo, não garantia de conexão.</p>
-</section>
-<section class="section calculation-page" id="formulas-agua">
-<h2>10. Fórmulas: água, microbacia e clima</h2>
-<p class="formula">A = round(0,30 × A₀ + 0,50 × B + 0,20 × K)</p>
-<h3>Indicador base de água (A₀)</h3>
-<p>Seja i a intensidade em L/kWh e e o escore Aqueduct 4.0 da UF, na escala 0 a 5. A UF é a informada no ponto; se ausente, usa a região candidata mais próxima.</p>
-<p class="formula">Impacto WUI = round(100 × clamp(i/3, 0, 1) × (0,35 + 0,65 × clamp(e/5, 0, 1)))<br>Aptidão WUI = 100 − impacto WUI<br>A₀ = clamp(round(0,65 × aptidão WUI + 0,35 × saneamento), 0, 100)</p>
-<p>Saneamento: água e esgoto no conjunto dos registros do raio = <strong>88</strong>; apenas água = <strong>72</strong>; apenas esgoto = <strong>64</strong>; nenhum dos dois registrado = <strong>42</strong>. Não comprova atendimento do lote. Impacto WUI: 0–25 baixo; 26–50 moderado; 51–75 substancial; 76–100 alto. Aqui, menor impacto é melhor.</p>
-<p>UF sem dado Aqueduct recebe e = 0 no código atual, com indicação “Sem dado Aqueduct”. Essa reserva pode subestimar o impacto e precisa de verificação; não é evidência de baixo estresse. O indicador é inspirado no WUI, não reprodução certificada do método The Green Grid.</p>
-<h3>Microbacia (B)</h3>
-<p>Usa a classe do balanço quantitativo ANA 2020 no ponto: baixo = 90; mediano/moderado = 75; alto = 50; muito alto = 30; crítico = 15; intermitente = 20. Classe desconhecida ou fonte indisponível = 50. Quando mais de uma bacia intersecta o ponto, escolhe a menor nota das retornadas. Não calcula média das bacias do raio.</p>
-<h3>Clima (K)</h3>
-<p>T = maior T2M_MAX entre os 12 meses (°C); H = média aritmética dos 12 RH2M (%); D = quantidade de meses com PRECTOTCORR &lt; 1 mm/dia.</p>
-<p class="formula">K = round(clamp(100 − 4 × max(0, T − 28) − 3D − 0,5 × max(0, H − 75), 10, 100))</p>
-<p>Exige os 12 meses válidos de cada variável; rejeita valores de preenchimento, temperatura fora de −70 a 65 °C, precipitação fora de 0 a 100 mm/dia e umidade fora de 0 a 100%. Se inválido/ausente, K = 50. Usa a média H antes de arredondá-la para exibição. O período climatológico vem da resposta NASA; não é previsão do tempo.</p>
-<h3>Consumos anuais, separados da nota</h3>
-<p class="formula">Energia anual (GWh) = round(carga de TI em MW × 8,76, uma casa)<br>Água anual (ML) = round(i × carga de TI em MW × 1.000 × 8.760 / 1.000.000)</p>
-<p>Assume operação contínua por 8.760 h/ano. Exemplo: 50 MW e 1 L/kWh = 438 GWh/ano e 438 ML/ano. A carga aumenta volumes e muda a cobertura renovável, mas não muda diretamente a nota WUI. Bacia e clima alteram A, sem alterar automaticamente i ou o volume anual.</p>
-</section>
-<section class="section calculation-page" id="limites-e-exemplo">
-<h2>11. Ambiente, limites e exemplo completo</h2>
-<table><thead><tr><th>Situação no ponto</th><th>Ambiente U</th><th>Diligência L</th><th>Teto final</th></tr></thead><tbody>
-<tr><td>Interseção em UC de proteção integral</td><td>15</td><td>20</td><td>39</td></tr>
-<tr><td>Interseção em outra UC, sem proteção integral</td><td>40</td><td>40</td><td>59</td></tr>
-<tr><td>Sem interseção CNUC, consulta completa</td><td>70</td><td>60</td><td>100 se as quatro fontes estão OK; senão 79</td></tr>
-<tr><td>CNUC incompleto, sem interseção conhecida</td><td>38 se reserva municipal indica proteção integral; senão 58</td><td>60</td><td>79</td></tr>
-</tbody></table>
-<p>Uma interseção conhecida prevalece mesmo com consulta parcial. UCs apenas próximas, dentro do raio mas sem conter o ponto, não acionam os tetos de 39/59. Os tetos têm precedência: proteção integral, outra UC, incompletude, sem limitação adicional. São precauções próprias do MVP, não proibições legais nem probabilidades.</p>
-<p>“Quatro fontes OK” significa status <code>ok</code> em CNUC, transmissão, ANA e NASA. Não garante cobertura de todos os riscos ou atualidade de todos os dados. Por exemplo, uma classe ANA desconhecida pode ter status OK e receber 50; falta de geometria visual da bacia não invalida seus atributos. As reservas ONS, fibra, saneamento e Aqueduct não acionam, por si, o teto de 79.</p>
-<h3>Exemplo didático reproduzível</h3>
-<p>Considere 50 MW de carga, 1 L/kWh, UF SP (Aqueduct 1,137287117), ≥50 MW renováveis no raio, ausência de saneamento registrado, microbacia “baixo”, T = 38,45 °C, H = 81,1%, D = 0; linha a 2 km, cabo a 17,1 km e pelo menos cinco cabos no raio; subestação a 10 km com tensão &lt;230 kV. Ponto em proteção integral e quatro consultas OK. É um cenário didático, não laudo de um imóvel.</p>
-<p class="formula">Impacto WUI = 17; aptidão WUI = 83<br>A₀ = round(0,65 × 83 + 0,35 × 42) = 69<br>K = round(100 − 4 × 10,45 − 0,5 × 6,1) = 55<br>A = round(0,30 × 69 + 0,50 × 90 + 0,20 × 55) = 77<br>E = 100; T = 90; C = 86 + 10 = 96; L = 20; U = 15; S = 90<br>Média = round((500 + 360 + 385 + 288 + 80 + 45 + 270) / 27)<br>Média = round(1.928 / 27) = 71<br>Score final = min(71, 39) = 39 → Alto risco</p>
-<p>Subtotais: Recursos = 89; Viabilidade = 66; Riscos territoriais = 53. As notas favoráveis de energia e rede não anulam a interseção conhecida.</p>
-</section>
-<section class="section calculation-page" id="auditoria-modelo">
-<h2>12. Ranking, dados ausentes e auditoria</h2>
-<h3>Por que ranking e resultado local podem ser diferentes?</h3>
-<p>O ranking compara candidatos gerados pelas bases municipais de saneamento e geração. Usa as notas de <code>region-options.js</code>, substitui água pela aptidão WUI da UF e acrescenta ambiente municipal e subestação ONS. Aplica a média dos sete critérios, mas não as consultas detalhadas nem os tetos territoriais da análise local.</p>
-<p>No ranking, energia/rede são indicadores de capacidade municipal ou estadual; conectividade usa fibra ou reserva estimada; diligência também é estimada. A análise Local recalcula recursos pelo raio, substitui transmissão e diligência, combina água/bacia/clima e cruza os polígonos. A classificação do ranking não deve ser apresentada como validação detalhada do ponto.</p>
-<h3>Ausência, indisponibilidade e atualização</h3>
-<ul><li><strong>Consulta completa sem resultado:</strong> pode pontuar ausência no recorte (por exemplo, transmissão 25). Não equivale a uma fonte que falhou.</li><li><strong>Consulta em andamento, parcial ou indisponível:</strong> usa as reservas descritas e limita a média a 79, salvo limite ambiental menor. A fonte e o estado ficam visíveis.</li><li><strong>Nova tentativa no mesmo local:</strong> o cliente preserva um resultado anterior com status OK se a atualização falhar e o marca parcial. Alertas ambientais conhecidos nesse resultado continuam válidos. Isso não representa histórico permanente; novas tentativas e seleções dependem do estado/cache corrente.</li><li><strong>Mudança de ponto ou raio:</strong> respostas da seleção anterior são descartadas. Fontes completas ficam em cache por até uma hora; a data da consulta não é a data de atualização da base oficial.</li><li><strong>Mapa:</strong> desligar uma camada apenas altera a visualização, não os pesos ou critérios do cálculo. Exibir menos geometrias não reduz a lista de resultados usada pelo motor.</li></ul>
-<h3>O que guardar para reproduzir um resultado</h3>
-<p>Registrar coordenadas, raio, UF utilizada, carga de TI, L/kWh, sete pesos, versão do código, notas individuais, média, teto aplicado, resultado final e status de cada fonte. Guardar também edição/data dos snapshots e respostas oficiais consultadas: serviços remotos podem mudar, mesmo com o mesmo ponto.</p>
-<table><thead><tr><th>Parte verificável</th><th>Implementação</th></tr></thead><tbody>
-<tr><td>Catálogo, pesos, médias e grupos</td><td>evaluation-criteria.js</td></tr>
-<tr><td>Recorte, energia, fibra, subestação e agregação local</td><td>site-analysis.js</td></tr>
-<tr><td>WUI e coeficientes Aqueduct por UF</td><td>wui-model.js</td></tr>
-<tr><td>Interseções, bacia, clima, diligência e tetos</td><td>territorial-model.js</td></tr>
-<tr><td>Fontes, edições, limites e distâncias de transmissão</td><td>server/territory-service.js</td></tr>
-<tr><td>Atualização, cache e seleção ativa</td><td>territorial-client.js</td></tr>
-<tr><td>Ranking e orquestração</td><td>region-options.js e app.js</td></tr>
-</tbody></table>
-<p><strong>Limite de interpretação:</strong> os pesos e cortes são escolhas do MVP, ainda sem validação empírica como modelo preditivo. Ambiente e diligência compartilham a interseção CNUC; esse efeito é intencional, não são evidências independentes. Revisões das fórmulas devem atualizar este manual, o PDF e os testes correspondentes.</p>
-</section>
-      <footer>
-        DataTerra · Como calculamos · Metodologia do MVP, outubro de 2026.
-      </footer>
+      <section class="section chapter" id="water">
+        <h2>4. Pillar one · Water stress</h2>
+        <p class="question">Question: how favourable are the implemented water-use, basin-balance and climate indicators at this location?</p>
+        <h3>Inputs actually consumed</h3>
+        <dl class="source-list">
+          <div><dt><a href="https://www.wri.org/data/aqueduct-global-maps-40-data">WRI Aqueduct 4.0</a> · non-governmental</dt><dd>The code stores state-level baseline water-stress coefficients, identified as <code>province baseline bws Tot</code>, on a 0–5 scale, without acquisition metadata. It does not make a new Aqueduct query for each site. This is a broad state proxy, not a site or abstraction-basin measurement. WRI is an independent research organisation, not a Brazilian water authority.</dd></div>
+          <div><dt>Legacy <a href="https://www.gov.br/cidades/pt-br/acesso-a-informacao/acoes-e-programas/saneamento/snis">SNIS water and sewerage</a> records · government-origin attribution, limited payload provenance</dt><dd>The application consumes <code>data/water.json</code>, derived from the local <code>Planilha_Pesquisa_Simplificada_AE2021.xls</code> input. Records contain municipality/state, provider, service labels, a population field and associated municipal coordinates, but no acquisition date or source-edition field. The institutional reference is not a verified download URL for that workbook. Only service presence in the radius enters the local service indicator; this is not the current SINISA 2025 dataset.</dd></div>
+          <div><dt><a href="https://www.snirh.gov.br/arcgis/rest/services/INDE/Camadas/MapServer/47">ANA/SNIRH quantitative water balance, layer 47</a> · Brazilian governmental</dt><dd>A spatial query intersects the selected point with the <strong>2020</strong> basin-balance layer. Consumed attributes include <code>COBACIA</code>, <code>UGRH</code>, <code>NORIOCOMP</code>, <code>CLASSE</code>, <code>BAL_PERC</code>, <code>DISP_Q95</code> and <code>DEM_ACM</code>. The class drives B; the basin code, region, river and commitment percentage provide context. The query date is not a new reference year for the balance.</dd></div>
+          <div><dt><a href="https://power.larc.nasa.gov/docs/services/api/temporal/climatology/">NASA POWER / MERRA-2 climatology</a> · United States governmental</dt><dd>The point API provides monthly <code>T2M_MAX</code> (°C), <code>RH2M</code> (%) and <code>PRECTOTCORR</code> (mm/day). The response's climatological period and query date are reported separately. This is a gridded climatology, not today's weather, a station on the property or a cooling design calculation. INMET station series are not integrated.</dd></div>
+        </dl>
+        <h3>Water criterion A</h3>
+        <div class="formula">
+          <span class="line">A = round(0.30 × A₀ + 0.50 × B + 0.20 × K)</span>
+          <span class="line">Water stress pillar = A, while its weight is positive</span>
+        </div>
+        <p>A₀ combines the WUI-inspired suitability indicator and service presence; B represents the ANA basin class; K is the climate heuristic. A higher A remains more favourable, despite the pillar's “stress” name.</p>
+        <h3>WUI-inspired impact and base indicator A₀</h3>
+        <p>Let i be water-use intensity in L/kWh and e the stored Aqueduct stress coefficient for the state. The local calculation uses the state supplied with the point, or the nearest candidate region's state if none was supplied. This is not a point-in-state-boundary validation.</p>
+        <div class="formula">
+          <span class="line">WUI impact = round(100 × clamp(i / 3, 0, 1)</span>
+          <span class="line">                   × (0.35 + 0.65 × clamp(e / 5, 0, 1)))</span>
+          <span class="line">WUI suitability = 100 − WUI impact</span>
+          <span class="line">A₀ = clamp(round(0.65 × WUI suitability</span>
+          <span class="line">                 + 0.35 × service indicator), 0, 100)</span>
+        </div>
+        <table>
+          <caption>Service indicator: presence across the records in the radius</caption>
+          <thead><tr><th scope="col">Recorded services</th><th scope="col">Value</th></tr></thead>
+          <tbody>
+            <tr><td>Water and sewerage, not necessarily in the same record</td><td>88</td></tr>
+            <tr><td>Water only</td><td>72</td></tr>
+            <tr><td>Sewerage only</td><td>64</td></tr>
+            <tr><td>Neither recorded</td><td>42</td></tr>
+          </tbody>
+        </table>
+        <p>Water and sewerage points use municipal reference coordinates; they are not mapped intakes, treatment works, delivery connections or evidence of supply at the property. Provider population fields do not establish spare industrial capacity and may overlap across records.</p>
+        <p>The intensity presets are 0.3, 1.0 and 2.5 L/kWh. The calculation constrains i to 0–5 L/kWh; its use term saturates at i = 3. WUI impact classes are 0–25 low, 26–50 moderate, 51–75 substantial and 76–100 high. <strong>These are impact classes, not pillar or overall suitability classes.</strong></p>
+        <p class="warning">An unknown state has e = 0 in the current code and is labelled as missing Aqueduct data. This fallback can understate impact; it is not evidence of low water stress. The indicator is inspired by The Green Grid WUI and WRI Aqueduct, not a certified reproduction of either methodology.</p>
+        <h3>ANA basin component B</h3>
+        <table>
+          <caption>Class labels returned by the 2020 layer and their model values</caption>
+          <thead><tr><th scope="col">Class meaning (source label)</th><th scope="col">B</th></tr></thead>
+          <tbody>
+            <tr><td>Low (<code>baixo</code>)</td><td>90</td></tr>
+            <tr><td>Medium/moderate (<code>mediano</code> / <code>moderado</code>)</td><td>75</td></tr>
+            <tr><td>High (<code>alto</code>)</td><td>50</td></tr>
+            <tr><td>Very high (<code>muito alto</code>)</td><td>30</td></tr>
+            <tr><td>Critical (<code>crítico</code>)</td><td>15</td></tr>
+            <tr><td>Intermittent (<code>intermitente</code>)</td><td>20</td></tr>
+            <tr><td>Unknown class, no result or unavailable source</td><td>50</td></tr>
+          </tbody>
+        </table>
+        <p>If more than one basin intersects the point, the returned basin with the lowest model value is selected. No mean is calculated over all basins in the radius. The 2020 classification is screening context, not a current abstraction entitlement, a flow measurement or an allocation to the proposed facility. The point's basin may differ from the basin of an eventual water-supply intake.</p>
+        <h3>Climate component K</h3>
+        <p>Let θ be the highest monthly <code>T2M_MAX</code> among the 12 months, H the arithmetic mean of the 12 <code>RH2M</code> values, and D the number of months with <code>PRECTOTCORR &lt; 1 mm/day</code>. Here θ denotes temperature; T elsewhere denotes transmission.</p>
+        <div class="formula">
+          <span class="line">K = round(clamp(100 − 4 × max(0, θ − 28)</span>
+          <span class="line">                − 3D − 0.5 × max(0, H − 75), 10, 100))</span>
+        </div>
+        <p>All 12 months must be valid for each variable. Fill values and temperatures outside −70 to 65 °C, precipitation outside 0–100 mm/day or humidity outside 0–100% are rejected. Missing or invalid climate data give K = 50. H enters the formula before its display rounding. These thresholds are product heuristics, not engineering design limits.</p>
+        <h3>Annual consumption: a separate scenario estimate</h3>
+        <div class="formula">
+          <span class="line">Annual energy (GWh) = round(IT load in MW × 8.76, 1 decimal)</span>
+          <span class="line">Annual water (ML) = round(i × IT load in MW</span>
+          <span class="line">                          × 1,000 × 8,760 / 1,000,000)</span>
+        </div>
+        <p>These assume continuous operation for 8,760 hours/year; the calculation constrains IT load to 1–500 MW. At 50 MW and 1 L/kWh, the estimates are 438 GWh/year and 438 ML/year. They do not add PUE or infer a cooling technology. Load changes volumes and renewable coverage, but not WUI impact directly. Basin and climate components change A without automatically changing i or annual water volume.</p>
+      </section>
+
+      <section class="section chapter" id="energy">
+        <h2>5. Pillar two · Energy capacity</h2>
+        <p class="question">Question: what do nearby registered renewable generation and mapped electrical infrastructure indicate for initial screening?</p>
+        <h3>Inputs actually consumed</h3>
+        <dl class="source-list">
+          <div><dt><a href="https://dadosabertos.aneel.gov.br/dataset/siga-sistema-de-informacoes-de-geracao-da-aneel">ANEEL generation inventory / SIGA</a> · Brazilian governmental</dt><dd>The application uses <code>data/energy.json</code>, including plant name, type, nominal capacity in MW, municipality/state and coordinates. The current SIGA ingestion code selects renewable plants in operation and converts <code>MdaPotenciaOutorgadaKw</code> to MW. However, the published legacy payload has unpopulated phase and source-record-date fields and no acquisition date. The existence of the newer ingestion routine does not prove that its filters were applied to this snapshot, or that every published plant is currently operating.</dd></div>
+          <div><dt><a href="https://sigel.aneel.gov.br/arcgis/rest/services/PORTAL/Transmiss%C3%A3o/MapServer/1">ANEEL/SIGEL transmission, attributed to ONS</a> · governmental publication of sector data</dt><dd>The territorial service reads a versioned snapshot of <strong>1,817 line geometries</strong>, acquired on 20 October 2026, rather than downloading the live SIGEL inventory for every point. Geometry and line name are used for proximity and display. Acquisition time is not a certified update date for every asset.</dd></div>
+          <div><dt><a href="https://dados.ons.org.br/dataset/subestacao">ONS substation inventory</a> · primary sector source, not a government agency</dt><dd>The versioned payload contains <strong>1,684 records</strong> with coordinates and voltage of at least 69 kV. It includes identifiers, names, operator, voltage, coordinates and subsystem. Multiple voltage/bus records may refer to the same physical substation; this is not a count of 1,684 distinct installations. Its coverage is not all distribution infrastructure. The published array has no source-edition or acquisition-date field.</dd></div>
+        </dl>
+        <div class="formula">
+          <span class="line">Energy capacity = round((5E + 4T + 3S) / 12)</span>
+          <span class="line">With custom weights, use only active E, T and S weights.</span>
+        </div>
+        <h3>Renewable generation E</h3>
+        <div class="formula">
+          <span class="line">E = clamp(round(100 × renewable MW in radius / IT load MW),</span>
+          <span class="line">          0, 100)</span>
+        </div>
+        <p>Sum the non-negative nominal capacities of valid plant records in the radius; round the total to two decimal places before calculating E. Nominal capacity equal to the IT load already yields 100. No plant records in the selected inventory area yield zero, which does not prove that no generation exists physically.</p>
+        <p><strong>MW are not available grid-access capacity.</strong> E does not model capacity factors, hourly coincidence, firm output, contracts, PUE, transmission constraints or a reserved connection. Nearby renewable generation is not proof that the facility will consume that generation.</p>
+        <h3>Transmission proximity T</h3>
+        <p>For a complete transmission response, d is the shortest distance to a line in the selected radius. The service rounds this distance to two decimal places before the following thresholds:</p>
+        <table>
+          <thead><tr><th scope="col">Transmission result</th><th scope="col">T</th></tr></thead>
+          <tbody>
+            <tr><td>d ≤ 5 km</td><td>90</td></tr>
+            <tr><td>5 &lt; d ≤ 20 km</td><td>75</td></tr>
+            <tr><td>20 &lt; d ≤ 50 km</td><td>55</td></tr>
+            <tr><td>d &gt; 50 km, still within the radius</td><td>35</td></tr>
+            <tr><td>Complete response with no line in the radius</td><td>25</td></tr>
+            <tr><td>Partial, loading or unavailable source</td><td>40</td></tr>
+          </tbody>
+        </table>
+        <p>Distance is approximated on line segments, using 111.32 km per degree of latitude and a cosine correction for longitude. It is not a feasible connection route, an easement assessment or an electrical power-flow study. The calculation does not extract available connection MW from SIGEL popup text.</p>
+        <h3>Substation proximity S</h3>
+        <p>Select the nearest valid ONS record in the entire payload, not only those inside the radius. Use the unrounded Haversine distance d (Earth radius 6,371 km) and selected radius r. Apply these conditions in order:</p>
+        <div class="formula">
+          <span class="line">S₀ = 90                                      if d ≤ 20</span>
+          <span class="line">S₀ = clamp(round(89 − 29 × (d − 20) / 30),</span>
+          <span class="line">           60, 89)                      if 20 &lt; d ≤ 50</span>
+          <span class="line">S₀ = clamp(round(59 − 19 × (d − 50) / max(1, r − 50)),</span>
+          <span class="line">           40, 59)                       if 50 &lt; d ≤ r</span>
+          <span class="line">S₀ = 32                                      otherwise</span>
+          <span class="line">S = clamp(S₀ + voltage bonus, 0, 100)</span>
+        </div>
+        <p>The bonus is 5 for voltage ≥230 kV, otherwise zero. It uses the selected record's voltage, not the maximum voltage of a deduplicated physical installation. If no valid substation is available, S = 40 without a bonus. The ≤20 km and ≤50 km conditions take precedence even when the substation lies outside a smaller selected radius; the voltage bonus also applies to S₀ = 32.</p>
+        <p class="warning">Neither substation proximity nor its voltage demonstrates spare capacity, bay availability, redundancy, connection cost or delivery date. A grid-access study and the applicable operator/distributor process remain necessary. Public access-capacity studies exist, but they are not consumed by these formulas.</p>
+      </section>
+
+      <section class="section chapter" id="connectivity">
+        <h2>6. Pillar three · Connectivity</h2>
+        <p class="question">Question: how close are the cable routes represented in the current inventory?</p>
+        <h3>Input actually consumed</h3>
+        <p>The application consumes <code>data/cables.json</code>, normalised from the repository's <code>all_cables.json</code> source. The inventory is attributed to <strong><a href="https://www2.telegeography.com/submarine-cable-faqs-frequently-asked-questions">TeleGeography</a>, a non-governmental commercial source</strong>, and includes cable name, owners, reported year, length and route geometry. This publisher reference is not a versioned download URL for the shipped payload. The payload has no acquisition date or source-edition field and does not establish each route's current commercial status. A reported cable year is not a dataset refresh date.</p>
+        <p>Route geometry drives proximity; names and ownership provide context. Despite the legacy criterion name referring to “connectivity and market”, <strong>the local formula contains no economic market-demand variable</strong>. It does not consume Anatel backhaul or IX.br interconnection data.</p>
+        <h3>Cable proximity C</h3>
+        <p>Let d be the unrounded distance to the nearest valid cable geometry, including cables outside the selected radius. Let n be the number of cable records whose nearest geometry lies within the radius.</p>
+        <div class="formula">
+          <span class="line">F(d) = 100                                   if d ≤ 5</span>
+          <span class="line">F(d) = clamp(round(95 − 15 × (d − 5) / 20),</span>
+          <span class="line">             80, 95)                     if 5 &lt; d ≤ 25</span>
+          <span class="line">F(d) = clamp(round(79 − 29 × (d − 25) / 50),</span>
+          <span class="line">             50, 79)                    if 25 &lt; d ≤ 75</span>
+          <span class="line">F(d) = clamp(round(49 − min(29, 0.3 × (d − 75))),</span>
+          <span class="line">             20, 49)                         if d &gt; 75</span>
+          <span class="line">C = clamp(F(d) + 2 × min(n, 5), 0, 100)</span>
+        </div>
+        <p>If no valid cable geometry is found, F = 0 and C = 35; the bonus is not applied in that case. With a positive criterion weight, the Connectivity pillar is exactly C. Setting the weight to zero leaves it unevaluated.</p>
+        <p>Distance considers route segments and endpoints, with a local planar approximation for segments and Haversine point distances. A displayed distance rounded to one decimal place is not the input used for the thresholds. Each cable record counts once; the quantity bonus is not a count of independent ducts, carriers or delivery points.</p>
+        <p class="warning">A nearby submarine cable is not terrestrial fibre available for contract at the site. Route proximity and cable count do not prove a landing/access point, usable capacity, latency, commercial availability or physical redundancy. Those require provider quotations, confirmed delivery points and route-level due diligence.</p>
+      </section>
+
+      <section class="section chapter" id="territorial">
+        <h2>7. Pillar four · Social/territorial risk</h2>
+        <p class="question">Question: what conservation overlaps and preliminary regulatory questions are visible in the available records?</p>
+        <h3>Inputs actually consumed</h3>
+        <p>The point analysis queries the governmental <a href="https://geoservicos.inde.gov.br/geoserver/MMA/ows?service=WFS&amp;version=2.0.0&amp;request=GetCapabilities">MMA/CNUC WFS</a>, using <code>MMA:cnuc_26_07_31</code>, the declared <strong>31 July 2026</strong> edition. It intersects the point with published conservation-unit polygons and identifies units within the radius.</p>
+        <p>Consumed information includes unit name, group, category, administrative sphere, managing organisation, management-plan indication and polygon-quality field. The geometry establishes whether the point is inside a unit; the declared protection group selects the strict-protection case. A nearby unit outside the point does not by itself trigger that intersection case.</p>
+        <p>When the point query is not complete, the environmental fallback uses <code>data/environmental-risk.json</code>, derived from the <a href="https://dados.mma.gov.br/dataset/44b6dc8a-dc82-4a84-8d95-1b0da7c85dac/resource/72dd3d2d-3cca-4b97-b382-a1c90531e379/download/cnuc_2026_07.csv">MMA/CNUC July 2026 municipal CSV</a>, without an acquisition date in the published array. Its strict-protection flag is matched by municipality name/state using the <strong>nearest municipal reference point</strong>, which can belong to a different municipality from the actual site. This is not a polygon intersection or a legal determination. The payload's Indigenous-land and quilombola fields are null, not evidence of absence; these sources are not integrated.</p>
+        <h3>Conservation U and preliminary regulatory diligence L</h3>
+        <table>
+          <thead><tr><th scope="col">Evidence at the point</th><th scope="col">U</th><th scope="col">L</th></tr></thead>
+          <tbody>
+            <tr><td>Known overlap with a strict-protection conservation unit</td><td>15</td><td>20</td></tr>
+            <tr><td>Known overlap with another conservation unit, with no strict-protection overlap</td><td>40</td><td>40</td></tr>
+            <tr><td>Complete CNUC response, no point overlap found</td><td>70</td><td>60</td></tr>
+            <tr><td>Incomplete CNUC response, no known point overlap</td><td>38 if the municipal fallback flags strict protection; otherwise 58</td><td>60</td></tr>
+          </tbody>
+        </table>
+        <p>A known overlap takes precedence even if the query is partial. Nearby units are still relevant evidence for due diligence, but do not change these point-overlap values. Missing municipal information follows the 58 fallback; it does not establish absence of restrictions.</p>
+        <div class="formula">
+          <span class="line">Social/territorial risk = round((4L + 3U) / 7)</span>
+          <span class="line">With custom weights, use only active L and U weights.</span>
+        </div>
+        <p>L and U share CNUC intersection evidence. Their combination is an existing modelling choice, not two independent confirmations. Higher values mean relatively more favourable screening conditions, not a probability of approval. This pillar has no direct measurement of social vulnerability, community impacts or the full set of territorial rights.</p>
+        <h3>What the regulatory guidance means</h3>
+        <ul>
+          <li>For a conservation-unit overlap, consult the creation act, category, management plan and competent manager under <a href="https://www.planalto.gov.br/ccivil_03/leis/l9985.htm">Law 9,985/2000 (SNUC)</a>.</li>
+          <li>For a federal conservation unit other than an Environmental Protection Area (APA), verify federal licensing competence under <a href="https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp140.htm">Complementary Law 140/2011</a>. The application raises a question for confirmation; it does not issue a binding competence ruling.</li>
+          <li>Confirm activity classification, size, associated works, local land use and the applicable licensing procedure, including <a href="https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15190.htm">Law 15,190/2025</a> and competent state/municipal rules.</li>
+          <li>For direct abstraction or discharge, verify water-use authorisation or a lawful exemption with the responsible authority; see <a href="https://www.gov.br/ana/pt-br/regulacao/principais-servicos/outorgas-emitidas">ANA's water-use authorisation information</a>. A modelled water volume does not establish an entitlement.</li>
+        </ul>
+        <p>The implemented guidance was revised on 20 October 2026; that date is not a current legal opinion. The engine does not ingest all legislation or automatically determine approval, exemption, applicable zoning or the final licensing authority.</p>
+        <p class="warning"><strong>No CNUC overlap does not mean clearance.</strong> FUNAI and INCRA territories, permanent preservation areas, conservation buffer zones, embargoes, physical hazards and detailed local rules are not geometrically covered by this version. Protected-area data depend on the declarations and polygon quality of the source. The application evaluates a point and a radius, not the parcel, access roads, transmission works, water intakes or other associated interventions.</p>
+      </section>
+
+      <section class="section chapter" id="coverage">
+        <h2>8. Coverage, distance and freshness</h2>
+        <h3>What a location and a radius represent</h3>
+        <p>Municipal reference coordinates come from the non-official <a href="https://github.com/kelvins/municipios-brasileiros">kelvins/Municipios-Brasileiros repository</a>. The published payload contains name, state, latitude and longitude, without an IBGE identifier, boundary geometry, source version or acquisition date. It supports search, geolocation and nearest-reference fallbacks, not authoritative municipal containment or parcel boundaries. A circle around a point is a search window, not an impact footprint, service area or permitted resource catchment.</p>
+        <p>Point-to-point distances for plants, service records, municipal references and ONS substations use Haversine with an Earth radius of 6,371 km. Transmission and conservation-boundary distances use local segment projection with 111.32 km per latitude degree and a longitude cosine correction. Cable proximity also considers endpoints. These approximations do not include terrain, buildable corridors, road routing or cadastral precision.</p>
+        <h3>Analytical coverage is not map display coverage</h3>
+        <ul>
+          <li>CNUC queries are limited to four pages of up to 100 features. Reaching 400 without evidence that the list has ended leaves coverage partial. Invalid or missing expected geometry also prevents a complete response.</li>
+          <li>The map displays at most 30 nearby conservation units and 40 nearby transmission lines, with simplified geometry. The proximity/intersection evaluation uses the original retrieved geometries, not just the visible subset.</li>
+          <li>The basin on the map is the selected point's basin, not all basins in the radius. Failure to obtain its display geometry does not invalidate already retrieved basin attributes.</li>
+          <li>The climate marker represents the gridded reference returned by NASA, not a meteorological station. Display geometry may also be omitted to keep a response within its size limit.</li>
+        </ul>
+        <h3>Source states and retained warnings</h3>
+        <table>
+          <thead><tr><th scope="col">State</th><th scope="col">Interpretation</th></tr></thead>
+          <tbody>
+            <tr><td>Complete / <code>ok</code></td><td>The implemented query completed under its checks. This is not certification of the source's accuracy, recency or legal completeness.</td></tr>
+            <tr><td>No data / <code>no-data</code></td><td>The query returned no applicable result. It is distinct from a failed request; the criterion's documented fallback still applies where defined.</td></tr>
+            <tr><td>Loading, partial or unavailable</td><td>Evidence is incomplete. The applicable fallback is used, and the incomplete-coverage warning remains. A retained known overlap continues to matter.</td></tr>
+          </tbody>
+        </table>
+        <p>“Four sources complete” refers only to <strong>CNUC, transmission, ANA basin and NASA climate</strong>. It does not validate the old generation, sanitation, cable, municipal or Aqueduct payloads, nor fill missing territorial layers. An unknown ANA class can arrive in an otherwise complete response and still receive B = 50.</p>
+        <p>Changing the point or radius changes the active query selection; late responses for an old selection are ignored. Successful results can be cached for up to one hour. The refresh control requests another application query, but does not rebuild the versioned transmission inventory or guarantee bypass of the server cache.</p>
+        <p>On a retry at the same point and radius, an immediately previous <code>ok</code> source result can be retained if the replacement fails; it is marked partial with a warning. Retained values are not a permanent history. Once marked partial, the record is not guaranteed the same preservation on another retry. This implementation detail must not be interpreted as durable evidence storage.</p>
+        <h3>Source year, query time and publication date differ</h3>
+        <p>Record the reference period of the subject matter, the publisher's edition and the acquisition/query timestamp separately. A query made today can still return ANA 2020 balance classes, a July 2026 CNUC layer or a stored transmission snapshot. Legacy payloads without adequate acquisition/version metadata must be treated as having limited provenance, not silently labelled current.</p>
+      </section>
+
+      <section class="section chapter" id="regional">
+        <h2>9. Regional comparison is not a point study</h2>
+        <p>The regional comparison uses candidates built from municipal sanitation and generation records. It applies the same four-pillar membership and within-pillar weighting, but <strong>its input indicators are not all the same as the detailed local indicators</strong>.</p>
+        <table>
+          <thead><tr><th scope="col">Pillar</th><th scope="col">Regional comparison</th><th scope="col">Detailed local analysis</th></tr></thead>
+          <tbody>
+            <tr><td>Water stress</td><td>State-level WUI suitability replaces the regional water proxy.</td><td>A combines WUI/service presence, ANA point-basin class and NASA climatology.</td></tr>
+            <tr><td>Energy capacity</td><td>E and T are municipal/state generation-capacity proxies; S uses the ONS substation inventory.</td><td>E uses nominal generation in the radius; T uses transmission geometry; S uses the nearest ONS record.</td></tr>
+            <tr><td>Connectivity</td><td>Cable proximity where available, with population-based or fixed fallback values depending on candidate type.</td><td>Nearest-cable F(d), the in-radius quantity bonus and the documented no-geometry fallback.</td></tr>
+            <tr><td>Social/territorial risk</td><td>Service-presence/fixed regulatory proxy and municipal conservation flag; no CNUC point intersection.</td><td>L and U use the point's CNUC result, with the municipal environmental fallback if needed.</td></tr>
+          </tbody>
+        </table>
+        <p>Regional energy and transmission indicators are two transformations of generation capacity, not independent evidence of grid access. Candidates inferred from generation rather than sanitation have their own fixed/proxy rules. Regional water does not include the local service, basin or climate composition. These differences are intentional descriptions of the retained implementation, not methodological equivalence.</p>
+        <h3>The retained regional proxy formulas</h3>
+        <p>For auditability, let m be the sum of recorded renewable MW under the candidate's exact municipality/state key, s the corresponding state sum, and p the maximum population field among its sanitation records, not a sum of residents served. Define the logarithmic transformation R:</p>
+        <div class="formula">
+          <span class="line">R(x; M, a, b) = clamp(round(a + (b − a)</span>
+          <span class="line">                × log10(1 + max(0, x)) / log10(1 + M)),</span>
+          <span class="line">                a, b)</span>
+        </div>
+        <p>Missing or invalid numeric inputs are treated as zero; R then returns a. These are proxy scales, not measured service or connection capacities.</p>
+        <h4>Candidates backed by sanitation records</h4>
+        <div class="formula">
+          <span class="line">E = R(m; 1000, 55, 100) if m &gt; 0;</span>
+          <span class="line">    otherwise R(s; 1200, 35, 70)</span>
+          <span class="line">T = R(m; 1000, 50, 85) if m &gt; 0;</span>
+          <span class="line">    otherwise R(s; 2500, 45, 70)</span>
+          <span class="line">C = F(d) with a valid cable; otherwise R(p; 12000000, 42, 100)</span>
+          <span class="line">L = clamp(round(58 + 0.25q), 60, 82)</span>
+        </div>
+        <p>F(d) is the cable-distance function in chapter 6, <strong>without the local cable-count bonus</strong> and without a radius exclusion. The service proxy q is 78 when both separate exact source labels <code>Água</code> and <code>Esgoto</code> occur, 70 for water only, 64 for sewerage only, and 55 otherwise. Unlike local service parsing, the regional parser does not split a single combined <code>Água e Esgoto</code> label: that label alone follows q = 55. This retained parsing limitation can change L; it is not evidence of a real service difference.</p>
+        <h4>Candidates inferred from generation only</h4>
+        <p>These are created for municipality/state keys with valid energy records but no sanitation-backed candidate. Their coordinates are the arithmetic mean of plant coordinates, not a capacity-weighted centre. Sanitation-backed candidates likewise average the coordinates of their records.</p>
+        <div class="formula">
+          <span class="line">E = max(60, R(m; 1000, 60, 100), min(100, round(m / 8)))</span>
+          <span class="line">T = R(m; 1000, 55, 88)</span>
+          <span class="line">C = F(d) with a valid cable; otherwise 52</span>
+          <span class="line">L = 70</span>
+        </div>
+        <p>For both candidate types, <strong>A is replaced by 100 − WUI impact</strong>; it is not blended with the candidate's original water/service proxy. U is 38 when the matching candidate municipality's fallback flags strict protection, otherwise 58, including missing records. S uses the same nearest-ONS-record formula and selected radius as chapter 5. These seven effective values are then composed within the four pillars only.</p>
+        <p>Selecting a candidate triggers the point-based analysis; values can change when radius-specific resources and territorial queries replace the regional proxies. Do not present a regional comparison row as a completed site investigation.</p>
+        <p class="note"><strong>Ordering is explicit:</strong> choose one pillar in the comparison control; the default is Water stress. The other three values remain separate. There is no total, overall class or cross-pillar tie-break based on a hidden total. A disabled pillar is unevaluated, not a zero-value or high-suitability candidate.</p>
+        <p>For a meaningful comparison, keep the scenario assumptions and weights consistent, identify the selected sorting pillar, and distinguish regional proxies from detailed point results in any exported notes or presentation.</p>
+      </section>
+
+      <section class="section chapter" id="example">
+        <h2>10. Worked example</h2>
+        <p>This is a reproducible teaching scenario, not an assessment of a real property. Assume the following point-analysis inputs:</p>
+        <ul>
+          <li>50 MW IT load; i = 1 L/kWh; São Paulo state, e = 1.137287117.</li>
+          <li>At least 50 MW of nominal renewable capacity in the radius; no recorded water/sewerage service in the radius.</li>
+          <li>ANA basin class “low”; θ = 38.45 °C, H = 81.1%, D = 0.</li>
+          <li>Transmission line at 2 km; cable at 17.1 km, with at least five cable records in the radius.</li>
+          <li>Substation at 10 km with voltage below 230 kV.</li>
+          <li>Known strict-protection conservation-unit overlap; all four territorial queries complete.</li>
+        </ul>
+        <div class="formula">
+          <strong class="formula-label">Water calculation</strong>
+          <span class="line">WUI impact = 17; WUI suitability = 83</span>
+          <span class="line">A₀ = round(0.65 × 83 + 0.35 × 42) = 69</span>
+          <span class="line">K = round(100 − 4 × 10.45 − 0.5 × 6.1) = 55</span>
+          <span class="line">A = round(0.30 × 69 + 0.50 × 90 + 0.20 × 55) = 77</span>
+        </div>
+        <div class="formula">
+          <strong class="formula-label">The seven retained criterion values</strong>
+          <span class="line">E = 100; T = 90; A = 77; C = 86 + 10 = 96</span>
+          <span class="line">L = 20; U = 15; S = 90</span>
+        </div>
+        <table>
+          <caption>Four separate results with default weights</caption>
+          <thead><tr><th scope="col">Pillar</th><th scope="col">Calculation</th><th scope="col">Value</th></tr></thead>
+          <tbody>
+            <tr><td>Water stress</td><td>A</td><td><strong>77</strong></td></tr>
+            <tr><td>Energy capacity</td><td>round((500 + 360 + 270) / 12)</td><td><strong>94</strong></td></tr>
+            <tr><td>Connectivity</td><td>C</td><td><strong>96</strong></td></tr>
+            <tr><td>Social/territorial risk</td><td>round((80 + 45) / 7)</td><td><strong>18</strong></td></tr>
+          </tbody>
+        </table>
+        <p>There is deliberately no fifth number and no overall classification. The known conservation overlap remains a warning and a due-diligence requirement. Favourable energy or connectivity does not remove it, and setting L and U weights to zero would leave the territorial pillar unevaluated without removing the evidence.</p>
+      </section>
+
+      <section class="section chapter" id="research">
+        <h2>11. Research context and important gaps</h2>
+        <p>The repository's technical research maps useful sources and possible future work. It is a source-and-limits reference, <strong>not a description of everything integrated into this release</strong>. The following items explain the main gaps in the four current values; none is silently added to a formula.</p>
+        <h3>Energy: national context is not a connection study</h3>
+        <p><a href="https://www.epe.gov.br/pt/publicacoes-dados-abertos/publicacoes/balanco-energetico-nacional-2025">EPE's National Energy Balance, BEN 2025</a> has <strong>reference year 2024</strong>. It provides national/state context on production, consumption, installed capacity, renewable shares and emissions. It is <strong>not consumed by the local score formulas</strong>, is not a site-level connection-capacity source and cannot convert nearby nominal MW into deliverable power. National renewable shares are not a facility's hourly electricity mix or marginal emissions factor.</p>
+        <p>Public <a href="https://www.ons.org.br/paginas/energia-no-futuro/transmissao/acesso">ONS access information</a> and the research's <a href="https://www.ons.org.br/AcervoDigitalDocumentosEPublicacoes/NT-ONS%20DPL%200083-2026-PNAST.pdf">2026 PNAST remaining-capacity study</a> show that some capacity information is publicly available. It is conditioned on study period, buses, works and assumptions; shared limits cannot simply be added, and the study does not reserve capacity. These studies and <a href="https://dadosabertos.aneel.gov.br/dataset/base-de-dados-geografica-da-distribuidora-bdgd">ANEEL's distribution database (BDGD)</a> are mapped for future use, not current inputs to E, T or S.</p>
+        <h3>Water: service records are not a supply guarantee</h3>
+        <p><a href="https://www.gov.br/cidades/pt-br/acesso-a-informacao/acoes-e-programas/saneamento/sinisa/resultados-sinisa/resultados-sinisa-2025">SINISA 2025, reference 2024</a>, offers official service, losses and continuity indicators that are not in the legacy service-presence formula. ANA intake/supply-system information, monitored hydrological series and water-use authorisations can improve understanding of the actual source and competing uses, but are not integrated here. Neither municipal service coverage nor Q95 by itself is industrial supply available to this site.</p>
+        <p><a href="https://portal.inmet.gov.br/servicos/bdmep-dados-historicos">INMET station histories</a> are mapped for future climate work, not consumed alongside NASA. Future use would require representative stations, quality control and suitable periods, rather than assuming the nearest station supplies a design condition.</p>
+        <h3>Connectivity: declared transport is not a physical route</h3>
+        <p><a href="https://informacoes.anatel.gov.br/paineis/infraestrutura/rede-de-transporte">Anatel's transport/backhaul data</a> are an official source mapped for future use. The published links join municipal seats and do not represent physical fibre alignments; their geometry must not be used as a lot-to-fibre distance. <a href="https://ix.br/localidades/atuais">IX.br localities and interconnection points</a>, from NIC.br, are a primary <strong>non-governmental</strong> complement for commercial diligence, also not integrated. Neither source proves a free port, a contractible route, latency or independent redundancy.</p>
+        <h3>Territory: conservation alone is not social/territorial coverage</h3>
+        <p><a href="https://www.gov.br/funai/pt-br/atuacao/terras-indigenas/geoprocessamento-e-mapas">FUNAI Indigenous-land information</a>, <a href="https://www.gov.br/incra/pt-br/assuntos/governanca-fundiaria/quilombolas">INCRA quilombola-territory information</a> and <a href="https://www.sgb.gov.br/pt/produtos-por-estado-cartografia-de-suscetibilidade">SGB susceptibility/risk mapping</a> are mapped for future use, not intersected by this version. Legal stages, acts and coverage matter; no polygon or title in a dataset does not mean no rights. Areas outside mapped risk sectors are not automatically safe.</p>
+        <p><a href="https://censo2022.ibge.gov.br/panorama/downloads.html">IBGE Census 2022</a> population and service data could inform affected-community context; <a href="https://servicodados.ibge.gov.br/api/docs/localidades">IBGE Localities</a> and <a href="https://servicodados.ibge.gov.br/api/docs/malhas?versao=3">official boundaries</a> could support controlled geographic identifiers and joins. These are not a replacement already made for the current municipal-reference repository. Census localities do not define legal territories, and vulnerable or traditional populations must not be treated as an automatic penalty.</p>
+        <p>Protected-area buffer zones, management-plan zoning, permanent preservation areas, embargoes and specific local rules remain additional gaps. A future dataset's inclusion would require a deliberate implementation and methodological review; listing it in research is not integration or validation.</p>
+      </section>
+
+      <section class="section chapter" id="reproducibility">
+        <h2>12. Reproducing and auditing a result</h2>
+        <h3>What to record</h3>
+        <ol>
+          <li>Code version; whether the result is a regional proxy or a detailed local analysis; coordinate and reference municipality/state.</li>
+          <li>Search radius, IT load, intensity in L/kWh, all seven criterion weights and the chosen regional sorting pillar.</li>
+          <li>Seven criterion values, four pillar values or “not evaluated”, WUI impact, annual volumes and all warnings. Do not invent or record an overall total.</li>
+          <li>Dataset editions, acquisition dates where available, query timestamps, returned source states and whether any earlier response was retained after a failed refresh.</li>
+          <li>The actual responses/snapshots used, including geometry where relevant. Remote services and legacy payloads can change; the same coordinates alone are insufficient for reproduction.</li>
+        </ol>
+        <table>
+          <caption>Implementation guide</caption>
+          <thead><tr><th scope="col">Responsibility</th><th scope="col">Repository implementation</th></tr></thead>
+          <tbody>
+            <tr><td>Criterion catalogue, weights and within-pillar composition</td><td><code>evaluation-criteria.js</code></td></tr>
+            <tr><td>Radius filtering, local resources, cable/substation distance and local composition</td><td><code>site-analysis.js</code></td></tr>
+            <tr><td>WUI-inspired impact and state-level Aqueduct coefficients</td><td><code>wui-model.js</code></td></tr>
+            <tr><td>Intersections, basin classes, climate heuristic, regulatory guidance and warnings</td><td><code>territorial-model.js</code></td></tr>
+            <tr><td>Territorial sources, editions, query/display limits and transmission snapshot</td><td><code>server/territory-service.js</code></td></tr>
+            <tr><td>Active selection, refresh behaviour and client cache</td><td><code>territorial-client.js</code></td></tr>
+            <tr><td>Regional proxy construction and comparison presentation</td><td><code>region-options.js</code>, <code>app.js</code>, <code>view-limits.js</code></td></tr>
+          </tbody>
+        </table>
+        <h3>Evidence boundary of this manual</h3>
+        <p>The linked publisher pages and primary references identify source provenance and research context. Their inclusion does <strong>not</strong> report a new online availability check, a new data acquisition or an independent audit performed for this manual. Stored edition/acquisition dates are reported as declared by the implementation. Legacy payload provenance is less complete than that of the explicit territorial source metadata.</p>
+        <p>The formulas describe current behaviour, including fallbacks and approximations; they are not recommendations to treat missing evidence as adequate. The technical research's access observations and proposals must not be presented as production coverage. Any future formula or input change must be reflected consistently in the application, this HTML manual and its PDF.</p>
+      </section>
+      <footer>DataTerra · Four-pillar methodology · English edition, October 2026 · Preliminary screening, not authorisation.</footer>
     </main>
   </body>
 </html>

@@ -5,8 +5,23 @@
         root.ViewLimits = factory();
     }
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
-    function sortByScore(regions, getScore) {
-        return [...regions].sort((a, b) => getScore(b) - getScore(a));
+    function compareRegions(a, b) {
+        return String(a.name || "").localeCompare(String(b.name || ""), "pt-BR") ||
+            String(a.state || "").localeCompare(String(b.state || ""), "pt-BR") ||
+            String(a.id).localeCompare(String(b.id), "pt-BR");
+    }
+
+    function sortByPillar(regions, pillarId, getGroupScores) {
+        return regions
+            .map(region => ({ region, score: getGroupScores(region)[pillarId] }))
+            .sort((a, b) => {
+                const aActive = Number.isFinite(a.score);
+                const bActive = Number.isFinite(b.score);
+                if (aActive !== bActive) return aActive ? -1 : 1;
+                if (aActive && a.score !== b.score) return b.score - a.score;
+                return compareRegions(a.region, b.region);
+            })
+            .map(({ region }) => region);
     }
 
     function includeSelected(regions, selectedRegion) {
@@ -15,8 +30,8 @@
         return [...regions, selectedRegion];
     }
 
-    function limitRankedRegions(regions, getScore, selectedRegion = null, maxItems = 30) {
-        const sorted = sortByScore(regions, getScore);
+    function limitRankedRegions(regions, pillarId, getGroupScores, selectedRegion = null, maxItems = 30) {
+        const sorted = sortByPillar(regions, pillarId, getGroupScores);
         const limited = includeSelected(sorted.slice(0, maxItems), selectedRegion);
 
         return {
@@ -26,27 +41,15 @@
         };
     }
 
-    function limitSelectableRegions(
-        regions,
-        getScore,
-        selectedState,
-        selectedRegion = null,
-        maxNationalItems = 120,
-    ) {
-        if (selectedState !== "ALL") return regions;
-        return includeSelected(sortByScore(regions, getScore).slice(0, maxNationalItems), selectedRegion);
-    }
-
     function limitMapRegions(
         regions,
-        getScore,
         selectedState,
         selectedRegion = null,
         maxNationalItems = 80,
         maxStateItems = 140,
     ) {
         const maxItems = selectedState === "ALL" ? maxNationalItems : maxStateItems;
-        const sorted = sortByScore(regions, getScore);
+        const sorted = [...regions].sort(compareRegions);
         const limited = includeSelected(sorted.slice(0, maxItems), selectedRegion);
 
         return {
@@ -56,5 +59,5 @@
         };
     }
 
-    return { limitMapRegions, limitRankedRegions, limitSelectableRegions };
+    return { limitMapRegions, limitRankedRegions };
 });

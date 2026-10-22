@@ -9,27 +9,27 @@
         renewables: {
             label: "Energia renovável",
             defaultWeight: 5,
-            groupId: "resources",
+            groupId: "energy",
         },
         grid: {
             label: "Infraestrutura elétrica",
             defaultWeight: 4,
-            groupId: "feasibility",
+            groupId: "energy",
         },
         water: {
             label: "Água, bacia e clima",
             defaultWeight: 5,
-            groupId: "resources",
+            groupId: "water",
         },
         connectivity: {
             label: "Conectividade e mercado",
             defaultWeight: 3,
-            groupId: "feasibility",
+            groupId: "connectivity",
         },
         licensing: {
             label: "Diligência regulatória",
             defaultWeight: 4,
-            groupId: "feasibility",
+            groupId: "territorial",
         },
         environmental: {
             label: "Restrições ambientais",
@@ -39,28 +39,34 @@
         substation: {
             label: "Distância de subestação",
             defaultWeight: 3,
-            groupId: "territorial",
+            groupId: "energy",
         },
     };
 
     const GROUPS = [
         {
-            id: "resources",
-            label: "Recursos e impacto",
-            description: "Geração renovável, impacto hídrico estimado, balanço por microbacia e condições climáticas.",
-            criteria: ["renewables", "water"],
+            id: "water",
+            label: "Estresse hídrico",
+            description: "Água, bacia e clima. Nota maior indica condições hídricas mais favoráveis, não maior estresse.",
+            criteria: ["water"],
         },
         {
-            id: "feasibility",
-            label: "Viabilidade estimada",
-            description: "Proximidade de transmissão oficial, conectividade e regras preliminares de diligência regulatória.",
-            criteria: ["grid", "connectivity", "licensing"],
+            id: "energy",
+            label: "Capacidade energética",
+            description: "Geração renovável, infraestrutura elétrica e proximidade de subestações. Não comprova capacidade disponível para conexão.",
+            criteria: ["renewables", "grid", "substation"],
+        },
+        {
+            id: "connectivity",
+            label: "Conectividade",
+            description: "Proximidade das rotas de cabos e indicadores regionais. Não comprova atendimento, redundância ou latência.",
+            criteria: ["connectivity"],
         },
         {
             id: "territorial",
-            label: "Riscos territoriais",
-            description: "Distância geodésica a subestações ONS e interseção do ponto com polígonos CNUC. A referência municipal é usada apenas como reserva; cobertura não substitui licenciamento.",
-            criteria: ["environmental", "substation"],
+            label: "Risco social/territorial",
+            description: "Diligência regulatória e restrições ambientais. Nota maior é mais favorável; cobertura social e territorial é parcial e não substitui licenciamento.",
+            criteria: ["licensing", "environmental"],
         },
     ];
 
@@ -75,18 +81,13 @@
         return Number.isFinite(number) ? number : fallback;
     }
 
-    function getCriterionKeys(criterionKeys) {
-        const keys = Array.isArray(criterionKeys) ? criterionKeys : Object.keys(CRITERIA);
-        return Array.from(new Set(keys)).filter((key) => Object.hasOwn(CRITERIA, key));
-    }
-
-    function calculateWeightedScore(scores, weights, criterionKeys) {
+    function calculateGroupScore(group, scores, weights) {
         const safeScores = scores && typeof scores === "object" ? scores : {};
         const safeWeights = weights && typeof weights === "object" ? weights : getDefaultWeights();
         let totalWeight = 0;
         let weightedTotal = 0;
 
-        getCriterionKeys(criterionKeys).forEach((key) => {
+        group.criteria.forEach((key) => {
             const weight = toFiniteNumber(safeWeights[key]);
             if (weight <= 0) return;
 
@@ -94,7 +95,7 @@
             weightedTotal += toFiniteNumber(safeScores[key]) * weight;
         });
 
-        if (totalWeight === 0) return 0;
+        if (totalWeight === 0) return null;
         return Math.round(weightedTotal / totalWeight);
     }
 
@@ -102,7 +103,7 @@
         return Object.fromEntries(
             GROUPS.map((group) => [
                 group.id,
-                calculateWeightedScore(scores, weights, group.criteria),
+                calculateGroupScore(group, scores, weights),
             ]),
         );
     }
@@ -111,7 +112,6 @@
         CRITERIA,
         GROUPS,
         getDefaultWeights,
-        calculateWeightedScore,
         calculateGroupScores,
     };
 });

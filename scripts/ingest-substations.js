@@ -3,7 +3,7 @@
  *
  * Baixa o CSV oficial ONS de subestações da Rede de Operação e gera
  * data/substations.json com os campos necessários para o cálculo de distância
- * e o score territorial (Distância de subestação).
+ * e o critério Distância de subestação do pilar Capacidade energética.
  *
  * Fonte: https://dados.ons.org.br/dataset/subestacao
  * CSV: https://ons-aws-prod-opendata.s3.amazonaws.com/dataset/subestacao/SUBESTACAO.csv

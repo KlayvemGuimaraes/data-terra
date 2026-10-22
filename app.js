@@ -23,6 +23,7 @@ let weights = EvaluationCriteria.getDefaultWeights();
 
 let selectedRegion = null;
 let selectedState = "ALL";
+let rankingPillar = "water";
 let wuiConfig = {
     preset: "standard",
     waterUseIntensityLPerKwh: WuiModel.WATER_USE_PRESETS.standard.intensity,
@@ -215,9 +216,9 @@ async function fetchData() {
         renderStateSelect();
         renderSelect();
         
-        const topRegion = getTopRegion();
-        if (topRegion) selectRegion(topRegion.id);
-        if (!topRegion) renderSiteAnalysis();
+        const firstRegion = ViewLimits.limitMapRegions(regionsData, selectedState).regions[0];
+        if (firstRegion) selectRegion(firstRegion.id);
+        else renderSiteAnalysis();
 
     } catch (error) {
         console.error('Error loading data:', error);
@@ -404,67 +405,52 @@ function renderElectricInfrastructure() {
 
 function renderRegions() {
     layers.regions.clearLayers();
-    const visible = ViewLimits.limitMapRegions(regionsData, getScore, selectedState, selectedRegion);
+    const visible = ViewLimits.limitMapRegions(regionsData, selectedState, selectedRegion);
     const ordered = [...visible.regions].sort((a, b) => {
         if (a.id === selectedRegion?.id) return 1;
         if (b.id === selectedRegion?.id) return -1;
-        return getScore(a) - getScore(b);
+        return 0;
     });
 
     ordered.forEach(region => {
-        const score = region.id === selectedRegion?.id && siteAnalysis ? siteAnalysis.overallScore : getScore(region);
-        const status = getClass(score);
         const isSelected = region.id === selectedRegion?.id;
+        const isLocal = isSelected && siteAnalysis;
+        const groupScores = isLocal ? siteAnalysis.groupScores : getRegionGroupScores(region);
         const marker = L.circleMarker([region.lat, region.lng], {
             renderer: regionRenderer,
             pane: "regionPane",
-            radius: isSelected ? 10 : getRegionMarkerRadius(score),
+            radius: isSelected ? 9 : 5,
             color: isSelected ? "#ffffff" : "#f8fafc",
             weight: isSelected ? 3 : 1.5,
             opacity: 0.95,
-            fillColor: getRegionMarkerColor(status.className),
+            fillColor: isSelected ? "#174b3c" : "#2970a8",
             fillOpacity: isSelected ? 0.96 : 0.76,
             interactive: true,
         }).bindPopup(`
-            <strong>${region.name}/${region.state}</strong><br>
-            Score territorial: ${score}/100<br>
-            ${region.tags.join(" • ")}
+            <strong>${escapeText(region.name)}/${escapeText(region.state)}</strong>
+            <p>${isLocal ? "Ponto e raio selecionados" : "Comparação regional preliminar"}</p>
+            <dl class="popup-pillars">${criteriaGroups.map(group => `
+                <div><dt>${group.label}</dt><dd>${formatPillarScore(groupScores[group.id])}</dd></div>
+            `).join("")}</dl>
+            <p>Maior nota = condição mais favorável em cada pilar. — = sem avaliação. Sem conclusão única sobre o local.</p>
         `);
 
         marker.on('click', () => selectRegion(region.id));
         if (isSelected) {
-            marker.bindTooltip(String(score), {
-                permanent: true,
-                direction: "center",
-                className: "selected-region-score",
+            marker.bindTooltip(`${escapeText(region.name)}/${escapeText(region.state)} · selecionada`, {
+                direction: "top",
             });
         }
         marker.addTo(layers.regions);
     });
 
     document.querySelector("#mapCandidateNote").textContent = visible.hiddenCount > 0
-        ? `Mapa: ${visible.regions.length} candidatos prioritários de ${visible.totalCount}.`
-        : `Mapa: ${visible.totalCount} candidatos neste recorte.`;
+        ? `Mapa: ${visible.regions.length} de ${visible.totalCount} candidatos, em recorte alfabético com a seleção preservada. Marcadores não indicam notas.`
+        : `Mapa: ${visible.totalCount} candidatos neste recorte. Marcadores não indicam notas.`;
 }
 
-function getRegionMarkerRadius(score) {
-    if (score >= 80) return 6.5;
-    if (score >= 70) return 5.5;
-    return 4.5;
-}
-
-function getRegionMarkerColor(className) {
-    const colors = {
-        high: "#1f9d63",
-        medium: "#c58a14",
-        low: "#c54532",
-    };
-    return colors[className] || "#0c6b58";
-}
-
-// Logic helpers (same as original but adapted)
-function getScore(region) {
-    return EvaluationCriteria.calculateWeightedScore(getEffectiveScores(region), weights);
+function getRegionGroupScores(region) {
+    return EvaluationCriteria.calculateGroupScores(getEffectiveScores(region), weights);
 }
 
 function getWuiInput(region) {
@@ -496,16 +482,6 @@ function getEffectiveScores(region) {
     };
 }
 
-function getClass(score) {
-    if (score >= 80) return { label: "Alta aptidão", className: "high" };
-    if (score >= 60) return { label: "Condicionada", className: "medium" };
-    return { label: "Alto risco", className: "low" };
-}
-
-function getTopRegion() {
-    return [...regionsData].sort((a, b) => getScore(b) - getScore(a))[0];
-}
-
 function selectRegion(id) {
     const region = regionsData.find(r => r.id === id);
     if (!region) return;
@@ -530,6 +506,7 @@ function setSimulatedSite(latlng, options = {}) {
         lat: Number(latlng.lat),
         lng: Number(latlng.lng),
         state: latlng.state,
+        name: latlng.name,
     };
 
     renderSiteAnalysis();
@@ -692,6 +669,7 @@ function renderSiteAnalysis() {
     const container = document.querySelector("#siteAnalysis");
     if (!simulatedSite || currentData.energy.length === 0) {
         siteAnalysis = null;
+        renderLocalScoreSummary(null);
         container.innerHTML = `
             <p class="field-note">Defina um ponto no mapa ou use a região selecionada para calcular os recursos no raio.</p>
         `;
@@ -707,23 +685,15 @@ function renderSiteAnalysis() {
         wuiConfig,
         weights,
     });
-    const status = getClass(siteAnalysis.overallScore);
     const coverage = siteAnalysis.load.renewableCoveragePercentage;
     const groupScores = siteAnalysis.groupScores;
     const expandedTerritory = new Map([...container.querySelectorAll("[data-territory-section]")].map(el => [el.dataset.territorySection, el.open]));
 
     container.innerHTML = `
-        <div class="site-score-card">
-            <div>
-                <span class="wui-label">Aptidão no raio</span>
-                <span class="score-value">${siteAnalysis.overallScore}</span>
-                <span class="score-total">/100</span>
-            </div>
-            <span class="status-pill ${status.className}">${status.label}</span>
-        </div>
-
+        <h3>Quatro pilares no ponto</h3>
         ${renderScoreGroupSummary(groupScores)}
-        <p class="field-note">${siteAnalysis.territorial.complete ? 'Consulta das quatro fontes concluída.' : 'Consulta incompleta ou em andamento; score provisório.'} Média: ${siteAnalysis.rawScore}/100${siteAnalysis.rawScore > siteAnalysis.overallScore ? ` · limite preventivo: ${siteAnalysis.territorial.cap}` : ''}.</p>
+        <p class="field-note">Notas heurísticas de 0 a 100: maior é mais favorável em cada pilar, inclusive estresse hídrico e risco social/territorial. Não são probabilidades nem autorizações.</p>
+        <p class="field-note">${siteAnalysis.territorial.complete ? 'Consulta das quatro fontes concluída; verifique os limites de cobertura.' : 'Consulta incompleta ou em andamento; os indicadores usam as reservas declaradas nas fontes.'}</p>
         ${renderTerritorialDetails()}
         <div class="site-location-grid">
             <span>Coordenadas</span>
@@ -872,22 +842,19 @@ function renderRegionFiberProximity(fiber) {
 }
 
 function renderDetails() {
+    if (siteAnalysis) {
+        renderLocalScoreSummary(siteAnalysis);
+        return;
+    }
     if (!selectedRegion) return;
-    const score = getScore(selectedRegion);
-    const status = getClass(score);
     const scores = getEffectiveScores(selectedRegion);
     const groupScores = EvaluationCriteria.calculateGroupScores(scores, weights);
     const wuiAssessment = getWuiAssessment(selectedRegion);
 
     document.querySelector("#selectedName").textContent = `${selectedRegion.name} / ${selectedRegion.state}`;
     document.querySelector("#selectedSummary").textContent = selectedRegion.summary;
-    document.querySelector("#selectedScore").textContent = score;
     document.querySelector("#selectedScoreGroups").innerHTML = renderScoreGroupSummary(groupScores);
     document.querySelector("#selectedFiber").innerHTML = renderRegionFiberProximity(selectedRegion.fiber);
-    
-    const statusEl = document.querySelector("#selectedClass");
-    statusEl.textContent = status.label;
-    statusEl.className = `status-pill ${status.className}`;
     
     document.querySelector("#recommendation").textContent = selectedRegion.recommendation;
 
@@ -900,7 +867,6 @@ function renderDetails() {
     document.querySelector("#conditions").innerHTML = selectedRegion.conditions
         .map((condition) => `<span class="condition">${condition}</span>`)
         .join("");
-    if (siteAnalysis) renderLocalScoreSummary(siteAnalysis);
 }
 
 function renderWuiResult(assessment) {
@@ -1053,22 +1019,34 @@ function getWuiClassName(impactScore) {
 }
 
 function renderRanking() {
-    const ranked = ViewLimits.limitRankedRegions(regionsData, getScore, selectedRegion, 30);
-    document.querySelector("#rankingNote").textContent = ranked.hiddenCount > 0
-        ? `Mostrando ${ranked.regions.length} de ${ranked.totalCount} regiões. Filtre por estado para investigar mais candidatos.`
-        : `${ranked.totalCount} regiões candidatas neste recorte.`;
-    document.querySelector("#rankingNote").textContent += " Ranking preliminar das bases locais; consulte o score detalhado na aba Local.";
+    const pillar = criteriaGroups.find(group => group.id === rankingPillar);
+    const select = document.querySelector("#rankingPillar");
+    select.innerHTML = criteriaGroups.map(group => `<option value="${group.id}">${group.label}</option>`).join("");
+    select.value = rankingPillar;
+    const ranked = ViewLimits.limitRankedRegions(regionsData, rankingPillar, getRegionGroupScores, selectedRegion, 30);
+    document.querySelector("#rankingNote").textContent =
+        `Ordem decrescente somente por ${pillar.label}. Sem avaliação vem ao final; empates seguem ordem alfabética. ` +
+        (ranked.hiddenCount > 0
+            ? `Mostrando até 30 candidatos e preservando a seleção (${ranked.regions.length} de ${ranked.totalCount}). `
+            : `${ranked.totalCount} regiões candidatas neste recorte. `) +
+        "Bases regionais preliminares: os quatro valores podem diferir da análise do ponto e raio na aba Local.";
     document.querySelector("#ranking").innerHTML = ranked.regions
-        .map((region, index) => {
-            const score = getScore(region);
+        .map(region => {
+            const groupScores = getRegionGroupScores(region);
             return `
-                <li data-region="${region.id}" class="${selectedRegion?.id === region.id ? 'selected' : ''}">
-                    <span class="ranking-index">${index + 1}</span>
-                    <span>
-                        <span class="ranking-name">${region.name}/${region.state}</span>
-                        <span class="ranking-tags">${region.tags.join(" • ")}</span>
-                    </span>
-                    <span class="ranking-score">${score}</span>
+                <li data-region="${escapeText(region.id)}" class="${selectedRegion?.id === region.id ? 'selected' : ''}">
+                    <button class="ranking-select" type="button" aria-label="Analisar ${escapeText(region.name)}/${escapeText(region.state)}">
+                        <span class="ranking-name">${escapeText(region.name)}/${escapeText(region.state)}${selectedRegion?.id === region.id ? " · selecionada" : ""}</span>
+                        <span class="ranking-tags">${escapeText(region.tags.join(" • "))}</span>
+                    </button>
+                    <dl class="ranking-pillars">
+                        ${criteriaGroups.map(group => `
+                            <div class="${group.id === rankingPillar ? "is-sorted" : ""}">
+                                <dt>${group.label}</dt>
+                                <dd>${formatPillarScore(groupScores[group.id])}${groupScores[group.id] === null ? "<small>Sem avaliação</small>" : ""}</dd>
+                            </div>
+                        `).join("")}
+                    </dl>
                 </li>
             `;
         })
@@ -1082,6 +1060,7 @@ function renderWeights() {
                 <div class="criteria-group-heading">
                     <h3>${group.label}</h3>
                     <p>${group.description}</p>
+                    ${group.criteria.length === 1 ? "<p>Critério único: qualquer peso positivo mantém a nota; zero desativa a avaliação deste pilar.</p>" : "<p>Pesos relativos apenas dentro deste pilar. Zero desativa o critério.</p>"}
                 </div>
                 <div class="criteria-group-controls">
                     ${group.criteria.map(renderWeightControl).join("")}
@@ -1097,12 +1076,12 @@ function renderWeightControl(key) {
         <div class="weight-control">
             <div class="weight-head">
                 <label for="weight-${key}">${criterion.label}</label>
-                <span id="weight-value-${key}">${weights[key]}</span>
+                <span id="weight-value-${key}">${weights[key] > 0 ? weights[key] : "Desativado"}</span>
             </div>
             <input
                 id="weight-${key}"
                 type="range"
-                min="1"
+                min="0"
                 max="5"
                 value="${weights[key]}"
                 data-weight="${key}"
@@ -1111,13 +1090,18 @@ function renderWeightControl(key) {
     `;
 }
 
+function formatPillarScore(value) {
+    return Number.isFinite(value) ? `${value}/100` : "—";
+}
+
 function renderScoreGroupSummary(groupScores) {
     return `
         <div class="criteria-score-grid">
             ${criteriaGroups.map((group) => `
                 <div class="criteria-score-card" data-score-group="${group.id}">
                     <span>${group.label}</span>
-                    <strong>${groupScores[group.id]}<small>/100</small></strong>
+                    <strong>${Number.isFinite(groupScores[group.id]) ? `${groupScores[group.id]}<small>/100</small>` : "—"}</strong>
+                    ${groupScores[group.id] === null ? '<small class="pillar-empty">Sem avaliação</small>' : ""}
                 </div>
             `).join("")}
         </div>
@@ -1132,7 +1116,7 @@ function renderMetricGroups(scores, groupScores) {
                     <h3>${group.label}</h3>
                     <p>${group.description}</p>
                 </div>
-                <strong>${groupScores[group.id]}/100</strong>
+                <strong>${formatPillarScore(groupScores[group.id])}</strong>
             </div>
             <div class="criteria-metric-list">
                 ${group.criteria.map((key) => renderMetric(key, scores[key])).join("")}
@@ -1147,7 +1131,7 @@ function renderMetric(key, score) {
         <div class="metric">
             <div class="metric-row">
                 <span>${criteriaCatalog[key].label}</span>
-                <span>${value}/100</span>
+                <span>${value}/100${weights[key] > 0 ? "" : " · fora da média"}</span>
             </div>
             <div class="bar"><span style="width:${value}%"></span></div>
         </div>
@@ -1228,17 +1212,21 @@ function applyStateFilter(state) {
     renderRanking();
     renderSelect();
 
-    if (regionsData.length > 0) {
-        selectRegion(regionsData[0].id);
-    }
+    const firstRegion = ViewLimits.limitMapRegions(regionsData, selectedState).regions[0];
+    if (firstRegion) selectRegion(firstRegion.id);
 }
 
 // Event Listeners
+document.querySelector("#rankingPillar").addEventListener("change", (event) => {
+    rankingPillar = event.target.value;
+    renderRanking();
+});
+
 document.querySelector("#weights").addEventListener("input", (e) => {
     const input = e.target.closest("[data-weight]");
     if (!input) return;
     weights[input.dataset.weight] = Number(input.value);
-    document.querySelector(`#weight-value-${input.dataset.weight}`).textContent = input.value;
+    document.querySelector(`#weight-value-${input.dataset.weight}`).textContent = input.value > 0 ? input.value : "Desativado";
     renderRegions();
     renderRanking();
     renderDetails();
@@ -1329,69 +1317,63 @@ function selectRegionSearchOption() {
 
     if (option.source === "candidate") {
         selectRegion(option.id);
-        note.textContent = "Região candidata selecionada com score territorial completo.";
+        note.textContent = "Região candidata selecionada. Os quatro pilares do ponto e raio estão disponíveis em Resumo e Local.";
         return;
     }
 
     selectedRegion = null;
     setSimulatedSite(
-        { lat: option.lat, lng: option.lng, state: option.state },
+        { lat: option.lat, lng: option.lng, state: option.state, name: option.name },
         { activateResults: true },
     );
     map.flyTo([option.lat, option.lng], 8);
     renderRegions();
     renderRanking();
-    renderMunicipalityDetails(option);
     activatePanelTabByTarget("controls-site");
     note.textContent = "Município selecionado para simulação local. Ajuste o raio para ver recursos e impacto.";
 }
 
-function renderMunicipalityDetails(option) {
-    document.querySelector("#selectedName").textContent = `${option.name} / ${option.state}`;
-    document.querySelector("#selectedSummary").textContent =
-        "Município escolhido pelo autocomplete. A análise principal passa a ser o raio de consumo do data center.";
-    renderLocalScoreSummary(siteAnalysis);
-
-    document.querySelector("#metrics").innerHTML = `
-        <p class="field-note">
-            Este município não tem necessariamente score territorial completo. Use a aba Local para ver energia,
-            água, conectividade e impacto dentro do raio configurado.
-        </p>
-    `;
-    document.querySelector("#recommendation").textContent =
-        "Valide o ponto pelo raio de consumo, disponibilidade renovável, segurança hídrica, fibra e licenciamento local.";
-    document.querySelector("#conditions").innerHTML = [
-        "Conferir outorga e disponibilidade hídrica local",
-        "Validar conexão elétrica e fibra",
-        "Checar licenciamento municipal e ambiental",
-    ].map((condition) => `<span class="condition">${condition}</span>`).join("");
-    renderRenewableMix({ name: option.name, state: option.state });
-}
-
 function renderLocalScoreSummary(analysis) {
-    const status = analysis
-        ? getClass(analysis.overallScore)
-        : { label: "Simulação local", className: "medium" };
-
-    if (!selectedRegion) {
-        document.querySelector("#selectedName").textContent = "Local simulado";
-        document.querySelector("#selectedSummary").textContent = "Triagem do ponto e raio escolhidos. Consulte cobertura, regras e próximos passos na aba Local.";
+    const location = selectedRegion || simulatedSite;
+    document.querySelector("#selectedName").textContent = location?.name
+        ? `${location.name} / ${location.state}`
+        : "Local simulado";
+    document.querySelector("#selectedSummary").textContent = analysis
+        ? `Triagem do ponto e raio de ${analysis.radiusKm} km. Quatro pilares independentes, sem nota ou classificação única do local.`
+        : "Defina um ponto e aguarde os dados para avaliar os quatro pilares.";
+    document.querySelector("#selectedCoverage").textContent = analysis
+        ? (analysis.territorial.complete
+            ? "Consulta territorial concluída; consulte limites e diligências na aba Local."
+            : "Consulta territorial incompleta ou em andamento; verifique cobertura e valores de reserva na aba Local.")
+        : "Sem avaliação local disponível.";
+    const groupScores = analysis?.groupScores || Object.fromEntries(criteriaGroups.map(group => [group.id, null]));
+    document.querySelector("#selectedScoreGroups").innerHTML = renderScoreGroupSummary(groupScores);
+    document.querySelector("#selectedFiber").innerHTML = analysis ? renderRegionFiberProximity(analysis.fiber) : "";
+    if (!analysis) {
+        document.querySelector("#metrics").innerHTML = "";
+        return;
     }
-    document.querySelector("#selectedCoverage").textContent = analysis?.territorial.complete ? "Consulta territorial concluída; consulte limites e diligências na aba Local." : "Resultado provisório: consulta territorial incompleta ou em andamento.";
-    if (analysis) {
-        document.querySelector("#metrics").innerHTML = renderMetricGroups(analysis.scores, analysis.groupScores);
-        document.querySelector("#recommendation").textContent = analysis.territorial.warnings.join(' ');
-        document.querySelector("#conditions").innerHTML = analysis.territorial.rules.map(rule => `<span class="condition">${escapeText(rule.title)}</span>`).join('');
-    }
-    document.querySelector("#selectedScore").textContent = analysis?.overallScore || 0;
-    document.querySelector("#selectedScoreGroups").innerHTML = analysis
-        ? renderScoreGroupSummary(analysis.groupScores)
-        : "";
-    document.querySelector("#selectedFiber").innerHTML = renderRegionFiberProximity(analysis?.fiber);
-
-    const statusEl = document.querySelector("#selectedClass");
-    statusEl.textContent = status.label;
-    statusEl.className = `status-pill ${status.className}`;
+    document.querySelector("#metrics").innerHTML = renderMetricGroups(analysis.scores, groupScores);
+    document.querySelector("#recommendation").textContent = analysis.territorial.warnings.join(' ');
+    document.querySelector("#conditions").innerHTML = analysis.territorial.rules.map(rule => `<span class="condition">${escapeText(rule.title)}</span>`).join('');
+    renderWuiResult(analysis.impact);
+    document.querySelector("#renewableMix").innerHTML = `
+        <div class="renewable-summary">
+            <span>Raio de ${analysis.radiusKm} km</span>
+            <strong>${formatMw(analysis.energy.totalCapacityMw)}</strong>
+            <small>${analysis.energy.totalPlants} usina(s) na base</small>
+        </div>
+        <div class="renewable-breakdown-list">${renderEnergyBreakdownRows(analysis.energy.types)}</div>
+        <p class="field-note">Capacidade nominal no raio; não representa energia contratada ou conexão garantida.</p>
+    `;
+    document.querySelector("#methodology").innerHTML = `
+        <div class="methodology-block">
+            <h3>Base do ponto e raio</h3>
+            <p>Os quatro pilares em Resumo e Local usam os recursos no raio, a referência WUI por UF, subestações ONS e as consultas territoriais detalhadas. Consulte o estado de cada fonte na aba Local.</p>
+            <p>A comparação regional usa indicadores municipais/estaduais distintos; não incorpora essas consultas detalhadas e não representa uma validação do ponto.</p>
+            <p>Pesos só combinam critérios dentro de cada pilar. Todos os pesos de um pilar em zero deixam esse pilar sem avaliação, sem ocultar alertas ambientais ou de cobertura.</p>
+        </div>
+    `;
 }
 
 document.querySelector("#focusRegion").addEventListener("click", () => {
