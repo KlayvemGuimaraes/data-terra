@@ -1,6 +1,41 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
+const fs = require('node:fs');
+const vm = require('node:vm');
 const { create, LOCALES, STORAGE_KEY, messages } = require('../i18n');
+
+function openBrowserLanguage(search, saved, storageDenied = false) {
+    const entries = new Map([[STORAGE_KEY, saved]]);
+    const storage = {
+        getItem(key) { if (storageDenied) throw new Error('denied'); return entries.get(key); },
+        setItem(key, value) { if (storageDenied) throw new Error('denied'); entries.set(key, value); }
+    };
+    const context = {
+        window: { localStorage: storage, location: { search } },
+        document: { documentElement: {} },
+        DataTerraTranslations: messages,
+        URLSearchParams,
+    };
+    vm.runInNewContext(fs.readFileSync(require.resolve('../i18n'), 'utf8'), context);
+    return { locale: context.DataTerraI18n.getLocale(), htmlLanguage: context.document.documentElement.lang, saved: entries.get(STORAGE_KEY) };
+}
+
+test('shared simulator links apply an explicit supported language before the first render', () => {
+    assert.deepEqual(openBrowserLanguage('?lang=en', 'pt-BR'), { locale: 'en', htmlLanguage: 'en', saved: 'en' });
+    for (const language of ['pt', 'pt-BR']) {
+        assert.deepEqual(openBrowserLanguage('?lang=' + language, 'en'), { locale: 'pt-BR', htmlLanguage: 'pt-BR', saved: 'pt-BR' });
+    }
+});
+
+test('missing or unsupported link languages preserve the saved choice', () => {
+    for (const search of ['', '?lang=unknown']) {
+        assert.deepEqual(openBrowserLanguage(search, 'en'), { locale: 'en', htmlLanguage: 'en', saved: 'en' });
+    }
+});
+
+test('a shared English link works when browser storage is unavailable', () => {
+    assert.equal(openBrowserLanguage('?lang=en', undefined, true).locale, 'en');
+});
 
 test('language choice persists, restores and falls back safely', () => {
     const entries = new Map();

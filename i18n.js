@@ -97,6 +97,12 @@
     let storage = null;
     try { if (typeof window !== 'undefined') storage = window.localStorage; } catch { /* Sandboxed browser. */ }
     const instance = create({ storage });
+    // A shared link can request a language without inheriting the visitor's last choice.
+    if (typeof window !== 'undefined') {
+        const requested = new URLSearchParams(window.location?.search || '').get('lang');
+        if (requested === 'en') instance.setLocale('en');
+        else if (requested === 'pt' || requested === 'pt-BR') instance.setLocale('pt-BR');
+    }
     if (typeof document !== 'undefined') document.documentElement.lang = instance.getLocale();
     return { ...instance, create, LOCALES, STORAGE_KEY, messages };
 });
