@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DataTerra — vídeos de demonstração</title>
+<style>
+@font-face{font-family:Montserrat;src:url('/assets/fonts/montserrat-latin-variable.woff2');font-weight:100 900}
+@font-face{font-family:Poppins;src:url('/assets/fonts/poppins-latin-400.woff2');font-weight:400}
+@font-face{font-family:Poppins;src:url('/assets/fonts/poppins-latin-600.woff2');font-weight:600}
+*{box-sizing:border-box}html,body{width:1920px;height:1080px;margin:0;overflow:hidden;background:#101b17;color:#edf2e8;font-family:Poppins,sans-serif;-webkit-font-smoothing:antialiased;cursor:none}
+button,iframe{cursor:none}button{font:inherit}
+#stage{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 35%,#20392b 0,#14251d 40%,#101b17 75%)}
+.contours{position:absolute;inset:0;opacity:.1;pointer-events:none}
+#browser{position:absolute;left:48px;top:28px;width:1824px;height:928px;border:1px solid #405747;border-radius:19px;overflow:hidden;background:#101b17;box-shadow:0 25px 75px #0004;transform-origin:50% 45%}
+.chrome{position:relative;height:54px;display:flex;align-items:center;border-bottom:1px solid #34463a;background:#1c2b24;padding:0 20px;gap:22px}
+.window-dots{display:flex;gap:8px;width:60px}.window-dots i{width:9px;height:9px;border-radius:100%;background:#5c7365}.window-dots i:nth-child(2){background:#84966c}.window-dots i:nth-child(3){background:#b3cf91}
+.tab{height:42px;width:337px;display:flex;align-items:center;gap:12px;align-self:flex-end;border-radius:10px 10px 0 0;background:#101b17;padding:0 12px 0 16px;font-size:13px;color:#d2dfca;white-space:nowrap}
+.tab svg{color:#b3cf91;flex-shrink:0}.tab button{height:29px;width:29px;display:grid;place-items:center;border:0;border-radius:6px;background:transparent;color:#b6c5b0;margin-left:auto}.tab button:hover{background:#33463a;color:#fff}
+.address{position:absolute;left:670px;right:320px;top:11px;height:31px;display:flex;align-items:center;justify-content:center;gap:10px;background:#142019;border:1px solid #2b4033;border-radius:7px;font-size:12px;color:#9eb19e;letter-spacing:.25px}
+.secure{width:12px;height:12px;color:#9fbf7d}.preview-note{position:absolute;right:23px;top:18px;font-size:9px;letter-spacing:1.6px;color:#a7b59f}
+.viewport{position:relative;width:1824px;height:874px;overflow:hidden}
+#app{width:1440px;height:690px;border:0;display:block;transform-origin:top left;transform:scale(1.2666666667)}
+#steps{position:absolute;left:76px;right:76px;top:979px;display:flex;align-items:center;justify-content:center;gap:37px}
+.step{display:flex;align-items:center;gap:15px;opacity:.37;transition:opacity .35s ease}
+.step.active,.step.done{opacity:1}.num{display:grid;place-items:center;width:39px;height:39px;border:1px solid #526544;border-radius:50%;color:#b3cf91;font-size:13px;font-weight:600}
+.step.active .num{background:#b3cf91;color:#182720;border-color:#b3cf91}
+.step span:last-child{font-size:21px;letter-spacing:-.4px}.connector{width:92px;height:1px;background:#526544}
+#footnote{position:absolute;bottom:15px;left:0;right:0;text-align:center;color:#7f9582;font-size:11px;letter-spacing:.25px}
+#pointer{position:absolute;top:0;left:0;width:31px;height:40px;z-index:100;pointer-events:none;filter:drop-shadow(0 2px 3px #0008);transform:translate(960px,540px)}
+.ripple{position:absolute;z-index:90;width:55px;height:55px;border:2px solid #d0e3b5;background:#b3cf9120;border-radius:50%;pointer-events:none;animation:click .55s ease-out forwards}
+@keyframes click{from{transform:translate(-50%,-50%) scale(.35);opacity:1}to{transform:translate(-50%,-50%) scale(1.5);opacity:0}}
+#focus{position:absolute;z-index:40;border:2px solid #b3cf91;border-radius:12px;box-shadow:0 0 0 5px #b3cf9110;pointer-events:none;opacity:0;transition:opacity .3s}
+#finale{position:absolute;inset:0;opacity:0;pointer-events:none}
+#halo{position:absolute;width:800px;height:800px;border:1px solid #759b6733;border-radius:50%;left:560px;top:140px;opacity:0}
+#halo:before,#halo:after{content:'';position:absolute;inset:65px;border:1px solid #759b6729;border-radius:50%}#halo:after{inset:-65px;opacity:.5}
+#symbol{position:absolute;left:704px;top:238px;width:512px;height:512px;overflow:visible}
+#final-wordmark{position:absolute;left:825px;top:461px;white-space:nowrap;font-family:Montserrat,sans-serif;font-size:112px;line-height:1.1;letter-spacing:-6px;font-weight:750;opacity:0}
+#final-wordmark .light{font-weight:400}#final-wordmark .period{color:#e4a080}
+#flag-line{position:absolute;top:786px;left:0;right:0;text-align:center;font:400 22px Poppins,sans-serif;color:#c7d5bc;letter-spacing:.3px;opacity:0}
+#signature{position:absolute;top:655px;left:0;right:0;text-align:center;opacity:0}
+#signature p{font:400 26px Poppins,sans-serif;letter-spacing:-.4px;margin:0 0 50px;color:#b5c3b0}
+#signature .url{color:#9fbf7d;font-size:15px;letter-spacing:1.2px}
+#cue{position:absolute;left:0;top:0;width:8px;height:8px;z-index:1000;background:transparent}
+</style>
+</head>
+<body>
+<main id="stage">
+ <svg class="contours" viewBox="0 0 1920 1080" fill="none" stroke="#9fbf7d" stroke-width="1">
+  <path d="M-150 900C250 720 250 1110 670 850S1280 610 2070 940M-170 940C260 750 260 1150 680 890S1290 650 2090 980M-190 980C270 780 270 1190 690 930S1300 690 2110 1020"/>
+  <path d="M-180 170C240 430 330-70 800 60S1440 350 2070 80M-170 210C250 470 340-30 810 100S1450 390 2080 120"/>
+ </svg>
+ <section id="finale">
+  <div id="halo"></div>
+  <svg id="symbol" viewBox="-4 -4 32 32" fill="none" stroke="#b3cf91" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+   <rect id="flag-field" x="-1" y="3.5" width="26" height="17" rx=".3" fill="#227249" stroke="none" opacity="0"/>
+   <path id="mark-top" d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/>
+   <path id="mark-mid" d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/>
+   <path id="mark-bottom" d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/>
+   <g id="flag-orb" opacity="0">
+    <circle cx="12" cy="12" r="3.75" fill="#284f8e" stroke="none"/>
+    <clipPath id="orb-clip"><circle cx="12" cy="12" r="3.75"/></clipPath>
+    <path d="M7.5 10.7Q11.9 9.3 16.4 13.5" stroke="#f2f2dc" stroke-width=".55" clip-path="url(#orb-clip)"/>
+    <g fill="#f2f2dc" stroke="none"><circle cx="10" cy="12.4" r=".14"/><circle cx="12" cy="13.7" r=".14"/><circle cx="13.5" cy="12.8" r=".13"/><circle cx="11.2" cy="14.5" r=".12"/><circle cx="14" cy="14.1" r=".12"/></g>
+   </g>
+  </svg>
+  <div id="flag-line">O Brasil em cada camada.</div>
+  <div id="final-wordmark">data<span class="light">terra</span><span class="period">.</span></div>
+  <div id="signature"><p>Boas decisões começam pelo território.</p><span class="url">data-terra.vercel.app</span></div>
+ </section>
+ <section id="browser">
+  <div class="chrome">
+   <span class="window-dots"><i></i><i></i><i></i></span>
+   <div class="tab"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 10 5-10 5L2 7Zm-10 10 10 5 10-5M2 17l10 5 10-5"/></svg><span>DataTerra · Simulação territorial</span><button id="close-tab" aria-label="Fechar aba"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="m4 4 8 8M12 4l-8 8"/></svg></button></div>
+   <div class="address"><svg class="secure" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="7" width="10" height="7" rx="2"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/></svg>data-terra.vercel.app</div>
+   <span class="preview-note">INTELIGÊNCIA TERRITORIAL</span>
+  </div>
+  <div class="viewport"><iframe id="app" src="/" title="Simulador DataTerra"></iframe></div>
+ </section>
+ <div id="steps"><div class="step active"><span class="num">01</span><span>Escolha o local</span></div><span class="connector"></span><div class="step"><span class="num">02</span><span>Ajuste o raio</span></div><span class="connector"></span><div class="step"><span class="num">03</span><span>Avalie os quatro pilares</span></div></div>
+ <div id="footnote">Demonstração de uso · Triagem preliminar com dados públicos</div>
+ <div id="focus"></div>
+ <svg id="pointer" width="31" height="40" viewBox="0 0 31 40" fill="none"><path d="M3 2v29l7.5-7 6 12 5-2.5-6.5-12H26Z" fill="#f5f8ee" stroke="#193426" stroke-width="2.1" stroke-linejoin="round"/></svg>
+ <div id="cue"></div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let animationFrame;
+window.pointerAt=(x,y)=>{$('pointer').style.transform=`translate(${x-3}px,${y-2}px)`;window.pointerPosition={x,y}};
+window.pulse=()=>{const {x,y}=window.pointerPosition;const p=document.createElement('div');p.className='ripple';p.style.left=x+'px';p.style.top=y+'px';$('stage').append(p);setTimeout(()=>p.remove(),650)};
+window.setStep=n=>document.querySelectorAll('.step').forEach((el,i)=>el.className='step'+(i===n?' active':i<n?' done':''));
+window.highlight=(box)=>{const el=$('focus');if(!box){el.style.opacity=0;return}Object.assign(el.style,{left:(box.x-4)+'px',top:(box.y-4)+'px',width:(box.width+8)+'px',height:(box.height+8)+'px',opacity:1})};
+window.cue=color=>$('cue').style.background=color||'transparent';
+const clamp=x=>Math.max(0,Math.min(1,x));
+const ease=x=>{x=clamp(x);return x*x*(3-2*x)};
+const phase=(t,a,b)=>ease((t-a)/(b-a));
+const mix=(a,b,k)=>a+(b-a)*k;
+function color(a,b,k){return `rgb(${a.map((v,i)=>Math.round(mix(v,b[i],k))).join(',')})`}
+window.renderFinale=t=>{
+ const entrance=phase(t,0,.55),morph=phase(t,1.15,2.65),back=phase(t,4.25,5.55),settle=phase(t,5.55,6.55),flag=morph*(1-back);
+ $('browser').style.opacity=1-entrance;$('browser').style.transform=`translateY(${entrance*22}px) scale(${1-entrance*.04})`;
+ $('steps').style.opacity=1-entrance;$('footnote').style.opacity=1-entrance;$('pointer').style.opacity=1-entrance;
+ $('finale').style.opacity=entrance;$('halo').style.opacity=.55*phase(t,.4,1.6)*(1-settle*.65);
+ const symbol=$('symbol');symbol.style.left=mix(704,548,settle)+'px';symbol.style.top=mix(238,405,settle)+'px';symbol.style.width=mix(512,228,settle)+'px';symbol.style.height=mix(512,228,settle)+'px';
+ symbol.style.transform=`scale(${mix(.86,1,phase(t,.15,1))})`;
+ $('flag-field').setAttribute('opacity',flag*.98);
+ const top=$('mark-top');top.setAttribute('transform',`translate(0 ${7+5*flag}) scale(1 ${1+.3*flag}) translate(0 -7)`);
+ top.setAttribute('stroke',color([179,207,145],[242,204,82],flag));top.setAttribute('fill',color([179,207,145],[242,204,82],flag));top.setAttribute('fill-opacity',flag);
+ $('mark-mid').setAttribute('opacity',1-flag);$('mark-bottom').setAttribute('opacity',1-flag);
+ $('mark-mid').setAttribute('transform',`translate(0 ${flag*1.8})`);$('mark-bottom').setAttribute('transform',`translate(0 ${flag*3.2})`);
+ $('flag-orb').setAttribute('opacity',phase(t,1.8,2.65)*(1-phase(t,4.25,4.85)));
+ $('flag-orb').setAttribute('transform',`translate(12 12) scale(${mix(.5,1,phase(t,1.8,2.65))}) translate(-12 -12)`);
+ $('flag-line').style.opacity=phase(t,2.4,3.1)*(1-phase(t,4,4.65));
+ $('final-wordmark').style.opacity=phase(t,5.9,6.6);$('final-wordmark').style.transform=`translateY(${14*(1-phase(t,5.9,6.6))}px)`;
+ $('signature').style.opacity=phase(t,6.25,7.05);$('signature').style.transform=`translateY(${10*(1-phase(t,6.25,7.05))}px)`;
+};
+window.startFinale=()=>{cancelAnimationFrame(animationFrame);window.highlight(null);const start=performance.now();const tick=()=>{renderFinale((performance.now()-start)/1000);animationFrame=requestAnimationFrame(tick)};tick()};
+$('close-tab').addEventListener('click',()=>{window.startFinale();setTimeout(()=>{$('app').style.visibility='hidden'},600)});
+window.resetStudio=()=>{cancelAnimationFrame(animationFrame);$('app').style.visibility='visible';$('browser').style.opacity=1;$('browser').style.transform='none';$('steps').style.opacity=1;$('footnote').style.opacity=1;$('pointer').style.opacity=1;$('finale').style.opacity=0;setStep(0);highlight(null);cue(null)};
+</script>
+</body></html>
