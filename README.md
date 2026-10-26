@@ -268,6 +268,20 @@ Configuração esperada na Vercel:
 - **Build Command:** `npm run build`.
 - **Output Directory:** `.`.
 
+O simulador público é [data-terra.vercel.app](https://data-terra.vercel.app/).
+O projeto `data-terra` na Vercel está conectado à branch `main` de
+[`KlayvemGuimaraes/data-terra`](https://github.com/KlayvemGuimaraes/data-terra).
+O repositório da equipe é
+[`nuvemnove/dataterra`](https://github.com/nuvemnove/dataterra), configurado como
+`origin` neste checkout. Para publicar a mesma revisão nos dois, sincronize seus
+históricos sem force-push, execute os testes e envie a branch `main` para ambos.
+O push no repositório conectado à Vercel inicia a publicação automaticamente.
+
+Os materiais de apresentação e vídeo em `output/` ficam disponíveis no GitHub;
+`.vercelignore` os exclui do pacote do simulador. Capturas intermediárias e caches
+locais dos novos materiais são ignorados pelo Git. Depois de publicar, confira o
+status `Ready` na Vercel e valide idioma, link da logo, manual e API no domínio público.
+
 ## Testes
 
 ```bash

@@ -6,3 +6,16 @@ server/references/
 server/check_aneel.js
 server/check_sources.js
 server/inspect_xls.js
+
+# Local metadata and deployment credentials
+.DS_Store
+.vercel/
+
+# Recording caches and intermediate slide exports stay on the author's machine.
+output/video/captures/
+output/imagegen/slides-23-26/regional-comparison-*.png
+output/imagegen/slides-23-26/capture-comparison.cjs
+output/imagegen/slides-23-26/export-slides.cjs
+output/imagegen/slides-23-26/comparison-capture.json
+output/imagegen/slides-23-26/export-manifest.json
+output/imagegen/slides-23-26/*.zip

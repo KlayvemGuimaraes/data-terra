@@ -1,0 +1,11 @@
+# Presentation and video deliverables are versioned in Git, not served by the app.
+output/
+
+# Local files are unnecessary for the hosted simulator.
+.DS_Store
+**/.DS_Store
+*.db
+*.db-journal
+.env
+.env.*
+server/references/
