@@ -282,6 +282,15 @@ Os materiais de apresentação e vídeo em `output/` ficam disponíveis no GitHu
 locais dos novos materiais são ignorados pelo Git. Depois de publicar, confira o
 status `Ready` na Vercel e valide idioma, link da logo, manual e API no domínio público.
 
+## Materiais de apresentação
+
+- [Vídeos: demonstração de uso e animação da marca](output/video/README.txt), com MP4s em Full HD e scripts de produção.
+- [Slides 23–26 do pitch](output/imagegen/slides-23-26/production-notes.txt), com PNGs 1920 × 1080, prompts, fontes e premissas.
+
+O assistente de IA dos slides é uma proposta conceitual. Prazos, preços e escopos
+comerciais apresentados são hipóteses sujeitas à validação, não capacidades ou
+compromissos já garantidos pelo simulador.
+
 ## Testes
 
 ```bash

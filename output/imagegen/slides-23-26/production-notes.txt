@@ -1,0 +1,30 @@
+DATATERRA — SLIDES 23–26
+Entrega: quatro imagens PNG 1920 x 1080, proporção 16:9.
+Idioma: inglês. Identidade: fundo verde escuro, destaques sálvia, texto creme, tipografia inspirada em Montserrat/Poppins e logo atual do projeto.
+
+23 — REGIONAL COMPARISON
+Captura real da aplicação local em inglês, tema escuro, estado SP, comparação ordenada por conectividade. A captura original é preservada na exportação. O texto descreve a ordenação por pilar e o recorte regional; não atribui à funcionalidade uma classificação combinada ou busca automática por proximidade.
+
+24 — AI EXPERT ASSISTANT
+Interface conceitual gerada para ilustrar a proposta do assistente. Identificada no slide como CONCEPT PREVIEW / FEATURE CONCEPT. Não é uma captura de uma funcionalidade já disponível no código inspecionado.
+
+25 — PRE-FEASIBILITY ADVANTAGE
+Fotografia real: Scala Data Centers, Campus Tamboré, Barueri/SP, SGRUTB08. Fonte pública oficial, com crédito no próprio slide:
+https://scaladatacenters.com/data-centers/
+https://scaladatacenters.com/wp-content/uploads/2022/03/SGRUTB08-2.png
+A foto original foi recortada e redimensionada na exportação, sem reconstrução do edifício por IA.
+Prazos e custo do rascunho (<15 minutos; 3–6 meses; dias a semanas; $100k+) foram preservados como hipóteses de planejamento não validadas. As comparações envolvem escopos diferentes (triagem preliminar vs. diligência detalhada).
+Contexto de mercado consultado, sem atribuir a esses relatórios a validação das métricas acima:
+https://www.cbre.com/insights/reports/global-data-center-trends-2025
+https://www.jll.com/en-us/insights/market-outlook/global-data-centers
+
+26 — BUSINESS MODEL & GO-TO-MARKET
+Valores comerciais preservados e organizados em B2B / B2G. Escopo e preços apresentados como proposta sujeita à validação por pilotos. Funcionalidades e termos comerciais do rascunho não foram tratados como preços já vigentes ou capacidades comprovadas do MVP.
+
+PRODUÇÃO
+Layouts criativos: image_gen.imagegen, modo edição com imagens de referência.
+Prompts: prompts.json e prompts-23-25.json nesta pasta.
+Exportação local: export-slides.cjs. Ajuste final de dimensões e preservação de pixels de captura/fotografia via Sharp.
+No Git ficam os quatro PNGs finais, os prompts e estas notas. Os scripts de captura/exportação, o ZIP e os manifestos com caminhos da máquina são auxiliares locais e não fazem parte do pacote versionado.
+Os JPGs originais e os arquivos gerados originais foram preservados.
+Nenhuma alteração ou publicação da aplicação foi realizada para esta entrega.
