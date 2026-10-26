@@ -1,0 +1,52 @@
+Use case: compositing.
+Edit the provided DataTerra slide (image 1). Deliver one 1920x1080 PNG, exact 16:9.
+The user explicitly requests REAL NEWS / PUBLIC-SOURCE PHOTOGRAPHS and a STRAIGHT HARD EDGE on the left sidebar, without any gradient.
+This is a photographic collage/layout edit, not generation of substitute scenes. Paste the supplied real photographs faithfully, with crop/resize only. Do not redraw, beautify, invent or reconstruct any people, buildings, banner text, jars, clothing or surroundings. No new synthetic photo content.
+
+INPUT ROLES:
+1. Current DataTerra slide: preserve its dark green theme, typography, logo, ordinary English headings, right-only content organization and broad left sidebar. Replace every synthetic image.
+2. Real AJC photograph by Ben Gray: Beverly and Jeff Morris wearing red in their kitchen with bottles and mason jars containing turbid water. Use in the LEFT of the three right-side cards.
+3. Real Scala official SGRUTB08 photograph: large white/black building with Scala signage. Use in the MIDDLE card.
+4. Real Iago Barreto Soares / Intercept photograph: community group beneath a leafy tree with banners reading “NÃO SOMOS QUINTAL DE DATA CENTER” and “ÁGUA E ENERGIA PARA O POVO, NÃO PARA DATA CENTERS”. Use in the RIGHT card. Preserve the actual group and banners exactly. Crop if necessary but never recompose people or retype the banner within the photo.
+5. Real Scala SGRUTB04 photograph: tall white/black data center under blue sky. Use for the large LEFT SIDEBAR.
+
+LAYOUT:
+Keep left sidebar from x=0 to x=724, full height. It must end in a PERFECTLY STRAIGHT, SHARP VERTICAL CUT against the right dark panel. NO FEATHERING, NO VIGNETTE, NO GRADIENT, NO BLENDED BORDER, NO SHADOW FADING over that edge. Image fills sidebar to the edge, right panel solid #101b17 immediately after it. Photo itself retains natural colors.
+Crop the source photograph rather than distorting or inventing the scene. A small opaque solid dark footer band at the bottom of the sidebar may carry the following white two-line source credit:
+"Campus Tamboré, Barueri"
+"Source: Scala Data Centers"
+
+Right area x=724 to x=1920 stays dark forest green #101b17, off-white #edf2e8, pale sage #b3cf91. Montserrat for bold emphasis and Poppins for supporting copy. Maintain the current DataTerra logo within the top of the RIGHT area. No text or cards intrude into the left photo.
+Preserve the current headline centered inside RIGHT region, exactly:
+"Are we making the right decisions about"
+"where it should grow?"
+Second line bold sage.
+Preserve subtitle:
+"THE MILLION-DOLLAR COST OF BLIND SITE SELECTION"
+
+Keep three equal image cards side by side, aligned, moderate rounded corners, with sensible gutters and padding. Maintain the source slide's approximate card placement, but reserve sufficient space BELOW each photograph for a legible two-line credit and the existing risk label. Use photo crops that preserve the crucial evidence in each source: water jars in image 2; actual facade in image 3; people and banner in image 4. If a portrait crop destroys meaningful photographic content, use a slightly wider/shorter common image area or restrained dark letterboxing rather than inventing missing pixels.
+
+Immediately UNDER each image, include the exact credits, small but readable muted sage, centered with correct spelling:
+Left:
+"Photo: Ben Gray / AJC"
+"ajc.com"
+Middle:
+"Photo: Scala Data Centers"
+"scaladatacenters.com"
+Right:
+"Photo: Iago Barreto Soares"
+"Intercept Brasil"
+
+Below these credits, maintain the exact existing white risk labels in aligned two-line blocks:
+Left: "Environmental" / "injunctions"
+Middle: "Loss of tax" / "incentives"
+Right: "Costly Legal" / "Operations"
+
+Under the middle label, include small muted text:
+"Infrastructure photo for context"
+This distinguishes the actual photo source from an unverified claim about that operator's tax benefits.
+
+Delete the old "Illustrative images" footer because the supplied photos replace all generated scenes.
+Keep the slide harmonious and clean, with readable credits, balanced spacing and no clipped text. All ordinary slide copy stays English; the real Portuguese banners inside the third photograph remain as photographed. Do not synthesize new footage or reinterpret the photographs. Most important: preserve actual source photographs and a completely straight, hard, non-gradient left photo boundary.
+
+Method: built-in image_gen for the layout edit and straight-edge correction. Final photographic areas are composited directly from the downloaded originals with Sharp, using only crop/resize and rounded clipping, so no generated reconstruction of faces, signs or buildings is retained. Final PNG: 1920x1080.

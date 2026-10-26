@@ -347,8 +347,29 @@ O link “Como calculamos” abre o PDF em inglês. O botão de tema alterna
 entre claro e escuro, inicia conforme o dispositivo e guarda a escolha no navegador.
 O PDF mantém fundo claro para leitura e impressão; o tema não altera os cálculos.
 
+O seletor de idioma oferece **PT-BR e English**, com português como padrão e escolha
+salva em `localStorage` (`dataterra-language`). A troca atualiza textos, dicas,
+resultados, avisos de cobertura, rótulos acessíveis e formatos numéricos sem recarregar
+a página. Local, raio, filtros, pesos, carga de TI e valores calculados são preservados.
+Nomes geográficos, nomes das instalações e documentos das fontes mantêm o idioma original.
+O PDF de metodologia continua em inglês, conforme indicado no nome acessível do link.
+
+A logo abre a [landing page DataTerra](https://dataterra.vercel.app/) em uma nova aba,
+usando `?lang=pt` ou `?lang=en` conforme a escolha na plataforma. A animação de entrada
+usa o símbolo SVG atual, dura cerca de 1,4 segundo e não depende do carregamento das
+APIs. É omitida com `prefers-reduced-motion: reduce` e termina antecipadamente ao
+interagir com a página. O mapa carrega em paralelo.
+
+As traduções ficam em `translations.js`, sem serviço externo de tradução. `i18n.js`
+traduz o HTML estático uma vez por escolha e expõe `t` para mensagens e `html` para
+templates dos renderizadores. Somente textos e atributos acessíveis são traduzidos;
+valores internos dos filtros, IDs e parâmetros das APIs permanecem canônicos.
+Ao adicionar mensagens, inclua a versão inglesa no catálogo e preserve todos os
+placeholders. Valores externos interpolados em HTML devem passar por `escapeText`.
+`npm test` verifica persistência, fallback, formatação e integridade dos placeholders.
+
 O simulador compartilha a paleta e a tipografia da
-[nossa landing page](https://github.com/nuvemnove/dataterra-landingpage): verde-floresta
+[nossa landing page](https://dataterra.vercel.app/): verde-floresta
 `#174b3c`, marfim `#f8f9f3`, sálvia `#719052` e terracota `#ae603e`.
 Montserrat é usada nos títulos e Poppins nos textos; arquivos e licenças ficam
 em `assets/fonts/`, sem depender de requisições a um serviço externo de fontes.

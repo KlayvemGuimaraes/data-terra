@@ -1605,3 +1605,43 @@ input[type="range"] { accent-color: var(--accent); }
   .method-link { padding: 0 8px; font-size: 9px; }
   .topbar-actions { gap: 5px; }
 }
+
+/* Language control follows the existing theme and remains usable on narrow screens. */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.language-control { display: inline-flex; align-items: center; gap: 7px; padding-left: 11px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel-soft); color: var(--ink); }
+.language-control > svg { flex-shrink: 0; color: var(--muted); }
+.language-control select { width: auto; max-width: 122px; min-height: 40px; margin: 0; padding: 0 23px 0 0; border: 0; background-color: transparent; color: inherit; font-size: 11px; cursor: pointer; }
+.language-control:focus-within { outline: 3px solid var(--terra); outline-offset: 3px; }
+.language-control select:focus-visible { outline: none; }
+.topbar-actions { gap: 12px; flex-shrink: 0; }
+
+/* Brand entry: CSS also expires the overlay if a later script fails. */
+.brand-intro { display: none; position: fixed; inset: 0; z-index: 10000; place-items: center; background: var(--bg); color: var(--accent); pointer-events: none; }
+.is-entering .brand-intro { display: grid; animation: intro-exit 1.4s both; }
+.brand-intro-content { display: grid; justify-items: center; gap: 22px; padding: 32px; }
+.intro-symbol { overflow: visible; }
+.intro-symbol path { transform-origin: center; animation: intro-layer .65s cubic-bezier(.16,1,.3,1) both; }
+.intro-symbol path:nth-child(2) { animation-delay: .12s; }
+.intro-symbol path:nth-child(3) { animation-delay: .24s; }
+.intro-wordmark { font-family: "Montserrat", sans-serif; font-size: clamp(32px, 6vw, 46px); font-weight: 750; letter-spacing: -2px; color: var(--ink); animation: intro-wordmark .55s .22s both; }
+.intro-line { width: 44px; height: 2px; background: var(--terra); transform-origin: center; animation: intro-wordmark .6s .36s both; }
+@keyframes intro-layer { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes intro-wordmark { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes intro-exit { 0%, 72% { opacity: 1; visibility: visible; } 100% { opacity: 0; visibility: hidden; } }
+@media (max-width: 780px) {
+  .topbar { flex-wrap: wrap; height: auto; min-height: 76px; gap: 12px; }
+  .topbar-actions { gap: 8px; }
+  .language-control select { max-width: 110px; }
+}
+@media (max-width: 560px) {
+  .topbar { display: grid; grid-template-columns: 1fr auto; }
+  .topbar-actions { display: contents; }
+  .language-control { justify-self: end; }
+  .theme-toggle { grid-column: 2; grid-row: 2; justify-self: end; }
+  .method-link { grid-column: 1; grid-row: 2; justify-self: start; min-height: 40px; padding: 0 12px; font-size: 11px; }
+  .brand-lockup { min-width: 0; width: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-intro, .is-entering .brand-intro { display: none; animation: none; }
+  .brand-intro * { animation: none; }
+}

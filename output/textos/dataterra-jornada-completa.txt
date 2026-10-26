@@ -1,0 +1,133 @@
+DataTerra | Jornada completa | 23/10/2026
+
+Base documental pública, sem entrevistas. Fatos profissionais e o caso de Vinhedo são verificados; necessidades, contratação e uso do DataTerra são hipóteses de produto. Não há evidência de que as pessoas ou empresas citadas utilizem, endossem ou tenham contratado o DataTerra.
+
+Leitura: 01-15 sequenciais; 16-20 em paralelo; reunir na 21 e seguir até 30.
+
+01. Marcos Siqueira*
+Responsável: PERSONA / PATROCINADOR
+Referência: liderança de expansão da Ascenty. [1,2]
+
+02. Define a necessidade
+Responsável: LIDERANÇA + CLIENTES
+Nova unidade; carga de TI, prazo, mercado e resiliência. [4,5]
+
+03. Autoriza os estudos
+Responsável: LIDERANÇA + FINANÇAS
+Define teto de gastos, metas e critérios de exclusão. [4]
+
+04. Contrata consultoria
+Responsável: COMPRAS + ENGENHARIA
+Engenharia e meio ambiente: escopo, entregáveis e responsáveis. [4,5]
+
+05. Prepara a busca
+Responsável: CONSULTORIA
+Traduz o escopo; prospecta terrenos e alternativas regionais. [4,5]
+
+06. Abre o simulador
+Responsável: ANALISTA / DATATERRA
+Acessa o mapa e lê as premissas em “Como calculamos”. [8]
+
+07. Explora regiões
+Responsável: ANALISTA / DATATERRA
+Filtra UF e município; usa o ranking para orientar a busca. [8]
+
+08. Marca cada candidato
+Responsável: ANALISTA / DATATERRA
+Seleciona um ponto no mapa para a análise local. [8]
+
+09. Configura a simulação
+Responsável: ANALISTA / DATATERRA
+Define raio, carga de TI e consumo de água por kWh de TI. [8]
+
+10. Ajusta os critérios
+Responsável: ANALISTA / DATATERRA
+Define os sete pesos; mantém premissas comparáveis entre locais. [8]
+
+11. Confere a cobertura
+Responsável: ANALISTA / DATATERRA
+Inspeciona camadas, origem, datas, aproximações e falhas. [8]
+
+12. Interpreta o resultado
+Responsável: ANALISTA / DATATERRA
+Lê score local, energia, água, clima, rede e risco territorial. [8]
+
+13. Compara os candidatos
+Responsável: CONSULTORIA
+Repete 08-12; registra evidências e pendências fora do MVP. [8]
+
+14. Recomenda uma seleção
+Responsável: CONSULTORIA
+Entrega poucos locais e um plano de diligências à liderança. [4]
+
+15. Vale aprofundar?
+Responsável: LIDERANÇA + ENGENHARIA
+SIM: iniciar as cinco frentes abaixo.
+NÃO: rever candidatos e premissas.
+Retorno: etapa 07.
+
+16. Terreno e riscos físicos
+Responsável: JURÍDICO + ENGENHARIA
+Título, zoneamento, sondagem, acesso, segurança e inundação. [4,5]
+
+17. Energia de fato
+Responsável: ELÉTRICA + CONCESSIONÁRIA
+Valida potência, prazo e custo de conexão, redundância e fornecimento. [4,5]
+
+18. Água e resfriamento
+Responsável: HÍDRICA + OPERADOR/ÓRGÃO
+Valida fontes, balanço, reúso e outorga/regularização aplicável. [5,7]
+
+19. Fibra e desempenho
+Responsável: TELECOM + OPERADORAS
+Confirma atendimento, rotas físicas distintas, latência e contratos. [4,5]
+
+20. Ambiente e comunidades
+Responsável: AMBIENTAL + ÓRGÃOS
+Verifica UC, APP, TI e quilombos; estudos, participação e rito local. [5,6]
+
+21. Consolida a viabilidade
+Responsável: CONSULTORIA + ENGENHARIA
+Reúne as cinco frentes, projeto conceitual, custos e cronograma. [4]
+
+22. Local viável?
+Responsável: LIDERANÇA + COMITÊ
+SIM: seleciona o local.
+NÃO: ajusta a busca ou encerra a proposta.
+Retorno: etapa 07.
+
+23. Obtém aprovações
+Responsável: CONSULTORIA + ÓRGÃOS
+Estudos, licenças, outorgas e alvarás aplicáveis à etapa de obra. [6,7]
+
+24. Libera o investimento
+Responsável: COMITÊ + JURÍDICO
+Aprova capital; formaliza terreno, conexão e demais compromissos. [4]
+
+25. Detalha e contrata
+Responsável: ENGENHARIA + COMPRAS
+Projeto executivo, construtora, fornecedores e equipamentos. [4]
+
+26. Pode iniciar a obra?
+Responsável: GESTÃO DO PROJETO
+SIM: libera a construção.
+NÃO: resolve pendências de aprovação.
+Retorno: etapa 23.
+
+27. Constrói e equipa
+Responsável: CONSTRUTORA + ENGENHARIA
+Executa obra, instalações e mitigação; fiscaliza segurança e qualidade. [4]
+
+28. Conecta e testa
+Responsável: UTILITIES + COMISSIONAMENTO
+Energiza, ativa fibra e testa falhas, redundância, refrigeração e TI. [1,4]
+
+29. Pode operar?
+Responsável: GESTÃO + ÓRGÃOS + OPERAÇÃO
+SIM: aceite e autorizações aplicáveis.
+NÃO: corrige testes/condicionantes.
+Retorno: etapa 28.
+
+30. Datacenter em operação
+Responsável: OPERAÇÃO
+Entrega assistida; monitora serviço, energia, água e condicionantes. [1,4,6]

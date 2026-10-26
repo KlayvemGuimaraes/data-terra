@@ -330,6 +330,7 @@
                 return {
                     ...region,
                     fiber,
+                    summaryData: { kind: "water", population: group.population, services: [...group.services], provider: providerLabel },
                     summary: `Cidade com ${group.population.toLocaleString("pt-BR")} habitantes. Serviços de ${serviceLabel} registrados para ${providerLabel || "prestador não informado"}.`,
                     scores,
                     tags: [serviceLabel, group.state, ...buildFiberTags(fiber)],
@@ -403,6 +404,7 @@
             return {
                 ...region,
                 fiber,
+                summaryData: { kind: "energy", plants: group.count, capacityMw: group.capacityMw },
                 summary: `Cidade com ${group.count.toLocaleString("pt-BR")} usinas renováveis registradas na ANEEL, somando ${formatMw(group.capacityMw)} MW de capacidade outorgada.`,
                 scores: {
                     renewables: Math.max(60, renewableScore, capacityScore),

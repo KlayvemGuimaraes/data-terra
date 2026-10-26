@@ -1,0 +1,33 @@
+Use case: productivity-visual.
+Asset type: DataTerra pitch deck feature slide, PNG, landscape exact 16:9, target 1920 x 1080.
+Input image 1: EDIT TARGET, the user's feature slide. Restyle it in the established DataTerra design.
+Input image 2: supporting BRAND AND LAYOUT REFERENCE, a previously completed DataTerra slide. Match its current logo, forest-green palette, typography, and full-height left screenshot band. Do not copy its headline or body.
+Input image 3: ACTUAL SCREENSHOT of the current application. This is original product evidence, not a UI mockup. Preserve its interface and text; do not invent controls or alter data. The original screenshot pixels will be inserted again during final export.
+Strict layout: full-height LEFT screenshot strip occupying approximately 42% of the canvas, from x=0 to x=803 at a 1920 px width, and right content column from x=803 to 1920. Preserve the left strip. HARD STRAIGHT VERTICAL EDGE, no gradient, blending, blur, feathering, rounded image corners or transparency at the boundary. Screenshot cropped proportionally to fit; never stretched. No browser chrome or device frame. No newly generated interface.
+Right section: near-solid dark forest #101b17, panels #182720, fine borders #34463a, off-white #edf2e8 text, sage #b3cf91 emphasis and icons, muted #b5c3b0 notes. Restrained terracotta #e4a080 only for the logo dot. Montserrat semibold headings, Poppins body. Spacious, harmonious editorial layout. No purple, white background, neon, glossy effects or decorative map.
+Right-column contents are left-aligned within one balanced column with generous equal margins. Small current DataTerra logo near the top: three stacked rounded diamond outline layers plus lowercase "dataterra.", bold data, regular terra, tiny terracotta terminal dot. One strong heading, readable paragraph, well-spaced bullets, concise lower note. Keep every text element inside the right column, no overlap with the screenshot.
+All slide copy is English, except the genuine Portuguese UI screenshot, which remains unmodified. No angle-bracket placeholders. No watermark, invented metrics, numbered slide labels, invented certifications, or additional claims.
+
+Specific task: produce the "Customized Requirements" feature slide. Keep the user's eight requirement categories, correct spelling and grammar, and distinguish the broader concept from the narrower current MVP controls. Do not depict missing fields as if they already exist.
+Small eyebrow:
+"FEATURE CONCEPT"
+Title, split into two lines if needed:
+"Customized Requirements"
+Intro:
+"At stage 1, Lily defines the project's requirements:"
+Eight bullets, exact text:
+"Installation type (hyperscale, edge nodes, multi-tenant)"
+"Cooling system (DLC, adiabatic, free cooling)"
+"Preferred macro-region"
+"Server model"
+"Server count"
+"Electrical power capacity"
+"Estimated water consumption"
+"Tier resilience & redundancy"
+Make "Preferred macro-region" bold sage, matching the source emphasis. Other bullets off-white with small sage dots, compact but comfortable line spacing.
+Lower supporting paragraph, exact text:
+"DataTerra supports preliminary site screening based on resource availability and territorial risks. Legal requirements and tax eligibility are confirmed through specialist due diligence."
+Small footer, exact text:
+"Current MVP inputs: location, radius, IT load and water-use intensity."
+The FEATURE CONCEPT label and this footer must both be readable; the broader checklist is not all implemented.
+Ensure all eight bullets and the complete lower paragraph fit and remain legible. This is a polished one-slide design, not a screenshot of the original draft.

@@ -1,0 +1,13 @@
+DataTerra — slides de pilares e estratégia territorial
+
+Entregas finais: PNG, 1920 x 1080, proporção 16:9.
+Design: ferramenta integrada image_gen, com os rascunhos fornecidos e slides anteriores como referências.
+Fontes visuais: identidade da aplicação local (Montserrat/Poppins; verde-floresta, sálvia, branco suave).
+
+O slide dos pilares mantém os vinte itens do rascunho e corrige Connectivity. O título e o rodapé identificam um quadro de avaliação mais amplo que o MVP, porque docs/manual-dataterra.html distingue entradas implementadas de camadas não integradas. A lista não foi transformada em afirmação de que todos esses dados já entram no cálculo.
+
+O slide de estratégia usa uma captura real da aplicação local, produzida com os arquivos do projeto e os mesmos redirecionamentos estáticos descritos em vercel.json. Não houve alteração de código da aplicação nem fabricação de valores para o screenshot. A captura vertical usa viewport 724 x 1080 em escala 2, com o tema escuro existente; data de produção: 25/10/2026. O script capturar-plataforma.cjs reproduz a captura.
+
+Na exportação final, os pixels originais da captura são compostos na faixa lateral esquerda, com recorte reto e sem degradê, preservando a interface em português. O restante do slide permanece em inglês.
+
+Referência de conteúdo: docs/manual-dataterra.html e rascunhos fornecidos pelo usuário. O rodapé de estratégia descreve fontes de dados sem classificar TeleGeography como órgão governamental.

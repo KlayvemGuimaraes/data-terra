@@ -1,0 +1,17 @@
+DataTerra — Customized Requirements e Four-Pillar Assessment
+
+Formato final: dois PNGs, 1920 x 1080, proporção 16:9.
+Design produzido com a ferramenta integrada image_gen a partir dos rascunhos enviados e da identidade visual dos slides anteriores.
+
+Fotografias de tela: capturas reais da aplicação local no tema escuro, produzidas em 25/10/2026. A aba WUI foi configurada pelo formulário existente para uma carga de TI de 100 MW, preservando os demais parâmetros. A segunda captura mostra a aba Local, os quatro pilares e os avisos reais de disponibilidade das fontes. Não foram criados controles, valores ou resultados fictícios.
+
+Na exportação, os pixels originais das capturas substituem integralmente a interface reinterpretada pelo gerador. A faixa esquerda tem borda reta, sem degradê, com redimensionamento proporcional e recorte. Scripts: capturar-features.cjs e exportar-features.cjs.
+
+Ajustes de texto:
+- Customized Requirements mantém as oito categorias do rascunho e identifica o formulário ampliado como FEATURE CONCEPT. O rodapé informa os campos existentes no MVP. Lily define os requisitos de projeto; não se afirma que todos os oito campos já possam ser inseridos na aplicação.
+- Foram corrigidos Preffered, Servidor e a redação em inglês.
+- A avaliação atual usa indicadores espaciais, quatro notas heurísticas independentes e uma estimativa inspirada em WUI. Não usa PUE no cálculo. Essa distinção segue docs/manual-dataterra.html e wui-model.js.
+- PUE e acompanhamento de alterações tributárias/legislativas permanecem citados como escopo além do MVP atual. Não se afirma que a plataforma monitora notícias legais ou determina elegibilidade fiscal.
+- O texto de diligência preserva a separação entre triagem preliminar e confirmação técnica, jurídica e tributária.
+
+Referências locais: docs/manual-dataterra.html; index.html; wui-model.js. Não houve mudança no código da aplicação nem deploy nesta atividade.

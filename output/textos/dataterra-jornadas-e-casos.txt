@@ -1,0 +1,210 @@
+PÁGINA 1
+
+dataterra.
+01 / JORNADA DE USO
+MATERIAL DE APOIO
+Da pergunta à pré-seleção de locais
+Fátima define a demanda. A equipe técnica usa o simulador e leva evidências para a decisão.
+DataTerra | Jornadas e público-alvo | 23/10/2026
+01 / 04
+ANALISTA NO DATATERRA
+DEMANDA
+DECISÃO DA EQUIPE
+01
+Alinhe a
+busca
+Defina carga,
+prazo, regiões e
+requisitos
+mínimos.
+02
+Abra o
+simulador
+Abra o mapa e
+explore UFs,
+municípios e
+candidatos.
+03
+Escolha
+um ponto
+Selecione uma
+região ou clique
+no mapa.
+04
+Configure
+o cenário
+Defina raio,
+carga de TI,
+L/kWh e pesos.
+05
+Leia as
+evidências
+Leia score local,
+água, alertas,
+fontes e Como
+calculamos.
+06
+Há base para
+priorizar este
+local?
+Sim
+07
+Leve à
+decisão
+Registre opções
+e pendências.
+Fátima prioriza
+os estudos.
+Não / faltam dados
+Revise o local, o cenário ou a fonte antes de avançar.
+SAÍDA DA JORNADA
+Pré-seleção de locais + parâmetros + riscos + próximos estudos.
+Compare opções repetindo a análise local e
+registrando os resultados fora do simulador.
+Triagem preliminar. Ranking regional e análise local usam bases diferentes; posição no ranking não valida o imóvel. [M1]
+
+
+PÁGINA 2
+
+dataterra.
+02 / JORNADA ATÉ A IMPLANTAÇÃO
+MATERIAL DE APOIO
+Da seleção territorial ao datacenter em operação
+O DataTerra apoia a triagem; a implantação depende de validação técnica, aprovações e execução externas.
+DataTerra | Jornadas e público-alvo | 23/10/2026
+02 / 04
+A / SELECIONAR
+Fátima + analista
+B / VALIDAR E APROVAR
+Engenharia + ESG + jurídico + finanças
+C / IMPLANTAR
+Empreendedor + construtoras + operação
+1
+Definir requisitos
+Energia, água/refrigeração, latência, terreno,
+prazo, orçamento e riscos sociais.
+2
+Triar com o DataTerra
+Explorar regiões; analisar ponto e raio; ler score,
+fontes e limitações.
+3
+Selecionar alternativas
+Equipe registra a pré-seleção e as pendências.
+Fátima autoriza estudos.
+4
+Comprovar viabilidade
+Visitas e estudos: conexão, água, fibra, terreno,
+clima e comunidades.
+5
+Aprovar o investimento
+Comitê avalia custos, prazos, riscos e
+condições de contratação.
+6
+Projetar e autorizar
+Projetos, contratos, licenças e outorgas
+aplicáveis antes das respectivas atividades.
+7
+Construir e conectar
+Obras, equipamentos e conexões conforme
+projetos e autorizações.
+8
+Comissionar e liberar
+Testar sistemas e redundância; atender
+exigências para entrar em operação.
+9
+Operar e monitorar
+Medir energia, água e emissões; cumprir
+condicionantes e revisar a expansão.
+PONTO DE DECISÃO
+Se a validação (4) ou a aprovação (5-6) indicar inviabilidade: revisar alternativas na etapa 2.
+Fluxo ilustrativo: atividades podem ocorrer em paralelo. Órgão competente e exigências variam por local e projeto. [R6, R7]
+
+
+PÁGINA 3
+
+dataterra.
+03 / CASOS INSTALADOS NO BRASIL
+MATERIAL DE APOIO
+Infraestruturas reais, decisões concretas
+Marcos públicos de implantação ajudam a explicar o percurso entre planejamento, obra e operação.
+DataTerra | Jornadas e público-alvo | 23/10/2026
+03 / 04
+ASCENTY
+Campus Vinhedo / SP
+ANGONAP / ANGOLA CABLES
+Praia do Futuro / Fortaleza, CE
+04/10/2018
+Início das obras anunciado pela prefeitura e pela
+empresa. [R1]
+21/10/2019
+Primeira unidade inaugurada em Vinhedo. [R2]
+30/11/2020
+Segunda unidade do campus entra em operação. [R3]
+2017
+Monet conecta Brasil e Estados Unidos na cronologia da
+Angola Cables. [R5]
+2018
+SACS conecta Angola e Brasil. [R5]
+16/04/2019
+AngoNAP inaugurado na Praia do Futuro, em Fortaleza.
+[R4]
+LEITURA PARA A JORNADA / INFERÊNCIA
+Expansão por fases exige reavaliar a infraestrutura e a capacidade de
+atendimento a cada novo projeto.
+LEITURA PARA A JORNADA / INFERÊNCIA
+A conectividade ajuda a formar a lista de alternativas; água, energia e
+território exigem análise própria.
+Como usar no pitch
+Mostre os marcos reais e, em seguida, a etapa de triagem que o DataTerra poderia apoiar em projetos semelhantes.
+Não há evidência de uso do DataTerra por essas empresas. Os marcos não reconstituem seus critérios internos nem certificam sustentabilidade.
+
+
+PÁGINA 4
+
+dataterra.
+04 / FONTES E PREMISSAS
+MATERIAL DE APOIO
+De onde vieram os fluxos e a revisão
+Fontes consultadas em 23/10/2026. Os títulos abaixo são links clicáveis no PDF.
+DataTerra | Jornadas e público-alvo | 23/10/2026
+04 / 04
+P1
+Pitch DataTerra, slide 7
+Quadro original de Fátima: cargo, objetivo e desafio.
+P2
+Visão Geral - Hackathon E+
+Páginas 2 e 12: público amplo da PID e recorte DataTerra.
+P3
+Roteiro de Pitch
+Páginas 1-3: problema, solução e promessas a delimitar.
+P4
+Cases de DataCenters pelo mundo
+Páginas 2-3: repetição de texto da Microsoft em Quilicura.
+P5
+Bemmover, slide 7
+Referência de sequência, atores e ciclos de retorno.
+R1
+Prefeitura de Vinhedo | 04/10/2018
+Anúncio do início das obras do campus da Ascenty.
+R2
+Ascenty | 21/10/2019
+Inauguração da primeira unidade em Vinhedo.
+R3
+Ascenty | 30/11/2020
+Entrada em operação da segunda unidade do campus.
+R4
+Prefeitura de Fortaleza | 16/04/2019
+Inauguração do AngoNAP na Praia do Futuro.
+R5
+Angola Cables / RNP | WTR-CE 2019
+Slide 2: marcos Monet (2017), SACS (2018) e AngoNAP (2019).
+R6
+Ibama | Licenciamento ambiental
+Procedimentos e competências: confirmar o rito do projeto.
+R7
+ANA | Outorga de recursos hídricos
+Competência federal ou estadual conforme o recurso hídrico.
+M1 / ESCOPO DO MVP
+README.md, docs/manual-dataterra.html e módulos locais no commit 8cd14ed. Fluxos baseados nas funções documentadas; revisão de
+jornada não é auditoria de exatidão das bases.
+Persona, papéis e sequência externa são propostas de síntese a validar com o público. Casos reais: somente os marcos explicitamente citados.

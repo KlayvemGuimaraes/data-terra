@@ -1,0 +1,11 @@
+DATATERRA | PERSONA DE MERCADO E JORNADA COMPLETA
+
+1. Persona: PDF A4 de duas páginas e texto editável.
+2. Jornada: diagrama vetorial 16:9 com sete etapas principais e uma volta à triagem.
+3. PNGs: páginas da persona e diagrama de 4000 x 2250 pixels.
+4. Apoio: roteiro detalhado de 30 etapas e fontes completas em TXT/JSON.
+
+Use esta versão no lugar dos materiais anteriores baseados na persona Fátima.
+O diagrama é um fluxo proposto, com origem e limite da evidência indicados.
+Os PDFs contêm links clicáveis para fontes públicas e o LinkedIn da referência principal.
+O cenário não afirma uso, parceria, entrevista ou contratação do DataTerra por terceiros.

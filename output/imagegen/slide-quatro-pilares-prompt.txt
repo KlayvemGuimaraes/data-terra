@@ -1,0 +1,52 @@
+Use case: productivity-visual.
+Asset type: DataTerra pitch deck, four evaluation pillars slide, landscape PNG, exact 16:9, target 1920 x 1080.
+Input image 1 is the EDIT TARGET: preserve the 2-by-2 structure and every data item from this supplied draft, while redesigning it completely in DataTerra's current visual identity.
+Input image 2 is a supporting BRAND STYLE REFERENCE ONLY: use its current logo, typography and dark forest/sage palette. Do not copy the persona, character or persona wording.
+Art direction: crisp, calm, refined information design, mathematically balanced 2-by-2 grid, generous margins, perfectly aligned equal-sized panels. Solid dark forest background #101b17, dark-green panels #182720, fine #34463a borders, off-white #edf2e8 body, sage #b3cf91 headings and line icons, muted #b5c3b0 secondary text. Montserrat semibold headings, Poppins regular body. No purple, white background, neon or garish gradients.
+Current small brand lockup at top-left: three stacked rounded diamond outline layers in sage next to lowercase "dataterra.", bold data and regular terra, tiny terracotta terminal period.
+Layout: concise balanced headline near top, centered within slide with generous separation from panels. Four equal rounded rectangles below, two rows, two columns. Each card has one simple thin sage icon, a strong title and a very readable five-item list. Icons are a water droplet, lightning bolt, network nodes, and shield with map-pin respectively. Align all lists consistently. Content must not crowd the panel edges. Use a wide enough card for the social/territorial heading. Do not omit any items.
+Because the project manual distinguishes current inputs from a broader scope, use the following revised exact headline and footer rather than claiming that all layers are already operational or all are official.
+
+Headline, exact text:
+"DataTerra's evaluation framework connects facility requirements with four essential data layers:"
+
+Top-left card title:
+"Water Stress"
+List:
+"River Basin Water Balances"
+"Baseline Water Scarcity"
+"Local Climatology"
+"Recycled Wastewater"
+"Effluent Availability"
+
+Top-right card title:
+"Energy Capacity"
+List:
+"Renewable Generation Assets"
+"Transmission Infrastructure"
+"Substation Coordinates"
+"Hourly Marginal Carbon Intensity"
+"Outage History"
+
+Bottom-left card title, spelling MUST be correct:
+"Connectivity"
+List:
+"Backbone Routes"
+"Network Density"
+"Landing & Access Points"
+"Network Latency Maps"
+"5G & Edge Node Density"
+
+Bottom-right card title:
+"Social and Territorial Risks"
+List:
+"Environmental Licensing Jurisdiction"
+"Skilled Technical Labor Density"
+"Population Density"
+"Protected Lands"
+"Tax Rules"
+
+Small but legible centered footer:
+"Evaluation framework · Includes data layers beyond the current MVP."
+
+Constraints: exact English text only; include all twenty data items, four titles, headline and footer. No generated statistics, scores, maps, extra claims, screenshots or photographs. No original grey placeholders. Make everything legible, balanced and contained within a single full-bleed 16:9 slide.

@@ -1,0 +1,34 @@
+Use case: productivity-visual.
+Asset: DataTerra pitch deck PERSONA slide, exactly 16:9, target 1920 x 1080 PNG.
+Input image 1: EDIT TARGET, the user's persona Lily draft. Stylize the slide and replace the large placeholder paragraph with an original businesswoman illustration. Keep the same persona, role, objectives, requirements, risks and challenge.
+Input image 2: supporting BRAND STYLE REFERENCE ONLY, DataTerra cover. Match the current logo, dark forest green, sage and off-white text. Do not copy the map or cover copy.
+Design: polished cohesive presentation, a calm editorial layout with generous whitespace and precise alignment. Dark forest #101b17 background, slightly lighter #182720 left column with a clean STRAIGHT vertical edge, no fade at the border. Off-white #edf2e8 primary text, sage #b3cf91 headings, muted #b5c3b0 secondary, tiny terracotta #e4a080 accents. Montserrat headings, Poppins body. No gradients.
+Layout: approximately 35% left identity/illustration column and 65% right text column, with generous side margins. Title "Persona" at top left. Full-body Lily illustration centered in the left column below the title. Name and job title below her feet, with sufficient padding and no clipping. Right column has an introductory statement followed by FOUR clearly separated aligned content groups: OBJECTIVE, MANDATORY CRITERIA, HIGH-STAKES RISKS, CHALLENGE. Use short sage headings and clear large off-white body text, no excessive decorative cards. Clean typographic hierarchy and restrained thin separators.
+Illustration: full body, professional adult woman with glasses, tailored sage green suit and dark green trousers, light blouse, elegant simple shoes. Confident upright executive pose suitable for a professional profile, approachable and composed. Modern flat corporate illustration with solid color blocks; no black outlines, no gradients, no realistic photo, no 3D. Proportions natural and professional. Restrained DataTerra palette with warm natural skin and dark hair. Place the entire person visibly from head to shoes. Do not print any of the placeholder illustration instructions.
+Current logo small in a corner: sage icon of three stacked rounded diamond outline layers, lowercase wordmark "dataterra.", data bold and terra regular, tiny terracotta terminal dot. Do not use old leaf/globe logos.
+
+Exact text:
+Title: "Persona"
+Name: "LILY"
+Role split over two balanced lines: "VP of Infrastructure Expansion & ESG"
+Small label under the role: "Illustrative persona"
+
+Intro:
+"Lily oversees a multibillion-dollar AI expansion fund."
+
+"OBJECTIVE"
+"Deploy a 100+ MW AI data center campus in Brazil, prioritizing low resource consumption costs."
+
+"MANDATORY CRITERIA"
+Three distinct bullets:
+"100% clean/renewable energy supply"
+"Zero water stress / strict water efficiency targets"
+"Full compliance to secure legal tax incentives"
+
+"HIGH-STAKES RISKS"
+"Unsuitable locations risk environmental injunctions, water stress disputes, and lost tax exemptions."
+
+"CHALLENGE"
+"Identify a location that balances economic viability, available infrastructure, and socio-environmental responsibility, while assessing regulatory requirements and the project's eligibility for applicable tax incentives."
+
+Constraints: retain all substantive information, improve typographic balance and readability, all text in English and spelled correctly. Lily is a fictional illustrative persona, not a real named executive; do not imply a real company, cite a fabricated biography, or add LinkedIn branding. No photos, no source citations needed for the original character illustration. No extra stats, charts, dates, watermarks or slide numbers. One complete slide, exact 16:9, no cropping.

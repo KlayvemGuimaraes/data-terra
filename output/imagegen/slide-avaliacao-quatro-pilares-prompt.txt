@@ -1,0 +1,29 @@
+Use case: productivity-visual.
+Asset type: DataTerra pitch deck feature slide, PNG, landscape exact 16:9, target 1920 x 1080.
+Input image 1: EDIT TARGET, the user's feature slide. Restyle it in the established DataTerra design.
+Input image 2: supporting BRAND AND LAYOUT REFERENCE, a previously completed DataTerra slide. Match its current logo, forest-green palette, typography, and full-height left screenshot band. Do not copy its headline or body.
+Input image 3: ACTUAL SCREENSHOT of the current application. This is original product evidence, not a UI mockup. Preserve its interface and text; do not invent controls or alter data. The original screenshot pixels will be inserted again during final export.
+Strict layout: full-height LEFT screenshot strip occupying approximately 42% of the canvas, from x=0 to x=803 at a 1920 px width, and right content column from x=803 to 1920. Preserve the left strip. HARD STRAIGHT VERTICAL EDGE, no gradient, blending, blur, feathering, rounded image corners or transparency at the boundary. Screenshot cropped proportionally to fit; never stretched. No browser chrome or device frame. No newly generated interface.
+Right section: near-solid dark forest #101b17, panels #182720, fine borders #34463a, off-white #edf2e8 text, sage #b3cf91 emphasis and icons, muted #b5c3b0 notes. Restrained terracotta #e4a080 only for the logo dot. Montserrat semibold headings, Poppins body. Spacious, harmonious editorial layout. No purple, white background, neon, glossy effects or decorative map.
+Right-column contents are left-aligned within one balanced column with generous equal margins. Small current DataTerra logo near the top: three stacked rounded diamond outline layers plus lowercase "dataterra.", bold data, regular terra, tiny terracotta terminal dot. One strong heading, readable paragraph, well-spaced bullets, concise lower note. Keep every text element inside the right column, no overlap with the screenshot.
+All slide copy is English, except the genuine Portuguese UI screenshot, which remains unmodified. No angle-bracket placeholders. No watermark, invented metrics, numbered slide labels, invented certifications, or additional claims.
+
+Specific task: produce the "Four-Pillar Assessment" feature slide. Match the visual hierarchy of a companion feature slide with the same left screenshot split.
+Small eyebrow:
+"FEATURE"
+Title, split into two lines if needed:
+"Four-Pillar Assessment"
+Intro, exact text:
+"DataTerra combines spatial indicators with a WUI-inspired water-impact estimate to calculate independent scores and report observations across four assessment pillars."
+Three prominent, well-spaced feature rows with restrained sage line icons (alert, shield/leaf, checklist) and exact text:
+"Highlight relevant territorial risks"
+"Flag mapped environmental constraints"
+"Identify regulatory questions for further due diligence"
+Below the feature rows, a small subtle panel or separated note with the label:
+"EXTENDED SCOPE"
+Then this exact copy:
+"PUE integration and monitoring of local tax and legislative updates are outside the current MVP."
+Keep the original draft's PUE and tax/legislation concepts in this clearly qualified note, not as current product functionality.
+Small footer, exact text:
+"Four independent heuristic scores · No single overall score."
+Use all the given copy and no additional statistics. The real screenshot on the left must retain its actual separate pillar cards and any displayed data-availability notices. Keep enough negative space for the slide to be clear, elegant and readable.

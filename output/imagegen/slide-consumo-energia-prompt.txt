@@ -1,0 +1,27 @@
+Use case: style-transfer / productivity-visual.
+Create one finished PNG presentation slide by redesigning input image 1. CRITICAL OUTPUT INVARIANT: exact 16:9 landscape aspect ratio, identical to the original 1920x1080 reference. Render at 3840x2160 pixels for crisp presentation quality (exactly twice the original dimensions). This aspect ratio is non-negotiable. Full-bleed rectangular slide, no outer margin or mockup.
+Input 1 is the slide to restyle: retain all of its ordinary English copy and the numerical claim verbatim. Replace all three angle-bracket placeholders with the requested visual elements. Input 2 is ONLY a style/brand reference from the actual DataTerra interface; use its logo, dark forest-green palette and typography, never its diagram/content. Input 3 is an actual photograph of the Ascenty Vinhedo datacenter: composite a faithful crop of this real photograph into the left photo strip. Preserve the real building details, no invented building or synthetic reconstruction.
+
+Design:
+- Premium, minimal pitch-deck visual with balanced spacing, crisp typography, careful optical alignment and generous negative space.
+- The left approximately 21% of the slide is a full-height photographic strip using input 3, cropped to retain a recognizable view of the facility. Harmonize the photo with a subtle dark green overlay while retaining photographic detail. A very small discreet caption at its bottom: "Photo: Ascenty / DCD (illustrative)".
+- Remaining 79%: solid very dark forest green #101b17; restrained soft surfaces #182720 and #203329 only if needed. Off-white #edf2e8 text, sage green #b3cf91 accents, muted #b5c3b0 secondary text, thin #34463a rules. Tiny terracotta #e4a080 logo dot. No cyan, neon glow, purple, bright blue, heavy gradients, clutter, drop shadows or ornamental textures.
+- Top of content area: small current DataTerra wordmark EXACTLY from input 2: three stacked outlined rounded diamond layers in sage + lowercase "dataterra." with bold "data", regular "terra" and tiny terracotta period. Keep it understated and clean, no other headline or extra branding.
+- Main visual grouping centered both horizontally and vertically within the right content area: a large refined outline datacenter/server-building icon on the left, the 2-line key statistic in the center, and a neat array of many small outline house icons on the right. Equal visual weight, breathing room, coherent simple rounded strokes. Do not repeat placeholder text or angle brackets. The facility icon should be much larger than an individual house. The house grid is symbolic, NOT an exact count chart; no labels or invented quantitative legend.
+- Key statistic: "400,000+" in enormous sage Montserrat bold, with "HOUSEHOLDS" directly below in off-white Montserrat medium, generous but controlled tracking. Keep the entire statistic centered in its column. The plus sign is a normal plus, not a superscript digit or asterisk.
+- Supporting sentence centered below this whole icon/statistic row, in Poppins regular off-white, with elegant line breaks and generous spacing.
+- Source footer centered under the main content near the bottom, Poppins regular, small but readable muted sage, a subtle thin horizontal rule above it.
+- Use Montserrat for the main number/headline and Poppins for supporting copy, matching the family shapes in input 2. Flat, precise, polished slide typography, no stretched letters.
+Exact ordinary slide text to preserve, with no translations, edits, omissions or additions:
+"400,000+"
+"HOUSEHOLDS"
+"Equal to the annual electricity consumption of a single AI data center campus."
+"Source: Ascenty ESG Report 2024; Data Center Dynamics."
+The photo caption and tiny DataTerra logo are the only extra text allowed.
+Maintain exact 16:9 canvas, make every element fully visible and centered with safe internal margins. No clipped letters, no watermarks, no placeholder strings, no commentary around the slide.
+
+Method: built-in image_gen image editing with three local reference images.
+Final export: 1920 x 1080 PNG, exact 16:9. The built-in result was 1672 x 941; its raster export was normalized with sips to the user's original dimensions, without further content changes.
+Photo source page: https://www.datacenterdynamics.com/es/noticias/ascenty-inicia-la-segunda-operaci%C3%B3n-del-centro-de-datos-en-el-mega-campus-de-vinhedo-s%C3%A3o-paulo/
+Photo source file: https://media.datacenterdynamics.com/media/images/Mega_Campus_Vinhedo_11.20.original.jpg
+Editorial note: statistic and source wording retained from the user-provided slide; this design operation is not an independent verification of the numerical claim.

@@ -1,0 +1,18 @@
+Use case: productivity-visual.
+Asset type: opening cover slide for the DataTerra pitch deck, PNG, landscape, exact 16:9 composition, target 1920 x 1080.
+Primary request: Create one elegant finished cover slide, visually consistent with the DataTerra website and the supplied deck style reference. This is a NEW cover; do not reuse the statistics or other copy in the reference.
+Input image 1 role: supporting BRAND AND STYLE REFERENCE ONLY. Match its forest-green palette, current lowercase dataterra wordmark with layered icon, sage accents, off-white typography. Do not copy the reference slide layout.
+Composition: sophisticated editorial cover with generous whitespace. Left 56% holds the brand and the full title in a spacious, clean aligned column. Right 44% holds one striking, carefully composed Brazil topographic illustration, entirely inside the canvas with comfortable margins. The illustration must balance rather than crowd the title. No vertical divider, cards, photo strip, collage, or inset slide border.
+Background: very dark forest green #101b17 with exceptionally subtle tonal depth. Near-solid clean background behind the copy. Restrained tonal contour lines can appear around the illustration only.
+Brand: current DataTerra identity at upper left: a sage outline icon of THREE stacked rounded diamond layers, followed by the lowercase wordmark "dataterra." in Montserrat, "data" bold and "terra" regular, with a tiny terracotta #e4a080 terminal dot. Exact spelling. Do not use a leaf, globe logo, or old logo.
+Main title: large, beautifully typeset Montserrat semibold, off-white #edf2e8, on three deliberate lines. Make the final line sage #b3cf91:
+"Territorial intelligence"
+"for data centers."
+It is fine to wrap the first phrase into two balanced lines to preserve generous scale, but do not alter any words. Clear hierarchy, clean optical kerning, no text effects.
+Supporting sentence: Poppins regular, smaller, muted light sage #b5c3b0, comfortably below title, exact copy:
+"Better decisions start with the territory."
+Small footer at bottom-left in spaced Poppins uppercase:
+"EARLY SITE SELECTION · BRAZIL"
+Illustration: an exquisite matte, dark-green relief silhouette of Brazil in an upright easily recognizable outline, with fine sage topographic contours and shallow stacked terrain layers echoing the brand icon. A few restrained abstract connected nodes suggest territorial intelligence. This is conceptual illustration, not a data visualization; do not add numerical scores, place labels, specific locations, or legends. Soft realistic depth and exquisite edge detail, very restrained light, no neon halo. Harmonious with the existing deck and site, not a gaming image.
+Typography: Montserrat for the wordmark/title, Poppins for supporting text. Exact English text only. No extra titles, dates, page numbers, invented facts, source lines, team names, or watermarks. No purple, blue, cyan, white background, excessive glow, or generic technology stock imagery.
+Output: one complete polished cover, full-bleed 16:9, nothing cropped, all text sharp and correctly spelled.

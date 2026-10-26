@@ -1,0 +1,31 @@
+DATATERRA | JORNADAS E PERSONA | 23/10/2026
+
+ENTREGAS
+1. pdf/dataterra-jornadas-e-casos.pdf (4 páginas): uso do simulador, implantação,
+   dois casos brasileiros inaugurados e fontes clicáveis.
+2. pdf/dataterra-persona-e-revisao.pdf (3 páginas): quadro proposto para o pitch,
+   revisão do slide 7 e hipóteses/perguntas de validação.
+3. png/: páginas em 3840 x 2160, formato 16:9, para inserir no Canva ou no pitch.
+4. textos/: conteúdo copiável e registro de fontes/premissas.
+
+USO NO PITCH
+Use o fluxo de uso para mostrar o que acontece na plataforma. Use o fluxo de
+implantação para mostrar onde a triagem entra no projeto real. A página de casos
+ilustra marcos históricos; não apresenta essas empresas como clientes.
+O quadro de Fátima é uma proposta de substituição, ainda a validar com usuários.
+
+EDIÇÃO E REPRODUÇÃO
+O Canva original não foi alterado. PNGs são imagens; os PDFs contêm texto e
+vetores. Para editar o texto no Canva, use os arquivos .txt como base.
+Fonte da geração: scripts/generate-journey-artifacts.py. Bibliotecas: reportlab,
+fonttools, brotli, pillow, pymupdf. Renderizador: Poppler (pdftoppm).
+O script usa as fontes Montserrat e Poppins já existentes no repositório.
+Tema escuro: cores extraídas de styles.css. Marca vetorial extraída de index.html,
+com ícone de camadas e wordmark dataterra. nas mesmas proporções do simulador.
+Os PNGs antigos da marca não são usados nestes materiais.
+
+LIMITES
+O DataTerra faz triagem preliminar. Engenharia, custos, contratos, capacidade de
+conexão, outorgas e licenças dependem de validação externa. Ranking regional e
+análise local não são equivalentes. Esta entrega não é uma nova auditoria do
+motor de cálculo, nem validação técnica de um empreendimento.

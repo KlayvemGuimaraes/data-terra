@@ -1,0 +1,40 @@
+DataTerra — fontes das fotografias do slide de riscos (v3)
+
+1. Água / família Morris
+Fotógrafo: Ben Gray, para The Atlanta Journal-Constitution (AJC).
+Reportagem: Georgia families sue Meta, accuse its data center of tainting their water.
+Publicação: 01/09/2026.
+Página: https://www.ajc.com/news/2026/09/georgia-families-sue-meta-accuse-its-data-center-of-tainting-their-water/
+Imagem: https://images.ajc.com/resizer/v2/WSAQMVQIE5HMHEFIJNSOGLMWN4.JPG?auth=a0c60c04cec1714b20d5cbe673b17baa47284c81d35d24fb7a8dea45b792f336&height=2560&smart=true&width=3840
+Arquivo: fontes-reais-riscos/agua-morris-ben-gray-ajc.jpg
+A foto mostra a família Morris e recipientes de água recolhida na lavagem do filtro de sua casa. A reportagem apresenta alegações dos moradores e a contestação da Meta; não comprova causalidade nem a concessão de liminar ambiental.
+
+2. Data center de Barueri — cartão central
+Fonte: Scala Data Centers, página oficial de instalações.
+Instalação identificada na página: SGRUTB08, Campus Tamboré, Barueri/SP.
+Página: https://scaladatacenters.com/data-centers/
+Imagem: https://scaladatacenters.com/wp-content/uploads/2022/03/SGRUTB08-2.png
+Arquivo: fontes-reais-riscos/scala-tambore-sgrutb08.png
+Uso contextual de infraestrutura. Esta fonte não comprova que a unidade ou a operadora tenha perdido incentivos fiscais.
+
+3. Mobilização em Caucaia, Ceará
+Fotógrafo: Iago Barreto Soares / Intercept Brasil.
+Reportagem: Moradores se unem para barrar data center do TikTok no Ceará.
+Publicação: 17/09/2025.
+Página: https://www.intercept.com.br/2025/09/17/moradores-se-mobilizam-contra-data-center-tiktok-ceara/
+Imagem: https://uploads.intercept.com.br/2025/09/DSC02242-1024x683.jpg
+Arquivo: fontes-reais-riscos/anace-faixa-iago-barreto-soares.jpg
+Fotografia de mobilização comunitária com faixas relativas ao projeto do data center.
+
+4. Foto lateral
+Fonte: Scala Data Centers, página oficial de instalações.
+Instalação identificada na página: SGRUTB04, Campus Tamboré, Barueri/SP.
+Página: https://scaladatacenters.com/data-centers/
+Imagem: https://scaladatacenters.com/wp-content/uploads/2022/03/bbed2a61-51de-478c-a287-6b775144128f-1024x575.png
+Arquivo: fontes-reais-riscos/scala-tambore-sgrutb04.png
+
+Os créditos indicam as fontes e autores identificados; não equivalem a uma declaração de domínio público ou licença de uso.
+As legendas de riscos vêm do slide fornecido pelo usuário; fotos documentam os contextos descritos acima, não todos os desfechos sugeridos pelas legendas.
+
+Produção final: a ferramenta integrada image_gen fez a edição do layout. Na exportação final, as áreas fotográficas foram compostas diretamente a partir dos arquivos originais baixados, com recorte, redimensionamento e máscara de cantos. Não foram mantidas reconstruções generativas de pessoas, faixas ou fachadas. O script compor-fotos-reais-v3.cjs registra a composição.
+

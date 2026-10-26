@@ -1,0 +1,51 @@
+Use case: style-transfer.
+Asset: one DataTerra pitch-deck slide, exactly 1920 x 1080 PNG, landscape 16:9, full bleed.
+
+INPUTS
+Image 1 is the supplied slide to redesign and its copy source. Image 2 is ONLY a branding/style reference: use its forest-green palette, Montserrat/Poppins typography, small stacked-diamond logo, typographic finish and clean spacing. Do not reuse image 2's Brazil map, statistical text or layout.
+
+DESIGN
+Create an elegant, editorial, dark slide that fits the established DataTerra deck. Deep forest #101b17 background with a barely perceptible darker gradient from the far left and around edges easing into the central field #182720. Keep the background plain and calm. Warm off-white #edf2e8 text, muted sage #b5c3b0, accent sage #b3cf91, thin borders #34463a.
+The source's huge blank left panel is a background placeholder, NOT a content column to retain. Rebalance and center all content across the full slide width. Use generous margins, symmetry, a clean grid and restrained round corners. No unused gray strip, no white background, no purple, no map, no decorative dashboard panels.
+Place a small current DataTerra logo at the top left: three stacked thin outlined rounded diamonds in sage and lowercase "dataterra." wordmark, bold data + regular terra and a tiny terracotta dot, exactly the branding character in image 2.
+
+TYPOGRAPHY AND COPY
+Use Montserrat semibold/bold for headings, Poppins for other text.
+Main question centered in the upper portion, two intentional balanced lines, large and clean:
+"Are we making the right decisions about"
+"where it should grow?"
+The second line should be bold pale sage; first line warm off-white. Do not change the wording.
+
+Below it, smaller uppercase subtitle with refined tracking:
+"THE MILLION-DOLLAR COST OF BLIND SITE SELECTION"
+
+THREE VISUALS
+Below the subtitle, create three equally sized photographic-style editorial ILLUSTRATIONS in an evenly spaced horizontal row with the same rounded corners and subtle forest/sage color treatment. The visuals must look polished and concrete, not like clip art, emoji, icons or cartoons. They are illustrative scenes, not documentary evidence or authentic photographs of specific events. Keep each scene visually simple and readable. Let the illustrations have natural warmer highlights while harmonizing with the dark green slide.
+
+Left illustration: close-up of a metallic domestic faucet pouring visibly murky, brownish water into a clear drinking glass above a sink, showing sediment and water concern. It evokes the water issues mentioned in the supplied placeholder without adding logos or asserting a proven cause. No Meta logo, real-person portrait or documentary caption.
+
+Middle illustration: an attractive realistic-looking contemporary Brazilian data center campus inspired by the industrial architecture of Greater São Paulo / Barueri: clean white and gray low-rise facades, cooling equipment, power infrastructure, a few trees, no readable corporate brand or invented address. Architectural scene only. Do not imply that an identifiable company has lost tax benefits.
+
+Right illustration: a dignified, peaceful community demonstration against a proposed large industrial data center in northeastern Brazil, evoking Ceará. Show a small group of adults in ordinary contemporary clothing holding placards and a banner with simple water-drop / leaf graphics, an industrial construction fence softly visible behind them. Respectful and natural body language, no sensationalism. No recognizable individuals or branded corporate logos, no invented news label, no violent scene. Do not pretend it is a documentary image from a real event.
+
+Place exact centered labels underneath the respective images, same font size/weight, and on matching baselines, warm off-white:
+Left:
+"Environmental"
+"injunctions"
+Middle:
+"Loss of tax"
+"incentives"
+Right:
+"Costly Legal"
+"Operations"
+Correct the original typo "Operaions" to "Operations"; this is the only spelling correction.
+
+Add the discreet but legible exact footer "Illustrative images" near the bottom center, small muted text. This accurately identifies the three visuals as illustrations.
+Preserve all other ordinary English copy. Remove every angle-bracket placeholder completely, replacing it only with its corresponding visual/background. No extra headings, claims, figures, slogans, captions or source assertions. Keep all elements safely inside a precisely proportioned 16:9 landscape canvas. Deliver one finished slide only.
+
+Method: built-in image_gen edit, followed by dimension verification and export normalization to 1920 x 1080 PNG if necessary.
+Visuals are illustrative, generated scenes. They are not documentary photographs of a named company or actual demonstration.
+Context consulted, not supplied as photographic inputs:
+https://www.bbc.com/news/articles/cy8gy7lv448o — water concerns reported by residents, with Meta disputing a causal connection.
+https://cimi.org.br/2026/09/povo-anace-data-centers/ — account of the Anacé community's concerns and demonstrations concerning a Ceará data center.
+The source slide's risk labels are retained as supplied; the design work does not independently substantiate loss of tax incentives at a named Barueri operator or a particular court injunction.

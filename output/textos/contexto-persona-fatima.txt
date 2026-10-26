@@ -1,0 +1,15 @@
+CONTEXTO DA PERSONA | FÁTIMA
+
+Persona hipotética, construída a partir do pitch e dos materiais do projeto. Contexto e comportamentos propostos devem ser validados em entrevistas com o público-alvo.
+
+Fátima é diretora de expansão e infraestrutura de uma operadora de data centers que planeja ampliar sua presença no Brasil para atender novas demandas de processamento, armazenamento e serviços de inteligência artificial. Sua responsabilidade é transformar essa necessidade de crescimento em uma proposta de implantação, identificando quais regiões merecem investigação e levando alternativas justificadas à direção da empresa.
+
+Ela coordena o trabalho de analistas, engenheiros, profissionais de sustentabilidade e consultores jurídicos e financeiros. Em sua rotina, acompanha estudos, reúne informações de diferentes áreas e organiza recomendações para o comitê de investimento. Fátima define as prioridades e orienta a seleção inicial; a equipe técnica realiza as análises, enquanto a aprovação do investimento cabe à direção ou ao comitê responsável.
+
+Quando surge um projeto de expansão, o primeiro passo é definir suas necessidades: capacidade de TI, prazo, orçamento, regiões de interesse e requisitos de infraestrutura. Fátima precisa considerar energia e conexão elétrica, água para refrigeração, conectividade e condições do território. Também precisa entender possíveis restrições ambientais e impactos sobre as comunidades antes de direcionar recursos para estudos mais detalhados.
+
+Sua principal dificuldade é lidar com dados dispersos, formatos diferentes e informações com níveis distintos de atualização e cobertura. Comparar localidades exige reunir evidências e compreender as limitações de cada fonte. Ela teme avançar com uma alternativa aparentemente promissora e descobrir, mais tarde, uma restrição que gere retrabalho, custos adicionais ou atraso no projeto.
+
+Nesse contexto, o DataTerra apoia a triagem inicial. A partir dos requisitos definidos por Fátima, o analista seleciona um ponto no mapa, configura o raio, a carga de TI, a intensidade de uso de água e os pesos dos critérios. Em seguida, consulta o score local, as camadas, os alertas e as premissas. A equipe repete a análise para outras opções e registra externamente os resultados e as pendências.
+
+Com essas evidências, Fátima prioriza quais locais devem avançar para estudos de engenharia, consultas às concessionárias, análise financeira e avaliação das autorizações aplicáveis. O valor esperado é chegar a uma decisão preliminar mais clara e rastreável, compreendendo por que uma alternativa merece investigação e o que ainda precisa ser confirmado. O score orienta essa priorização; a viabilidade definitiva depende das validações técnicas e regulatórias posteriores.

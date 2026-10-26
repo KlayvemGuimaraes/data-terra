@@ -1,0 +1,45 @@
+DataTerra | Fontes e premissas | 23/10/2026
+
+Base documental pública, sem entrevistas. Fatos profissionais e o caso de Vinhedo são verificados; necessidades, contratação e uso do DataTerra são hipóteses de produto. Não há evidência de que as pessoas ou empresas citadas utilizem, endossem ou tenham contratado o DataTerra.
+
+[1] Ascenty | Liderança executiva
+https://ascenty.com/sobre/ascenty/lideranca/
+Evidência: Marcos Siqueira: VP executivo & CRO, responsável por estratégia de crescimento e expansão. Alberto Lopes: VP de Projetos, Engenharia e Construção.
+Limite: Cargos consultados em 23/10/2026; não comprovam adoção do DataTerra.
+
+[2] Marcos Siqueira | LinkedIn público
+https://br.linkedin.com/in/siqueiramarcos
+Evidência: Perfil profissional público indexado: CRO & Head de Estratégia na Ascenty.
+Limite: Perfil localizado em busca pública; a abertura integral foi bloqueada pelo LinkedIn. O cargo atual foi confirmado na fonte institucional [1].
+
+[3] Ascenty | Vinhedo, segunda unidade
+https://ascenty.com/blog/news-ascenty/ascenty-inicia-a-operacao-do-seu-segundo-data-center-no-seu-mega-campus-em-vinhedo/
+Evidência: Notícia de 30/11/2020 sobre a entrada em operação da segunda unidade em Vinhedo; cita Marcos, então VP de Operações.
+Limite: Caso histórico brasileiro; não é um projeto que tenha usado o DataTerra.
+
+[4] Arup | Engenharia e consultoria para datacenters
+https://www.arup.com/en-us/markets/data-centers/
+Evidência: Serviços de seleção de locais, diligência, viabilidade, projeto, engenharia, construção e entrega.
+Limite: Evidência de serviços existentes no mercado. Não comprova contrato com a Ascenty para este cenário.
+
+[5] Ramboll | Critérios para seleção de local
+https://www.ramboll.com/en-us/insights/resilient-societies-and-liveability/data-center-site-selection-criteria
+Evidência: Artigo de 09/12/2025: energia, conectividade, água, clima, uso do solo e participação social. Apresenta Andrea H. Merkle como liderança do setor ambiental de datacenters.
+Limite: Referência de consultoria e critérios; exemplos regulatórios internacionais não foram transpostos como regras brasileiras.
+
+[6] Ibama | Competências no licenciamento
+https://www.gov.br/ibama/pt-br/assuntos/laf/sobre
+Evidência: O órgão competente pode ser federal, estadual ou municipal, segundo o enquadramento.
+Limite: O fluxo não presume rito único, licenciamento federal ou exigências idênticas para todos os datacenters.
+
+[7] ANA | Outorga de recursos hídricos
+https://www.gov.br/ana/pt-br/assuntos/gestao-das-aguas/politica-nacional-de-recursos-hidricos/outorga-dos-direitos-de-uso-de-recursos-hidricos
+Evidência: Competência da ANA para águas da União; usos de domínio estadual seguem o órgão estadual.
+Limite: Verificar regularização aplicável à captação, ao fornecimento e ao lançamento previstos no projeto.
+
+[8] DataTerra | Interface, cálculo e manual locais
+index.html; app.js; evaluation-criteria.js; site-analysis.js; docs/manual-dataterra.html.
+Evidência: index.html; app.js; evaluation-criteria.js; site-analysis.js; docs/manual-dataterra.html.
+Limite: Revisão local 7644e7e, consultada em 23/10/2026. Simulação é triagem; comparação formal e lista de candidatos são produzidas pela equipe fora da plataforma.
+
+O diagrama sintetiza um fluxo proposto, não o processo interno comprovado da Ascenty. A etapa 04 agrupa diligências especializadas que podem ocorrer em paralelo. O caso de Vinhedo confirma implantação real, sem reconstituir todos os seus contratos e licenças. Os 20 MW de TI e três terrenos são parâmetros didáticos, não dados do caso histórico.

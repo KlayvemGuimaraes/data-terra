@@ -1,0 +1,129 @@
+PÁGINA 1
+
+dataterra.
+PERSONA / PROPOSTA PARA O PITCH
+MATERIAL DE APOIO
+Fátima precisa saber onde aprofundar
+Foco inicial sugerido: equipes que planejam a expansão física de data centers no Brasil.
+DataTerra | Jornadas e público-alvo | 23/10/2026
+01 / 03
+FÁTIMA
+Diretora de expansão
+e infraestrutura
+Operadora de data centers ou
+grande empresa de TI com projeto de
+expansão no Brasil.
+GATILHO
+Nova demanda de capacidade de TI. É
+preciso escolher onde investir em
+estudos.
+Persona hipotética, a validar em entrevistas.
+OBJETIVO
+Pré-selecionar regiões com
+evidências suficientes para orientar
+os próximos estudos de implantação.
+DOR
+Dados dispersos e premissas difíceis
+de comparar. Receio de descobrir
+restrições apenas após investir em
+estudos.
+O QUE PRECISA VER
+Energia e conexão, água,
+conectividade e riscos territoriais,
+com origem, limites e pendências dos
+dados.
+VALOR ESPERADO
+Uma decisão preliminar rastreável:
+alternativas justificadas, lacunas
+explícitas e próximos passos
+definidos.
+Analista opera o simulador
+Fátima prioriza os estudos
+Comitê aprova o investimento
+R$ 2,5 bilhões não foi mantido como fato. O valor do quadro original só deve reaparecer identificado como cenário fictício ou com fonte. [P1]
+
+
+PÁGINA 2
+
+dataterra.
+REVISÃO / SLIDE 7 DO PITCH
+MATERIAL DE APOIO
+O quadro já tem direção; faltam papéis e evidências
+Diagnóstico: objetivo e desafio estão presentes, mas ainda não formam uma persona completa para orientar o produto.
+DataTerra | Jornadas e público-alvo | 23/10/2026
+02 / 03
+NO QUADRO ATUAL
+AVALIAÇÃO
+AJUSTE PROPOSTO
+Expansão para atender IA
+Objetivo e gatilho estão claros.
+Preservar o contexto e tornar a saída concreta: quais locais merecem estudos?
+Presidência de expansão, infraestrutura
+e ESG
+Cargo amplo; concentra responsabilidades
+distintas.
+Usar expansão/infraestrutura como papel focal; mostrar ESG, engenharia e jurídico
+como parceiros.
+Empresa de TI de grande porte
+Segmento pouco delimitado; usuário
+operacional ausente.
+Priorizar operadoras/equipes de expansão e incluir analista ou consultoria como usuário
+do simulador.
+Fundo de R$ 2,5 bilhões
+Não foi apresentada evidência da persona ou
+da captação.
+Retirar a precisão financeira ou identificá-la como hipótese ilustrativa. Não tratar como
+cliente validado.
+Viabilidade e incentivos fiscais
+Necessidades reais da decisão, além do escopo
+do MVP.
+Separar triagem de estudos de engenharia, custos, elegibilidade fiscal e licenciamento,
+feitos externamente.
+Dores, rotina e sucesso implícitos
+Faltam comportamento, evidências e critério de
+valor.
+Adicionar dados fragmentados, rotina de comparação, decisão rastreável e métricas a
+validar com usuários.
+AJUSTE VISUAL
+No slide atual, a foto cobre parte do título e há palavras quebradas. Use título curto, retrato menor e textos alinhados à esquerda.
+Base da revisão: [P1] quadro original; [P2-P3] contexto e roteiro; [M1] funções atuais do MVP. Links no caderno de jornadas, página 4.
+
+
+PÁGINA 3
+
+dataterra.
+PÚBLICO / VALIDAÇÃO
+MATERIAL DE APOIO
+Quem participa e o que ainda precisamos descobrir
+A proposta distingue usuário, patrocinador e decisor; as hipóteses comportamentais precisam de entrevistas.
+DataTerra | Jornadas e público-alvo | 23/10/2026
+03 / 03
+PAPÉIS NA JORNADA
+Usuário principal
+Analista de localização, engenharia ou consultoria: configura e interpreta cenários.
+Patrocinadora / decisora da triagem
+Fátima: define requisitos e prioriza o investimento em estudos.
+Decisor do investimento
+Comitê ou direção: avalia o caso de negócio e aprova a implantação.
+Especialistas e partes interessadas
+ESG, jurídico, concessionárias, órgãos e comunidades: validam condições e impactos.
+PERGUNTAS PARA VALIDAR
+1.
+Como você selecionou locais no último projeto? Que fontes e planilhas usou?
+2.
+Quem analisa, quem contrata a ferramenta e quem aprova os estudos?
+3.
+Quais critérios eliminam um local antes de comparar a pontuação?
+4.
+Qual evidência gera confiança? Como trata dados ausentes ou desatualizados?
+5.
+Quanto tempo a triagem leva hoje? Em qual etapa ocorre mais retrabalho?
+PÚBLICO ADJACENTE
+Gestores públicos, pesquisadores e investidores aparecem no contexto amplo da PID. Validar seus fluxos separadamente antes de tratá-los como a
+mesma persona. [P2]
+CORREÇÕES NO MATERIAL DE APOIO
+[P4] Quilicura repete texto de Microsoft/Quincy; o bloco de casos malsucedidos está vazio. Usar os
+casos brasileiros verificados do caderno de jornadas.
+[P3] Revisar afirmações gerais sobre obrigação de energia renovável, ausência de concorrentes e
+impacto ambiental. Exigem fonte, escopo e data; não são resultados do MVP.
+Métricas sugeridas para entrevistas: tempo de triagem, retrabalho e rastreabilidade das decisões. Não são ganhos já medidos ou prometidos.

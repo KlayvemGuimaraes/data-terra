@@ -1,0 +1,90 @@
+{
+  "data": "2026-10-23",
+  "commit_mvp": "8cd14ed",
+  "identidade_visual": {
+    "tema": "escuro",
+    "marca": "SVG brand-icon e wordmark de index.html",
+    "cores": "tokens de styles.css [data-theme=dark]",
+    "tipografia": "Montserrat e Poppins"
+  },
+  "fontes": [
+    {
+      "id": "P1",
+      "titulo": "Pitch DataTerra, slide 7",
+      "apoia": "Quadro original de Fátima: cargo, objetivo e desafio.",
+      "url": "https://www.canva.com/design/DAHYqRoXY1I/4l2_8bvNnVlrE-znorBiAQ/edit"
+    },
+    {
+      "id": "P2",
+      "titulo": "Visão Geral - Hackathon E+",
+      "apoia": "Páginas 2 e 12: público amplo da PID e recorte DataTerra.",
+      "url": "https://drive.google.com/file/d/1UUzoavvxiFGUX2f0HA1PLLpsMTh_fJ0z/view"
+    },
+    {
+      "id": "P3",
+      "titulo": "Roteiro de Pitch",
+      "apoia": "Páginas 1-3: problema, solução e promessas a delimitar.",
+      "url": "https://drive.google.com/file/d/1zZTft9kB3JJ_807sbROMvNm9I4vOs4i5/view"
+    },
+    {
+      "id": "P4",
+      "titulo": "Cases de DataCenters pelo mundo",
+      "apoia": "Páginas 2-3: repetição de texto da Microsoft em Quilicura.",
+      "url": "https://drive.google.com/file/d/1F3qqYGMLmZ_TSB7lKZeDuJzpVPNib_Lo/view"
+    },
+    {
+      "id": "P5",
+      "titulo": "Bemmover, slide 7",
+      "apoia": "Referência de sequência, atores e ciclos de retorno.",
+      "url": "https://www.canva.com/design/DAGxmDztHmM/zmIXqdn-Zizq081G-n5Tlg/edit"
+    },
+    {
+      "id": "R1",
+      "titulo": "Prefeitura de Vinhedo | 04/10/2018",
+      "apoia": "Anúncio do início das obras do campus da Ascenty.",
+      "url": "https://www.vinhedo.sp.gov.br/portal/noticias/0/3/1344/prefeitura-anuncia-instalacao-do-maior-data-center-da-america-latina-em-vinhedo/tmp/chamados"
+    },
+    {
+      "id": "R2",
+      "titulo": "Ascenty | 21/10/2019",
+      "apoia": "Inauguração da primeira unidade em Vinhedo.",
+      "url": "https://ascenty.com/blog/news-ascenty/ascenty-inaugura-14-data-center-no-brasil-o-maior-da-america-latina/"
+    },
+    {
+      "id": "R3",
+      "titulo": "Ascenty | 30/11/2020",
+      "apoia": "Entrada em operação da segunda unidade do campus.",
+      "url": "https://ascenty.com/blog/news-ascenty/ascenty-inicia-a-operacao-do-seu-segundo-data-center-no-seu-mega-campus-em-vinhedo/"
+    },
+    {
+      "id": "R4",
+      "titulo": "Prefeitura de Fortaleza | 16/04/2019",
+      "apoia": "Inauguração do AngoNAP na Praia do Futuro.",
+      "url": "https://www.fortaleza.ce.gov.br/noticias/prefeito-roberto-claudio-e-governador-camilo-santana-participam-da-inauguracao-do-data-center-da-angola-cables"
+    },
+    {
+      "id": "R5",
+      "titulo": "Angola Cables / RNP | WTR-CE 2019",
+      "apoia": "Slide 2: marcos Monet (2017), SACS (2018) e AngoNAP (2019).",
+      "url": "https://wtr.rnp.br/pop-ce/sites/default/files/WTR-CE_2019_AngolaCables_Andr%C3%A9Martins.pdf"
+    },
+    {
+      "id": "R6",
+      "titulo": "Ibama | Licenciamento ambiental",
+      "apoia": "Procedimentos e competências: confirmar o rito do projeto.",
+      "url": "https://www.gov.br/ibama/pt-br/acesso-a-informacao/perguntas-frequentes/licenciamento-ambiental"
+    },
+    {
+      "id": "R7",
+      "titulo": "ANA | Outorga de recursos hídricos",
+      "apoia": "Competência federal ou estadual conforme o recurso hídrico.",
+      "url": "https://www.gov.br/ana/pt-br/assuntos/gestao-das-aguas/politica-nacional-de-recursos-hidricos/outorga-dos-direitos-de-uso-de-recursos-hidricos"
+    }
+  ],
+  "premissas": [
+    "Persona hipotética; proposta a validar em entrevistas.",
+    "Casos reais não são clientes nem usuários comprovados do DataTerra.",
+    "Fluxo de implantação é uma síntese ilustrativa; ritos e competências variam.",
+    "Registro e comparação entre análises locais são atividades da equipe, fora do MVP."
+  ]
+}

@@ -1,0 +1,12 @@
+DataTerra — dois slides em PNG, 1920 x 1080 px (16:9).
+
+1. dataterra-slide-imperativo-estrategico.png
+Prompt: slide-imperativo-estrategico-prompt.txt
+
+2. dataterra-slide-riscos-selecao.png
+Prompt: slide-riscos-selecao-prompt.txt
+
+Método: ferramenta integrada image_gen para edição dos slides; exportação final com proporção exata de 16:9.
+Identidade: verde escuro, verde sálvia, off-white, Montserrat/Poppins e logo atual do DataTerra.
+No segundo slide, as três cenas são ilustrações geradas e identificadas no rodapé como “Illustrative images”. Não são registros fotográficos de acontecimentos específicos.
+A grafia “Operaions” foi corrigida para “Operations”.

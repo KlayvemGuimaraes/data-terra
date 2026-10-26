@@ -1,0 +1,49 @@
+Use case: productivity-visual.
+Asset: DataTerra pitch deck slide, exactly 16:9, 1920 x 1080 PNG.
+Input image 1: EDIT TARGET, the supplied journey and time-comparison draft. Redesign this entire slide while preserving its information and two-part structure.
+Input image 2: BRAND STYLE REFERENCE ONLY, the completed DataTerra cover. Match its current logo, forest green, sage, off-white typography and professional presentation style. Do not copy the map or the cover copy.
+Design: polished, harmonious, readable corporate presentation. Solid dark forest background #101b17; panel #182720; muted borders #34463a; body #edf2e8; secondary #b5c3b0; sage accent #b3cf91. Montserrat semibold headings and metrics; Poppins body. No gradients, glow, purple, blue or white background. Sharp full-bleed canvas, generous margins, aligned grid.
+Layout: top half has two equal comparison columns with a fine vertical rule and generous inner spacing. Large time metrics, then subtitles, then TWO short bullet paragraphs per column. Lower half has SIX evenly sized numbered process cards, left-to-right with small simple chevrons BETWEEN them. All six must fit in one row, with the same baseline and text padding. Highlight ONLY stages 03 and 04 in a slightly lighter muted sage-green panel to show DataTerra's role. Other cards in dark panels. Number, concise title, thin elegant line icon and paragraph inside every card. No screenshot of original cards: redraw and translate them. Use target, map-pin, stacked layers, comparison chart, checklist and safety helmet icons respectively. Body text large enough to read at presentation size; do not let text overflow. Source footer centered below cards.
+Small current logo in top margin: three stacked rounded diamond outline layers plus lowercase "dataterra.", "data" bold, "terra" regular, tiny terracotta period. Keep logo small so there is adequate room for content.
+
+Top-left exact text:
+"3 TO 6 MONTHS"
+"Traditional Site Screening & Feasibility"
+"Expensive External Consulting: Multiple RFPs for engineering, environmental, and real estate advisory per candidate site."
+"Delayed Time-to-Market: Capital locked up in site options while waiting for preliminary feasibility reports."
+
+Top-right exact text:
+"< 15 MINUTES"
+"DataTerra Territorial Intelligence"
+"Instant Multi-Pillar Screening: Automated integration of energy, water, connectivity, and social/territorial risk."
+"Pre-Diligence Capital Protection: Filters out non-viable locations before committing $100k+ in field studies."
+
+Cards, all in English, preserve these exact meanings with the exact copy below:
+01
+"Define project requirements"
+"Define computing capacity, budget, energy and cooling needs, and connectivity and ESG requirements."
+
+02
+"Find candidate regions"
+"Identify potential regions through consultancies, public datasets and information from multiple sources."
+
+03
+"Assess territory and risks"
+"DataTerra combines water, energy, connectivity and socio-environmental data to assess regional suitability for the project."
+
+04
+"Compare and prioritize"
+"Compare regions, rank alternatives and generate a traceable report to support the investment decision."
+
+05
+"Validate feasibility"
+"Specialists verify grid capacity, water availability, land, licensing and standards for technical, regulatory and economic feasibility."
+
+06
+"Acquire, license and build"
+"Negotiate the land, develop the designs, obtain permits and begin construction."
+
+Footer text:
+"Sources: CBRE & JLL Global Data Center Outlooks (2025/2026); Avisen Legal Data Center Development Timeline."
+This source line is carried over from the user's draft. Do not invent additional evidence or citations.
+Constraints: all content must remain on the slide; preserve the comparative headings and all six stages in order; all English, no instructional placeholders, no angle-bracket annotations except the mathematical less-than sign. Do not invent photography or extra labels. Make every word accurate and legible. One slide only.

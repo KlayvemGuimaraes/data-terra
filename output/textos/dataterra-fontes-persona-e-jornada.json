@@ -1,0 +1,71 @@
+{
+  "consulta": "23/10/2026",
+  "revision": "7644e7e",
+  "nota": "Base documental pública, sem entrevistas. Fatos profissionais e o caso de Vinhedo são verificados; necessidades, contratação e uso do DataTerra são hipóteses de produto. Não há evidência de que as pessoas ou empresas citadas utilizem, endossem ou tenham contratado o DataTerra.",
+  "sources": [
+    {
+      "id": 1,
+      "title": "Ascenty | Liderança executiva",
+      "short": "Ascenty: pessoas e cargos",
+      "url": "https://ascenty.com/sobre/ascenty/lideranca/",
+      "evidence": "Marcos Siqueira: VP executivo & CRO, responsável por estratégia de crescimento e expansão. Alberto Lopes: VP de Projetos, Engenharia e Construção.",
+      "scope": "Cargos consultados em 23/10/2026; não comprovam adoção do DataTerra."
+    },
+    {
+      "id": 2,
+      "title": "Marcos Siqueira | LinkedIn público",
+      "short": "LinkedIn: Marcos Siqueira",
+      "url": "https://br.linkedin.com/in/siqueiramarcos",
+      "evidence": "Perfil profissional público indexado: CRO & Head de Estratégia na Ascenty.",
+      "scope": "Perfil localizado em busca pública; a abertura integral foi bloqueada pelo LinkedIn. O cargo atual foi confirmado na fonte institucional [1]."
+    },
+    {
+      "id": 3,
+      "title": "Ascenty | Vinhedo, segunda unidade",
+      "short": "Ascenty: Vinhedo em operação",
+      "url": "https://ascenty.com/blog/news-ascenty/ascenty-inicia-a-operacao-do-seu-segundo-data-center-no-seu-mega-campus-em-vinhedo/",
+      "evidence": "Notícia de 30/11/2020 sobre a entrada em operação da segunda unidade em Vinhedo; cita Marcos, então VP de Operações.",
+      "scope": "Caso histórico brasileiro; não é um projeto que tenha usado o DataTerra."
+    },
+    {
+      "id": 4,
+      "title": "Arup | Engenharia e consultoria para datacenters",
+      "short": "Arup: do local à entrega",
+      "url": "https://www.arup.com/en-us/markets/data-centers/",
+      "evidence": "Serviços de seleção de locais, diligência, viabilidade, projeto, engenharia, construção e entrega.",
+      "scope": "Evidência de serviços existentes no mercado. Não comprova contrato com a Ascenty para este cenário."
+    },
+    {
+      "id": 5,
+      "title": "Ramboll | Critérios para seleção de local",
+      "short": "Ramboll: critérios de localização",
+      "url": "https://www.ramboll.com/en-us/insights/resilient-societies-and-liveability/data-center-site-selection-criteria",
+      "evidence": "Artigo de 09/12/2025: energia, conectividade, água, clima, uso do solo e participação social. Apresenta Andrea H. Merkle como liderança do setor ambiental de datacenters.",
+      "scope": "Referência de consultoria e critérios; exemplos regulatórios internacionais não foram transpostos como regras brasileiras."
+    },
+    {
+      "id": 6,
+      "title": "Ibama | Competências no licenciamento",
+      "short": "Ibama: órgão e rito aplicáveis",
+      "url": "https://www.gov.br/ibama/pt-br/assuntos/laf/sobre",
+      "evidence": "O órgão competente pode ser federal, estadual ou municipal, segundo o enquadramento.",
+      "scope": "O fluxo não presume rito único, licenciamento federal ou exigências idênticas para todos os datacenters."
+    },
+    {
+      "id": 7,
+      "title": "ANA | Outorga de recursos hídricos",
+      "short": "ANA: uso da água e outorga",
+      "url": "https://www.gov.br/ana/pt-br/assuntos/gestao-das-aguas/politica-nacional-de-recursos-hidricos/outorga-dos-direitos-de-uso-de-recursos-hidricos",
+      "evidence": "Competência da ANA para águas da União; usos de domínio estadual seguem o órgão estadual.",
+      "scope": "Verificar regularização aplicável à captação, ao fornecimento e ao lançamento previstos no projeto."
+    },
+    {
+      "id": 8,
+      "title": "DataTerra | Interface, cálculo e manual locais",
+      "short": "DataTerra: funcionalidades do MVP",
+      "url": "",
+      "evidence": "index.html; app.js; evaluation-criteria.js; site-analysis.js; docs/manual-dataterra.html.",
+      "scope": "Revisão local 7644e7e, consultada em 23/10/2026. Simulação é triagem; comparação formal e lista de candidatos são produzidas pela equipe fora da plataforma."
+    }
+  ]
+}

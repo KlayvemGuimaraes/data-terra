@@ -1,0 +1,43 @@
+Use-case: style-transfer / professional pitch-deck slide.
+Create a polished raster PNG redesign of the FIRST reference image. The requested final canvas is exactly 1920 x 1080 pixels, 16:9 landscape. Preserve that proportion; do not add an outer border, mockup, frame, or padding.
+
+REFERENCE ROLES
+1. "/Users/klayvemguimaraeslealdasilva/Downloads/DataTerra Pitch Deck (1).jpg" is the slide to edit: it supplies the English content and the approximate 37.7%-left / 62.3%-right composition.
+2. "/Users/klayvemguimaraeslealdasilva/Desktop/dataterra/output/imagegen/dataterra-slide-consumo-energia-v2.png" supplies ONLY the established DataTerra brand palette, typographic character, small logo treatment, polish, spacing and dark visual style. Do NOT copy its photograph, numbers, claims, icons or captions.
+
+DESIGN
+Create one cohesive, elegant, restrained dark slide in the visual language of the DataTerra website.
+Palette: deep forest background #101b17; panel tones #182720 and #203329; warm off-white text #edf2e8; muted secondary text #b5c3b0; pale sage accent #b3cf91 and #9fbf7d; subtle divider #34463a. The tiny logo dot may use #e4a080. No purple, cyan, blue neon or bright white background.
+Typography: Montserrat for heading and large figures; Poppins for labels, sentence and source. Crisp typesetting and strong reading hierarchy. Do not distort glyphs.
+
+LEFT ~37.7%:
+Replace ALL angle-bracket placeholder text with beautiful minimal map art of Brazil. Show a geographically recognizable, correctly proportioned Brazilian silhouette with a fine sage perimeter, softly shaded forest-green interior and extremely subtle geographic contour texture. It is decorative background art, not a data chart. No invented city names, values, geographical labels or plotted data. Center this map gracefully in the left region, with abundant breathing room and a restrained soft glow fading into the deep green background. Keep the visual quiet enough to support the statistics. Remove the original flat gray area. Integrate the map naturally into the full dark canvas. A fine vertical tonal boundary is acceptable, but avoid a heavy card or prominent frame.
+
+RIGHT ~62.3%:
+Place a small DataTerra logo at the upper left of this right region, following reference 2: three thin outlined rounded diamond layers stacked vertically, sage; lowercase "dataterra." wordmark, bold "data", regular "terra", a tiny terracotta terminal dot. Keep it understated.
+Below, center the heading within the right content region, using deliberate line breaks if needed:
+"BRAZIL: LATIN AMERICA’S DATA HUB"
+
+Create two spacious and perfectly balanced columns. The two figures must share the same baseline, size and weight, in pale sage:
+Left: "48%"
+Right: "71%"
+
+Under each number, centered warm off-white labels with consistent font size, line-height, optical balance and matching top alignment:
+Under 48%: "of Total Installed Capacity of LATAM"
+Under 71%: "of Projects Under Construction of LATAM"
+You may wrap each label into two or three carefully balanced lines without changing any words. Use a very thin, low-contrast vertical separator between the columns, if useful; avoid cards.
+
+Below both columns, center the following sentence across the right region, in muted off-white, with comfortable spacing and two or three balanced lines:
+"Driven by abundant clean energy and global demand, the market is projected to double by 2030."
+
+Near the lower edge of the right region, with a generous bottom margin, center this readable, small muted source line exactly:
+"Source: JLL Latin America Data Center Report."
+
+CONTENT AND FINISH CONSTRAINTS
+Preserve every ordinary English word and numeric value above exactly. Do not translate, add slogans, invent a chart, add extra claims, or use the source line from reference 2.
+The map is the only replacement for the bracketed placeholder. No bracketed instruction text may remain.
+The final design must be harmonious, clean and professional, with precise alignment, consistent typography, excellent spacing, and no clipped or overlapping elements.
+Use the whole rectangular 16:9 canvas. Deliver a single finished PNG slide.
+
+Method: built-in image_gen image edit. Final PNG export is checked and normalized to 1920 x 1080 pixels if necessary.
+The supplied slide copy and source attribution are preserved. This design operation does not assert independent verification of the numerical claims.

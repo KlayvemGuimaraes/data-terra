@@ -1,3 +1,5 @@
+const { t, html } = DataTerraI18n;
+
 let map;
 let energyRenderer;
 let electricRenderer;
@@ -101,6 +103,11 @@ function initMap() {
         setSimulatedSite(event.latlng, { activateResults: true });
         activatePanelTabByTarget("controls-site");
     });
+    map.on('popupopen', event => {
+        const close = event.popup.getElement()?.querySelector('.leaflet-popup-close-button');
+        close?.setAttribute('aria-label', t('Fechar janela do mapa'));
+        close?.setAttribute('title', t('Fechar janela do mapa'));
+    });
 }
 
 function initPanelTabs() {
@@ -196,6 +203,7 @@ async function fetchData() {
             ApiClient.fetchOptionalJson('/api/environmental', [])
         ]);
 
+        await window.DataTerraIntroReady;
         currentData = { cables, water, energy, municipalities, substations, envRisk };
         renderTerritorialLayers();
 
@@ -234,13 +242,13 @@ function renderTerritorialLayers() {
     layers.environmental.clearLayers();
     currentData.substations.forEach(s => L.circleMarker([s.lat, s.lng], {
         radius: 4, color: "#fbbf24", weight: 1, fillOpacity: 0.7,
-    }).bindPopup(`<strong>${escapeText(s.name)}</strong><br>ONS · ${s.voltageKv} kV<br>Proximidade não garante conexão ou capacidade disponível.`).addTo(layers.substations));
+    }).bindPopup(html`<strong>${escapeText(s.name)}</strong><br>ONS · ${s.voltageKv} kV<br>Proximidade não garante conexão ou capacidade disponível.`).addTo(layers.substations));
     currentData.municipalities.forEach(m => {
         const summary = SiteAnalysis.summarizeEnvironmental(currentData.envRisk, m);
         if (summary.status !== "atencao") return;
         L.circleMarker([m.lat, m.lng], {
             radius: 5, color: "#fb7185", weight: 1, fillOpacity: 0.3,
-        }).bindPopup(`<strong>${escapeText(m.name)}/${escapeText(m.state)}</strong><br>${summary.label}.<br>Sede municipal: não representa limite ou sobreposição no terreno.`).addTo(layers.environmental);
+        }).bindPopup(html`<strong>${escapeText(m.name)}/${escapeText(m.state)}</strong><br>${t(summary.label)}.<br>Sede municipal: não representa limite ou sobreposição no terreno.`).addTo(layers.environmental);
     });
 }
 
@@ -253,7 +261,7 @@ function renderCables() {
                 weight: 2,
                 opacity: 0.6
             }
-        }).bindPopup(`<strong>Cable: ${cable.name}</strong><br>Owners: ${cable.owners}`).addTo(layers.cables);
+        }).bindPopup(html`<strong>Cabo: ${escapeText(cable.name)}</strong><br>Proprietários: ${escapeText(cable.owners)}`).addTo(layers.cables);
     });
 }
 
@@ -273,7 +281,7 @@ function renderWater() {
             weight: 1,
             opacity: 1,
             fillOpacity: 0.8
-        }).bindPopup(`<strong>${w.city}</strong><br>População: ${w.population.toLocaleString()}<br>Serviço: ${w.service_type}`).addTo(layers.water);
+        }).bindPopup(html`<strong>${w.city}</strong><br>População: ${w.population.toLocaleString(DataTerraI18n.getLocale())}<br>Serviço: ${escapeText(t(w.service_type))}`).addTo(layers.water);
     });
 }
 
@@ -315,16 +323,16 @@ function getEnergyCellColor(cell) {
 }
 
 function renderEnergyCellPopup(cell) {
-    const capacity = cell.capacityMw.toLocaleString("pt-BR", {
+    const capacity = cell.capacityMw.toLocaleString(DataTerraI18n.getLocale(), {
         maximumFractionDigits: 1,
     });
-    const count = cell.count.toLocaleString("pt-BR");
+    const count = cell.count.toLocaleString(DataTerraI18n.getLocale());
 
-    return `
+    return html`
         <strong>Energia renovável agregada</strong><br>
-        ${count} usina${cell.count === 1 ? "" : "s"} nesta área<br>
+        ${t`Usinas nesta área: ${count}`}<br>
         Capacidade somada: ${capacity} MW<br>
-        Tipos: ${cell.types.join(", ")}
+        Tipos: ${cell.types.map(type => t(type)).join(", ")}
     `;
 }
 
@@ -356,7 +364,7 @@ function renderElectricInfrastructure() {
                 dashArray: "6 5",
                 interactive: true,
             },
-        ).bindPopup(`
+        ).bindPopup(html`
             <strong>Linha de transmissão estimada</strong><br>
             Liga polos ANEEL próximos para indicar eixo elétrico provável.<br>
             Distância: ${formatKm(line.distanceKm)}
@@ -374,12 +382,12 @@ function renderElectricInfrastructure() {
             fillColor: "#8b5cf6",
             fillOpacity: 0.84,
             interactive: true,
-        }).bindPopup(`
+        }).bindPopup(html`
             <strong>Subestação estimada</strong><br>
-            ${node.city ? `${node.city}/${node.state}<br>` : ""}
+            ${node.city ? html`${node.city}/${node.state}<br>` : ""}
             Polo renovável ANEEL: ${formatMw(node.capacityMw)}<br>
             Usinas no entorno: ${node.plantCount}<br>
-            Fonte dominante: ${node.dominantType}
+            Fonte dominante: ${escapeText(t(node.dominantType))}
         `).addTo(layers.electric);
     });
 
@@ -394,10 +402,10 @@ function renderElectricInfrastructure() {
             fillColor: "#0f766e",
             fillOpacity: 0.82,
             interactive: true,
-        }).bindPopup(`
+        }).bindPopup(html`
             <strong>Carga elétrica</strong><br>
             ${center.city}/${center.state}<br>
-            População atendida: ${center.population.toLocaleString("pt-BR")}<br>
+            População atendida: ${center.population.toLocaleString(DataTerraI18n.getLocale())}<br>
             Serviços: ${formatServices(center.services)}
         `).addTo(layers.electric);
     });
@@ -426,18 +434,18 @@ function renderRegions() {
             fillColor: isSelected ? "#174b3c" : "#2970a8",
             fillOpacity: isSelected ? 0.96 : 0.76,
             interactive: true,
-        }).bindPopup(`
+        }).bindPopup(html`
             <strong>${escapeText(region.name)}/${escapeText(region.state)}</strong>
-            <p>${isLocal ? "Ponto e raio selecionados" : "Comparação regional preliminar"}</p>
-            <dl class="popup-pillars">${criteriaGroups.map(group => `
-                <div><dt>${group.label}</dt><dd>${formatPillarScore(groupScores[group.id])}</dd></div>
+            <p>${isLocal ? t("Ponto e raio selecionados") : t("Comparação regional preliminar")}</p>
+            <dl class="popup-pillars">${criteriaGroups.map(group => html`
+                <div><dt>${t(group.label)}</dt><dd>${formatPillarScore(groupScores[group.id])}</dd></div>
             `).join("")}</dl>
             <p>Maior nota = condição mais favorável em cada pilar. — = sem avaliação. Sem conclusão única sobre o local.</p>
         `);
 
         marker.on('click', () => selectRegion(region.id));
         if (isSelected) {
-            marker.bindTooltip(`${escapeText(region.name)}/${escapeText(region.state)} · selecionada`, {
+            marker.bindTooltip(`${escapeText(region.name)}/${escapeText(region.state)} ${t('· selecionada')}`, {
                 direction: "top",
             });
         }
@@ -445,8 +453,8 @@ function renderRegions() {
     });
 
     document.querySelector("#mapCandidateNote").textContent = visible.hiddenCount > 0
-        ? `Mapa: ${visible.regions.length} de ${visible.totalCount} candidatos, em recorte alfabético com a seleção preservada. Marcadores não indicam notas.`
-        : `Mapa: ${visible.totalCount} candidatos neste recorte. Marcadores não indicam notas.`;
+        ? t`Mapa: ${visible.regions.length} de ${visible.totalCount} candidatos, em recorte alfabético com a seleção preservada. Marcadores não indicam notas.`
+        : t`Mapa: ${visible.totalCount} candidatos neste recorte. Marcadores não indicam notas.`;
 }
 
 function getRegionGroupScores(region) {
@@ -539,6 +547,8 @@ function renderSiteMarker() {
     const marker = L.marker([simulatedSite.lat, simulatedSite.lng], {
         pane: "sitePane",
         draggable: true,
+        title: t('Marcador do local simulado'),
+        alt: t('Marcador do local simulado'),
         icon: L.divIcon({
             className: "site-marker",
             html: "<span></span>",
@@ -596,7 +606,7 @@ function renderSiteControls() {
 
     const context = document.querySelector("#siteContext");
     if (!simulatedSite) {
-        context.innerHTML = `
+        context.innerHTML = html`
             <span><strong>Local:</strong> nenhum ponto definido</span>
             <span><strong>Raio:</strong> ${siteConfig.radiusKm} km</span>
         `;
@@ -604,10 +614,10 @@ function renderSiteControls() {
     }
 
     const nearest = siteAnalysis?.site?.nearestRegion;
-    context.innerHTML = `
+    context.innerHTML = html`
         <span><strong>Coordenadas:</strong> lat ${formatCoordinate(simulatedSite.lat)} / lng ${formatCoordinate(simulatedSite.lng)}</span>
         <span><strong>UF estimada:</strong> ${siteAnalysis?.site?.state || simulatedSite.state || "NA"}</span>
-        <span><strong>Referência próxima:</strong> ${nearest ? `${nearest.name}/${nearest.state} (${formatKm(nearest.distanceKm)})` : "sem candidato próximo"}</span>
+        <span><strong>Referência próxima:</strong> ${nearest ? `${nearest.name}/${nearest.state} (${formatKm(nearest.distanceKm)})` : t("sem candidato próximo")}</span>
     `;
 }
 
@@ -619,40 +629,40 @@ function renderLiveLayers() {
         const data = liveTerritory[kind];
         if (!data) continue;
         if (kind === 'climate') {
-            if (data.status === 'ok' && simulatedSite) L.circleMarker([simulatedSite.lat, simulatedSite.lng], { radius: 9, color: '#ea580c', fillOpacity: 0.2 }).bindPopup(`NASA POWER · referência em grade<br>Máxima climatológica: ${escapeText(data.maxTemperature)} °C<br>${escapeText(data.edition)}`).addTo(layers.climate);
+            if (data.status === 'ok' && simulatedSite) L.circleMarker([simulatedSite.lat, simulatedSite.lng], { radius: 9, color: '#ea580c', fillOpacity: 0.2 }).bindPopup(html`NASA POWER · referência em grade<br>Máxima climatológica: ${escapeText(data.maxTemperature)} °C<br>${escapeText(data.edition)}`).addTo(layers.climate);
             continue;
         }
         L.geoJSON(data.features || [], {
             style: { color: colors[kind], weight: kind === 'transmission' ? 2 : 1.5, fillOpacity: 0.1 },
             onEachFeature(feature, layer) {
                 const p = feature.properties || {};
-                layer.bindPopup(`<strong>${escapeText(p.name || data.source)}</strong><br>${escapeText(p.category || p.class || '')}<br>${escapeText(data.source)} · geometria visual simplificada${p.atPoint ? '<br>Interseção com o ponto selecionado' : ''}`);
+                layer.bindPopup(html`<strong>${escapeText(p.name || data.source)}</strong><br>${escapeText(t(p.category || p.class || ''))}<br>${escapeText(data.source)} · geometria visual simplificada${p.atPoint ? html('<br>Interseção com o ponto selecionado') : ''}`);
             },
         }).addTo(layers[layerName]);
     }
 }
 
 function renderTerritorialDetails() {
-    const statusText = { loading: 'Consultando', ok: 'Consultado', partial: 'Cobertura parcial', unavailable: 'Indisponível', 'no-data': 'Sem dado no ponto' };
-    const labels = { environment: 'Áreas protegidas · CNUC', transmission: 'Linhas oficiais · ANEEL/ONS', basin: 'Microbacia · ANA', climate: 'Clima · NASA POWER' };
+    const statusText = { loading: t('Consultando'), ok: t('Consultado'), partial: t('Cobertura parcial'), unavailable: t('Indisponível'), 'no-data': t('Sem dado no ponto') };
+    const labels = { environment: t('Áreas protegidas · CNUC'), transmission: t('Linhas oficiais · ANEEL/ONS'), basin: t('Microbacia · ANA'), climate: t('Clima · NASA POWER') };
     const summaries = {
-        environment: data => `${data.count ?? 0} UC(s) no raio; ${data.items?.filter(i => i.atPoint).length ?? 0} no ponto.`,
-        transmission: data => data.nearestDistanceKm == null ? 'Nenhuma linha identificada no raio consultado.' : `${data.nearestName} · distância aproximada ${formatKm(data.nearestDistanceKm)} ao traçado.`,
-        basin: data => `${data.code} · ${data.region} · classe ${data.class}. Comprometimento: ${data.commitmentPercent == null ? 'não informado' : Number(data.commitmentPercent).toFixed(1) + '%'}.`,
-        climate: data => `Máxima climatológica ${data.maxTemperature} °C · umidade média ${data.humidity}% · ${data.dryMonths} mês(es) com precipitação média inferior a 1 mm/dia. Indicador climático: ${data.score}/100.`,
+        environment: data => t`${data.count ?? 0} UC(s) no raio; ${data.items?.filter(i => i.atPoint).length ?? 0} no ponto.`,
+        transmission: data => data.nearestDistanceKm == null ? t('Nenhuma linha identificada no raio consultado.') : t`${data.nearestName} · distância aproximada ${formatKm(data.nearestDistanceKm)} ao traçado.`,
+        basin: data => t`${data.code} · ${data.region} · classe ${t(data.class)}. Comprometimento: ${data.commitmentPercent == null ? t('não informado') : DataTerraI18n.number(data.commitmentPercent, { maximumFractionDigits: 1 }) + '%'}.`,
+        climate: data => t`Máxima climatológica ${data.maxTemperature} °C · umidade média ${data.humidity}% · ${data.dryMonths} mês(es) com precipitação média inferior a 1 mm/dia. Indicador climático: ${data.score}/100.`,
     };
-    return `<details class="methodology-block territorial-details" data-territory-section="main" open>
+    return html`<details class="methodology-block territorial-details" data-territory-section="main" open>
         <summary>Consulta territorial e próximos passos</summary>
         <div aria-live="polite">${Object.entries(labels).map(([kind, label]) => {
             const data = liveTerritory[kind] || { status: 'loading' };
-            return `<details class="territorial-source" data-territory-section="${kind}"><summary>${label} · ${data.refreshing ? 'Atualizando (resultado anterior)' : statusText[data.status] || 'Sem dado'}</summary>
-                <p>${escapeText(data.status === 'ok' || data.status === 'partial' ? summaries[kind](data) : data.message || 'Aguardando consulta à fonte oficial.')}</p>
-                ${data.items ? `<ul>${data.items.filter(i => i.atPoint).map(i => `<li>${escapeText(i.name)} · ${escapeText(i.group)} · plano de manejo: ${escapeText(i.managementPlan || 'não informado')}. Gestor: ${escapeText(i.manager || 'não informado')}.</li>`).join('')}</ul>` : ''}
-                <p class="field-note">${escapeText(data.message || '')} ${escapeText(data.edition || '')}${data.fetchedAt ? ` · consultado em ${escapeText(new Date(data.fetchedAt).toLocaleString('pt-BR'))}` : ''}${data.displayLimited ? ' · mapa mostra apenas as feições mais próximas; contagem inclui todas as consultadas.' : ''}${data.geometryStatus && data.geometryStatus !== 'ok' ? ' · geometria indisponível para exibição.' : ''}</p>
+            return html`<details class="territorial-source" data-territory-section="${kind}"><summary>${label} · ${data.refreshing ? t('Atualizando (resultado anterior)') : statusText[data.status] || t('Sem dado')}</summary>
+                <p>${escapeText(data.status === 'ok' || data.status === 'partial' ? summaries[kind](data) : t(data.message || 'Aguardando consulta à fonte oficial.'))}</p>
+                ${data.items ? html`<ul>${data.items.filter(i => i.atPoint).map(i => html`<li>${escapeText(i.name)} · ${escapeText(t(i.group))} · plano de manejo: ${escapeText(t(i.managementPlan || 'não informado'))}. Gestor: ${escapeText(i.manager || t('não informado'))}.</li>`).join('')}</ul>` : ''}
+                <p class="field-note">${escapeText(t(data.message || ''))} ${escapeText(data.sourceRetrievedAt ? t`Snapshot oficial de ${data.sourceRetrievedAt}` : t(data.edition || ''))}${data.fetchedAt ? t` · consultado em ${escapeText(new Date(data.fetchedAt).toLocaleString(DataTerraI18n.getLocale()))}` : ''}${data.displayLimited ? t(' · mapa mostra apenas as feições mais próximas; contagem inclui todas as consultadas.') : ''}${data.geometryStatus && data.geometryStatus !== 'ok' ? t(' · geometria indisponível para exibição.') : ''}</p>
             </details>`;
         }).join('')}</div>
-        <details data-territory-section="rules"><summary>Regras de triagem e diligências</summary><ul>${siteAnalysis.territorial.rules.map(r => `<li><strong>${escapeText(r.title)}:</strong> ${escapeText(r.text)} <a href="${r.url}" target="_blank" rel="noopener">Fonte oficial</a></li>`).join('')}</ul></details>
-        <p class="field-note">${escapeText(siteAnalysis.territorial.warnings.join(' '))}</p>
+        <details data-territory-section="rules"><summary>Regras de triagem e diligências</summary><ul>${siteAnalysis.territorial.rules.map(r => html`<li><strong>${escapeText(t(r.title))}:</strong> ${escapeText(t(r.text))} <a href="${r.url}" target="_blank" rel="noopener">Fonte oficial</a></li>`).join('')}</ul></details>
+        <p class="field-note">${escapeText(siteAnalysis.territorial.warnings.map(warning => t(warning)).join(' '))}</p>
         <button type="button" id="retryTerritory" class="secondary-button">Atualizar consultas</button>
     </details>`;
 }
@@ -670,7 +680,7 @@ function renderSiteAnalysis() {
     if (!simulatedSite || currentData.energy.length === 0) {
         siteAnalysis = null;
         renderLocalScoreSummary(null);
-        container.innerHTML = `
+        container.innerHTML = html`
             <p class="field-note">Defina um ponto no mapa ou use a região selecionada para calcular os recursos no raio.</p>
         `;
         return;
@@ -689,11 +699,11 @@ function renderSiteAnalysis() {
     const groupScores = siteAnalysis.groupScores;
     const expandedTerritory = new Map([...container.querySelectorAll("[data-territory-section]")].map(el => [el.dataset.territorySection, el.open]));
 
-    container.innerHTML = `
+    container.innerHTML = html`
         <h3>Quatro pilares no ponto</h3>
         ${renderScoreGroupSummary(groupScores)}
         <p class="field-note">Notas heurísticas de 0 a 100: maior é mais favorável em cada pilar, inclusive estresse hídrico e risco social/territorial. Não são probabilidades nem autorizações.</p>
-        <p class="field-note">${siteAnalysis.territorial.complete ? 'Consulta das quatro fontes concluída; verifique os limites de cobertura.' : 'Consulta incompleta ou em andamento; os indicadores usam as reservas declaradas nas fontes.'}</p>
+        <p class="field-note">${siteAnalysis.territorial.complete ? t('Consulta das quatro fontes concluída; verifique os limites de cobertura.') : t('Consulta incompleta ou em andamento; os indicadores usam as reservas declaradas nas fontes.')}</p>
         ${renderTerritorialDetails()}
         <div class="site-location-grid">
             <span>Coordenadas</span>
@@ -711,12 +721,12 @@ function renderSiteAnalysis() {
             <div class="resource-card">
                 <span>Energia renovável</span>
                 <strong>${formatMw(siteAnalysis.energy.totalCapacityMw)}</strong>
-                <small>${siteAnalysis.energy.totalPlants} usina${siteAnalysis.energy.totalPlants === 1 ? "" : "s"} · ${formatCoverage(coverage)}</small>
+                <small>${t`Usinas: ${DataTerraI18n.number(siteAnalysis.energy.totalPlants)}`} · ${formatCoverage(coverage)}</small>
             </div>
             <div class="resource-card">
                 <span>Água e esgoto</span>
                 <strong>${siteAnalysis.water.points}</strong>
-                <small>${formatServices(siteAnalysis.water.services)} · ${siteAnalysis.water.municipalities} município${siteAnalysis.water.municipalities === 1 ? "" : "s"}</small>
+                <small>${formatServices(siteAnalysis.water.services)} · ${t`Municípios: ${DataTerraI18n.number(siteAnalysis.water.municipalities)}`}</small>
             </div>
             <div class="resource-card">
                 <span>Proximidade da fibra</span>
@@ -727,9 +737,9 @@ function renderSiteAnalysis() {
 
         <details class="methodology-block">
             <summary>Subestação ONS e referência municipal de reserva</summary>
-            <p><strong>Subestação ONS:</strong> ${siteAnalysis.nearestSubstation.nearestName ? `${escapeText(siteAnalysis.nearestSubstation.nearestName)} · ${formatKm(siteAnalysis.nearestSubstation.nearestDistanceKm)} em linha geodésica · ${siteAnalysis.nearestSubstation.nearestVoltageKv} kV` : "Sem dados disponíveis (40 pontos)"}. Validar capacidade e acesso com o agente responsável.</p>
-            <p><strong>Ambiental:</strong> ${siteAnalysis.environmental.label}. Referência: ${escapeText(siteAnalysis.environmental.municipality || "indisponível")}.</p>
-            <p>${siteAnalysis.environmental.source} Consultar limites, planos de manejo e órgão licenciador antes de selecionar o terreno.</p>
+            <p><strong>Subestação ONS:</strong> ${siteAnalysis.nearestSubstation.nearestName ? t`${escapeText(siteAnalysis.nearestSubstation.nearestName)} · ${formatKm(siteAnalysis.nearestSubstation.nearestDistanceKm)} em linha geodésica · ${siteAnalysis.nearestSubstation.nearestVoltageKv} kV` : t("Sem dados disponíveis (40 pontos)")}. Validar capacidade e acesso com o agente responsável.</p>
+            <p><strong>Ambiental:</strong> ${t(siteAnalysis.environmental.label)}. Referência: ${escapeText(siteAnalysis.environmental.municipality || t("indisponível"))}.</p>
+            <p>${t(siteAnalysis.environmental.source)} Consultar limites, planos de manejo e órgão licenciador antes de selecionar o terreno.</p>
         </details>
         <h3>Matriz renovável no raio</h3>
         <div class="renewable-breakdown-list">
@@ -739,13 +749,13 @@ function renderSiteAnalysis() {
         <h3>Impacto calculado do data center</h3>
         <div class="impact-grid">
             <span>Carga de TI</span>
-            <strong>${siteAnalysis.load.itLoadMw.toLocaleString("pt-BR")} MW</strong>
+            <strong>${siteAnalysis.load.itLoadMw.toLocaleString(DataTerraI18n.getLocale())} MW</strong>
             <span>Energia anual estimada</span>
-            <strong>${siteAnalysis.load.annualEnergyGwh.toLocaleString("pt-BR")} GWh/ano</strong>
+            <strong>${siteAnalysis.load.annualEnergyGwh.toLocaleString(DataTerraI18n.getLocale())} GWh/ano</strong>
             <span>Consumo de água estimado</span>
-            <strong>${siteAnalysis.impact.annualWaterMegaliters.toLocaleString("pt-BR")} ML/ano</strong>
+            <strong>${siteAnalysis.impact.annualWaterMegaliters.toLocaleString(DataTerraI18n.getLocale())} ML/ano</strong>
             <span>Impacto WUI</span>
-            <strong>${siteAnalysis.impact.impactScore}/100 · ${siteAnalysis.impact.impactClass}</strong>
+            <strong>${siteAnalysis.impact.impactScore}/100 · ${t(siteAnalysis.impact.impactClass)}</strong>
         </div>
 
         ${renderNearestResources(siteAnalysis)}
@@ -762,10 +772,10 @@ function renderSiteAnalysis() {
 }
 
 function renderEnergyBreakdownRows(types) {
-    return types.map(item => `
+    return types.map(item => html`
         <div class="renewable-breakdown-row">
             <div class="renewable-breakdown-head">
-                <span><i class="energy-swatch ${getEnergySwatchClass(item.type)}"></i>${item.type}</span>
+                <span><i class="energy-swatch ${getEnergySwatchClass(item.type)}"></i>${escapeText(t(item.type))}</span>
                 <strong>${item.percentage}%</strong>
             </div>
             <div class="bar"><span style="width:${item.percentage}%"></span></div>
@@ -776,33 +786,33 @@ function renderEnergyBreakdownRows(types) {
 
 function renderNearestResources(analysis) {
     const plants = analysis.energy.topPlants
-        .map((plant) => `
+        .map((plant) => html`
             <li>
-                <span>${plant.name || plant.type} · ${plant.city}/${plant.state}</span>
+                <span>${escapeText(plant.name || t(plant.type))} · ${plant.city}/${plant.state}</span>
                 <strong>${formatMw(plant.capacityMw)} · ${formatKm(plant.distanceKm)}</strong>
             </li>
         `)
         .join("");
     const water = analysis.water.items
-        .map((item) => `
+        .map((item) => html`
             <li>
-                <span>${item.city}/${item.state} · ${item.serviceType}</span>
+                <span>${item.city}/${item.state} · ${escapeText(t(item.serviceType))}</span>
                 <strong>${formatKm(item.distanceKm)}</strong>
             </li>
         `)
         .join("");
     const fiber = analysis.fiber.nearestName
-        ? `
+        ? html`
             <li>
                 <span>Cabos de Fibra · ${analysis.fiber.nearestName}</span>
-                <strong>${analysis.fiber.label} · ${formatKm(analysis.fiber.nearestDistanceKm)}</strong>
+                <strong>${t(analysis.fiber.label)} · ${formatKm(analysis.fiber.nearestDistanceKm)}</strong>
             </li>
         `
         : "";
 
     if (!plants && !water && !fiber) return "";
 
-    return `
+    return html`
         <h3>Recursos mais próximos</h3>
         <ul class="mini-list">
             ${plants}
@@ -814,28 +824,28 @@ function renderNearestResources(analysis) {
 
 function renderFiberProximity(fiber, cables) {
     if (!fiber || fiber.label === "Sem dado") {
-        return `<span class="fiber-band unknown">Sem dado</span> sem cabo válido na base`;
+        return html`<span class="fiber-band unknown">Sem dado</span> sem cabo válido na base`;
     }
 
-    const cableCount = cables.count === 1 ? "1 cabo no raio" : `${cables.count} cabos no raio`;
-    return `
-        <span class="fiber-band ${fiber.className}">${fiber.label}</span>
+    const cableCount = t`Cabos no raio: ${DataTerraI18n.number(cables.count)}`;
+    return html`
+        <span class="fiber-band ${fiber.className}">${t(fiber.label)}</span>
         ${fiber.nearestName} a ${formatKm(fiber.nearestDistanceKm)} · ${cableCount}
     `;
 }
 
 function renderRegionFiberProximity(fiber) {
     if (!fiber || fiber.label === "Sem dado") {
-        return `
+        return html`
             <p class="field-note region-fiber-summary">
                 Fibra: sem rota válida na base para pontuar esta região.
             </p>
         `;
     }
 
-    return `
+    return html`
         <div class="region-fiber-summary">
-            <span class="fiber-band ${fiber.className}">${fiber.label}</span>
+            <span class="fiber-band ${fiber.className}">${t(fiber.label)}</span>
             <span>${fiber.nearestName} a ${formatKm(fiber.nearestDistanceKm)}. Quanto mais perto da rota, maior o indicador.</span>
         </div>
     `;
@@ -852,11 +862,11 @@ function renderDetails() {
     const wuiAssessment = getWuiAssessment(selectedRegion);
 
     document.querySelector("#selectedName").textContent = `${selectedRegion.name} / ${selectedRegion.state}`;
-    document.querySelector("#selectedSummary").textContent = selectedRegion.summary;
+    document.querySelector("#selectedSummary").textContent = formatRegionSummary(selectedRegion);
     document.querySelector("#selectedScoreGroups").innerHTML = renderScoreGroupSummary(groupScores);
     document.querySelector("#selectedFiber").innerHTML = renderRegionFiberProximity(selectedRegion.fiber);
     
-    document.querySelector("#recommendation").textContent = selectedRegion.recommendation;
+    document.querySelector("#recommendation").textContent = t(selectedRegion.recommendation);
 
     document.querySelector("#metrics").innerHTML = renderMetricGroups(scores, groupScores);
 
@@ -865,30 +875,30 @@ function renderDetails() {
     renderMethodology(selectedRegion, wuiAssessment);
 
     document.querySelector("#conditions").innerHTML = selectedRegion.conditions
-        .map((condition) => `<span class="condition">${condition}</span>`)
+        .map((condition) => html`<span class="condition">${t(condition)}</span>`)
         .join("");
 }
 
 function renderWuiResult(assessment) {
-    document.querySelector("#wuiResult").innerHTML = `
+    document.querySelector("#wuiResult").innerHTML = html`
         <div class="wui-head">
             <span>
                 <span class="wui-label">Índice de impacto</span>
                 <span class="wui-score">${assessment.impactScore}</span>
             </span>
-            <span class="status-pill ${getWuiClassName(assessment.impactScore)}">${assessment.impactClass}</span>
+            <span class="status-pill ${getWuiClassName(assessment.impactScore)}">${t(assessment.impactClass)}</span>
         </div>
         <div class="wui-grid">
             <span>Estresse Aqueduct</span>
-            <strong>${assessment.stress.label}</strong>
+            <strong>${t(assessment.stress.label)}</strong>
             <span>Consumo anual estimado</span>
-            <strong>${assessment.annualWaterMegaliters.toLocaleString("pt-BR")} ML/ano</strong>
+            <strong>${assessment.annualWaterMegaliters.toLocaleString(DataTerraI18n.getLocale())} ML/ano</strong>
             <span>Intensidade</span>
-            <strong>${assessment.waterUseIntensityLPerKwh.toLocaleString("pt-BR")} L/kWh TI</strong>
+            <strong>${assessment.waterUseIntensityLPerKwh.toLocaleString(DataTerraI18n.getLocale())} L/kWh TI</strong>
             <span>Carga de TI</span>
-            <strong>${assessment.itLoadMw.toLocaleString("pt-BR")} MW</strong>
+            <strong>${assessment.itLoadMw.toLocaleString(DataTerraI18n.getLocale())} MW</strong>
         </div>
-        <p class="field-note">${assessment.source}</p>
+        <p class="field-note">${t(assessment.source)}</p>
     `;
 }
 
@@ -896,32 +906,32 @@ function renderRenewableMix(region) {
     const summary = RenewableBreakdown.buildRenewableBreakdown(currentData.energy, region);
 
     if (summary.totalCapacityMw === 0) {
-        document.querySelector("#renewableMix").innerHTML = `
+        document.querySelector("#renewableMix").innerHTML = html`
             <p class="field-note">Sem geração renovável registrada na base ANEEL para este recorte.</p>
         `;
         return;
     }
 
-    document.querySelector("#renewableMix").innerHTML = `
+    document.querySelector("#renewableMix").innerHTML = html`
         <div class="renewable-summary">
-            <span>${summary.scopeLabel}</span>
-            <strong>${summary.totalCapacityMw.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} MW</strong>
-            <small>${summary.totalPlants.toLocaleString("pt-BR")} usina${summary.totalPlants === 1 ? "" : "s"}</small>
+            <span>${formatRenewableScope(summary, region)}</span>
+            <strong>${summary.totalCapacityMw.toLocaleString(DataTerraI18n.getLocale(), { maximumFractionDigits: 1 })} MW</strong>
+            <small>${t`Usinas: ${DataTerraI18n.number(summary.totalPlants)}`}</small>
         </div>
         <div class="renewable-breakdown-list">
-            ${summary.types.map(item => `
+            ${summary.types.map(item => html`
                 <div class="renewable-breakdown-row">
                     <div class="renewable-breakdown-head">
-                        <span><i class="energy-swatch ${getEnergySwatchClass(item.type)}"></i>${item.type}</span>
+                        <span><i class="energy-swatch ${getEnergySwatchClass(item.type)}"></i>${escapeText(t(item.type))}</span>
                         <strong>${item.percentage}%</strong>
                     </div>
                     <div class="bar"><span style="width:${item.percentage}%"></span></div>
-                    <small>${item.capacityMw.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} MW</small>
+                    <small>${item.capacityMw.toLocaleString(DataTerraI18n.getLocale(), { maximumFractionDigits: 1 })} MW</small>
                 </div>
             `).join("")}
         </div>
         <p class="field-note">
-            Percentual calculado pela capacidade outorgada renovável no ${summary.scopeLabel.toLowerCase()} usado como recorte.
+            Percentual calculado pela capacidade outorgada renovável no ${formatRenewableScope(summary, region)} usado como recorte.
         </p>
     `;
 }
@@ -937,48 +947,65 @@ function getEnergySwatchClass(type) {
 }
 
 function formatMw(value) {
-    return `${Number(value || 0).toLocaleString("pt-BR", {
+    return `${Number(value || 0).toLocaleString(DataTerraI18n.getLocale(), {
         maximumFractionDigits: 1,
     })} MW`;
 }
 
 function formatCoordinate(value) {
-    return Number(value || 0).toLocaleString("pt-BR", {
+    return Number(value || 0).toLocaleString(DataTerraI18n.getLocale(), {
         maximumFractionDigits: 5,
     });
 }
 
 function formatNearestRegion(region) {
-    if (!region) return "sem referência";
+    if (!region) return t("sem referência");
     return `${region.name}/${region.state} (${formatKm(region.distanceKm)})`;
 }
 
 function formatServices(services) {
-    if (!services || services.length === 0) return "sem serviço no raio";
-    return services.join(" e ");
+    if (!services || services.length === 0) return t("sem serviço no raio");
+    return DataTerraI18n.list(services.map(service => t(service)));
+}
+
+function formatRenewableScope(summary) {
+    return t(summary.scopeLabel);
+}
+
+function formatRegionSummary(region) {
+    const data = region.summaryData;
+    if (data?.kind === "water") return t`Cidade com ${DataTerraI18n.number(data.population)} habitantes. Serviços de ${formatServices(data.services)} registrados para ${data.provider || t("prestador não informado")}.`;
+    if (data?.kind === "energy") return t`Cidade com ${DataTerraI18n.number(data.plants)} usinas renováveis registradas na ANEEL, somando ${formatMw(data.capacityMw)} de capacidade outorgada.`;
+    return t(region.summary);
+}
+
+function formatRegionTags(region) {
+    const tags = region.tags.filter(tag => !tag.startsWith("Fibra ")).map(tag => t(tag));
+    if (region.fiber?.hasData) tags.push(t`Fibra: ${t(region.fiber.label)} (${formatKm(region.fiber.nearestDistanceKm)})`);
+    return tags.join(" • ");
 }
 
 function formatCableDistance(cables) {
     if (cables.count > 0) {
         return cables.nearestDistanceKm === null
-            ? "cabo no raio"
-            : `mais próximo a ${formatKm(cables.nearestDistanceKm)}`;
+            ? t("cabo no raio")
+            : t`mais próximo a ${formatKm(cables.nearestDistanceKm)}`;
     }
-    if (cables.nearestDistanceKm === null) return "sem cabo na base";
-    return `mais próximo a ${formatKm(cables.nearestDistanceKm)}`;
+    if (cables.nearestDistanceKm === null) return t("sem cabo na base");
+    return t`mais próximo a ${formatKm(cables.nearestDistanceKm)}`;
 }
 
 function formatCoverage(percentage) {
     if (percentage >= 1000) {
-        return `${(percentage / 100).toLocaleString("pt-BR", {
+        return t`${(percentage / 100).toLocaleString(DataTerraI18n.getLocale(), {
             maximumFractionDigits: 1,
         })}x da carga TI`;
     }
-    return `${percentage}% da carga TI`;
+    return t`${percentage}% da carga TI`;
 }
 
 function formatKm(value) {
-    return `${Number(value || 0).toLocaleString("pt-BR", {
+    return `${Number(value || 0).toLocaleString(DataTerraI18n.getLocale(), {
         maximumFractionDigits: 1,
     })} km`;
 }
@@ -987,10 +1014,10 @@ function renderMethodology(region, assessment) {
     const dataBasis = region.methodology?.dataBasis || [];
     const assumptionNotes = region.methodology?.assumptionNotes || [];
 
-    document.querySelector("#methodology").innerHTML = `
+    document.querySelector("#methodology").innerHTML = html`
         <div class="methodology-block">
             <h3>Dados reais usados</h3>
-            <p>${dataBasis.join(" • ") || "Sem fonte declarada"}</p>
+            <p>${dataBasis.map(value => t(value)).join(" • ") || t("Sem fonte declarada")}</p>
         </div>
         <div class="methodology-block">
             <h3>Como calculamos o impacto hídrico</h3>
@@ -1003,7 +1030,7 @@ function renderMethodology(region, assessment) {
             <h3>Premissas das bases regionais</h3>
             <p>A simulação local incorpora as consultas oficiais descritas em Novas fontes e premissas territoriais.</p>
             <ul>
-                ${assumptionNotes.map(note => `<li>${note}</li>`).join("")}
+                ${assumptionNotes.map(note => html`<li>${t(note)}</li>`).join("")}
                 <li>WUI é uma estimativa por UF baseada em The Green Grid WUI e WRI Aqueduct 4.0; não substitui estudo por bacia, outorga ou disponibilidade local.</li>
                 <li>Impacto hídrico atual: ${assessment.impactScore}/100, onde menor é melhor.</li>
             </ul>
@@ -1021,29 +1048,29 @@ function getWuiClassName(impactScore) {
 function renderRanking() {
     const pillar = criteriaGroups.find(group => group.id === rankingPillar);
     const select = document.querySelector("#rankingPillar");
-    select.innerHTML = criteriaGroups.map(group => `<option value="${group.id}">${group.label}</option>`).join("");
+    select.innerHTML = criteriaGroups.map(group => html`<option value="${group.id}">${t(group.label)}</option>`).join("");
     select.value = rankingPillar;
     const ranked = ViewLimits.limitRankedRegions(regionsData, rankingPillar, getRegionGroupScores, selectedRegion, 30);
     document.querySelector("#rankingNote").textContent =
-        `Ordem decrescente somente por ${pillar.label}. Sem avaliação vem ao final; empates seguem ordem alfabética. ` +
+        t`Ordem decrescente somente por ${t(pillar.label)}. Sem avaliação vem ao final; empates seguem ordem alfabética. ` +
         (ranked.hiddenCount > 0
-            ? `Mostrando até 30 candidatos e preservando a seleção (${ranked.regions.length} de ${ranked.totalCount}). `
-            : `${ranked.totalCount} regiões candidatas neste recorte. `) +
-        "Bases regionais preliminares: os quatro valores podem diferir da análise do ponto e raio na aba Local.";
+            ? t`Mostrando até 30 candidatos e preservando a seleção (${ranked.regions.length} de ${ranked.totalCount}). `
+            : t`${ranked.totalCount} regiões candidatas neste recorte. `) +
+        t("Bases regionais preliminares: os quatro valores podem diferir da análise do ponto e raio na aba Local.");
     document.querySelector("#ranking").innerHTML = ranked.regions
         .map(region => {
             const groupScores = getRegionGroupScores(region);
-            return `
+            return html`
                 <li data-region="${escapeText(region.id)}" class="${selectedRegion?.id === region.id ? 'selected' : ''}">
                     <button class="ranking-select" type="button" aria-label="Analisar ${escapeText(region.name)}/${escapeText(region.state)}">
-                        <span class="ranking-name">${escapeText(region.name)}/${escapeText(region.state)}${selectedRegion?.id === region.id ? " · selecionada" : ""}</span>
-                        <span class="ranking-tags">${escapeText(region.tags.join(" • "))}</span>
+                        <span class="ranking-name">${escapeText(region.name)}/${escapeText(region.state)}${selectedRegion?.id === region.id ? t(" · selecionada") : ""}</span>
+                        <span class="ranking-tags">${escapeText(formatRegionTags(region))}</span>
                     </button>
                     <dl class="ranking-pillars">
-                        ${criteriaGroups.map(group => `
+                        ${criteriaGroups.map(group => html`
                             <div class="${group.id === rankingPillar ? "is-sorted" : ""}">
-                                <dt>${group.label}</dt>
-                                <dd>${formatPillarScore(groupScores[group.id])}${groupScores[group.id] === null ? "<small>Sem avaliação</small>" : ""}</dd>
+                                <dt>${t(group.label)}</dt>
+                                <dd>${formatPillarScore(groupScores[group.id])}${groupScores[group.id] === null ? html("<small>Sem avaliação</small>") : ""}</dd>
                             </div>
                         `).join("")}
                     </dl>
@@ -1055,12 +1082,12 @@ function renderRanking() {
 
 function renderWeights() {
     document.querySelector("#weights").innerHTML = criteriaGroups
-        .map((group) => `
+        .map((group) => html`
             <section class="criteria-group" data-criteria-group="${group.id}">
                 <div class="criteria-group-heading">
-                    <h3>${group.label}</h3>
-                    <p>${group.description}</p>
-                    ${group.criteria.length === 1 ? "<p>Critério único: qualquer peso positivo mantém a nota; zero desativa a avaliação deste pilar.</p>" : "<p>Pesos relativos apenas dentro deste pilar. Zero desativa o critério.</p>"}
+                    <h3>${t(group.label)}</h3>
+                    <p>${t(group.description)}</p>
+                    ${group.criteria.length === 1 ? html("<p>Critério único: qualquer peso positivo mantém a nota; zero desativa a avaliação deste pilar.</p>") : html("<p>Pesos relativos apenas dentro deste pilar. Zero desativa o critério.</p>")}
                 </div>
                 <div class="criteria-group-controls">
                     ${group.criteria.map(renderWeightControl).join("")}
@@ -1072,11 +1099,11 @@ function renderWeights() {
 
 function renderWeightControl(key) {
     const criterion = criteriaCatalog[key];
-    return `
+    return html`
         <div class="weight-control">
             <div class="weight-head">
-                <label for="weight-${key}">${criterion.label}</label>
-                <span id="weight-value-${key}">${weights[key] > 0 ? weights[key] : "Desativado"}</span>
+                <label for="weight-${key}">${t(criterion.label)}</label>
+                <span id="weight-value-${key}">${weights[key] > 0 ? weights[key] : t("Desativado")}</span>
             </div>
             <input
                 id="weight-${key}"
@@ -1095,13 +1122,13 @@ function formatPillarScore(value) {
 }
 
 function renderScoreGroupSummary(groupScores) {
-    return `
+    return html`
         <div class="criteria-score-grid">
-            ${criteriaGroups.map((group) => `
+            ${criteriaGroups.map((group) => html`
                 <div class="criteria-score-card" data-score-group="${group.id}">
-                    <span>${group.label}</span>
-                    <strong>${Number.isFinite(groupScores[group.id]) ? `${groupScores[group.id]}<small>/100</small>` : "—"}</strong>
-                    ${groupScores[group.id] === null ? '<small class="pillar-empty">Sem avaliação</small>' : ""}
+                    <span>${t(group.label)}</span>
+                    <strong>${Number.isFinite(groupScores[group.id]) ? html`${groupScores[group.id]}<small>/100</small>` : "—"}</strong>
+                    ${groupScores[group.id] === null ? html('<small class="pillar-empty">Sem avaliação</small>') : ""}
                 </div>
             `).join("")}
         </div>
@@ -1109,12 +1136,12 @@ function renderScoreGroupSummary(groupScores) {
 }
 
 function renderMetricGroups(scores, groupScores) {
-    return criteriaGroups.map((group) => `
+    return criteriaGroups.map((group) => html`
         <section class="criteria-metric-group" data-metric-group="${group.id}">
             <div class="criteria-metric-heading">
                 <div>
-                    <h3>${group.label}</h3>
-                    <p>${group.description}</p>
+                    <h3>${t(group.label)}</h3>
+                    <p>${t(group.description)}</p>
                 </div>
                 <strong>${formatPillarScore(groupScores[group.id])}</strong>
             </div>
@@ -1127,11 +1154,11 @@ function renderMetricGroups(scores, groupScores) {
 
 function renderMetric(key, score) {
     const value = Number.isFinite(Number(score)) ? Number(score) : 0;
-    return `
+    return html`
         <div class="metric">
             <div class="metric-row">
-                <span>${criteriaCatalog[key].label}</span>
-                <span>${value}/100${weights[key] > 0 ? "" : " · fora da média"}</span>
+                <span>${t(criteriaCatalog[key].label)}</span>
+                <span>${value}/100${weights[key] > 0 ? "" : t(" · fora da média")}</span>
             </div>
             <div class="bar"><span style="width:${value}%"></span></div>
         </div>
@@ -1141,10 +1168,10 @@ function renderMetric(key, score) {
 function renderWuiControls() {
     const presetEntries = Object.entries(WuiModel.WATER_USE_PRESETS);
     document.querySelector("#wuiPreset").innerHTML = [
-        ...presetEntries.map(([key, preset]) => `
-            <option value="${key}">${preset.label}</option>
+        ...presetEntries.map(([key, preset]) => html`
+            <option value="${key}">${t(preset.label)}</option>
         `),
-        `<option value="custom">Ajustado</option>`,
+        html`<option value="custom">Ajustado</option>`,
     ].join("");
     document.querySelector("#wuiPreset").value = wuiConfig.preset;
     document.querySelector("#waterIntensity").value = wuiConfig.waterUseIntensityLPerKwh;
@@ -1155,8 +1182,8 @@ function renderWuiControls() {
 function renderWuiPresetDescription() {
     const preset = WuiModel.WATER_USE_PRESETS[wuiConfig.preset];
     document.querySelector("#wuiPresetDescription").textContent = preset
-        ? preset.description
-        : "Valor ajustado manualmente para simulação.";
+        ? t(preset.description)
+        : t("Valor ajustado manualmente para simulação.");
 }
 
 function renderSelect() {
@@ -1167,8 +1194,8 @@ function renderSelect() {
     );
 
     document.querySelector("#regionOptions").innerHTML = regionSearchOptions
-        .map(option => `
-            <option value="${escapeHtml(option.label)}">${escapeHtml(option.description)}</option>
+        .map(option => html`
+            <option value="${escapeHtml(option.label)}">${escapeHtml(t(option.description))}</option>
         `)
         .join("");
 
@@ -1177,7 +1204,7 @@ function renderSelect() {
     const candidateCount = regionSearchOptions.filter(option => option.source === "candidate").length;
     const municipalityCount = regionSearchOptions.length - candidateCount;
     document.querySelector("#regionSearchNote").textContent =
-        `${candidateCount} regiões candidatas e ${municipalityCount} municípios disponíveis neste recorte.`;
+        t`${candidateCount} regiões candidatas e ${municipalityCount} municípios disponíveis neste recorte.`;
 }
 
 function setRegionSearchValue(region) {
@@ -1198,8 +1225,8 @@ function escapeHtml(value) {
 function renderStateSelect() {
     const states = RegionOptions.getStateOptions(allRegionsData);
     document.querySelector("#stateSelect").innerHTML = [
-        `<option value="ALL"${selectedState === "ALL" ? " selected" : ""}>Todos os estados</option>`,
-        ...states.map(state => `<option value="${state}">${state}</option>`),
+        html`<option value="ALL"${selectedState === "ALL" ? " selected" : ""}>Todos os estados</option>`,
+        ...states.map(state => html`<option value="${state}">${state}</option>`),
     ].join("");
     document.querySelector("#stateSelect").value = selectedState;
 }
@@ -1226,7 +1253,7 @@ document.querySelector("#weights").addEventListener("input", (e) => {
     const input = e.target.closest("[data-weight]");
     if (!input) return;
     weights[input.dataset.weight] = Number(input.value);
-    document.querySelector(`#weight-value-${input.dataset.weight}`).textContent = input.value > 0 ? input.value : "Desativado";
+    document.querySelector(`#weight-value-${input.dataset.weight}`).textContent = input.value > 0 ? input.value : t("Desativado");
     renderRegions();
     renderRanking();
     renderDetails();
@@ -1309,7 +1336,7 @@ function selectRegionSearchOption() {
     const option = RegionSearch.findRegionOption(regionSearchOptions, input.value);
 
     if (!option) {
-        note.textContent = "Nenhuma região ou município encontrado para este estado.";
+        note.textContent = t("Nenhuma região ou município encontrado para este estado.");
         return;
     }
 
@@ -1317,7 +1344,7 @@ function selectRegionSearchOption() {
 
     if (option.source === "candidate") {
         selectRegion(option.id);
-        note.textContent = "Região candidata selecionada. Os quatro pilares do ponto e raio estão disponíveis em Resumo e Local.";
+        note.textContent = t("Região candidata selecionada. Os quatro pilares do ponto e raio estão disponíveis em Resumo e Local.");
         return;
     }
 
@@ -1330,22 +1357,22 @@ function selectRegionSearchOption() {
     renderRegions();
     renderRanking();
     activatePanelTabByTarget("controls-site");
-    note.textContent = "Município selecionado para simulação local. Ajuste o raio para ver recursos e impacto.";
+    note.textContent = t("Município selecionado para simulação local. Ajuste o raio para ver recursos e impacto.");
 }
 
 function renderLocalScoreSummary(analysis) {
     const location = selectedRegion || simulatedSite;
     document.querySelector("#selectedName").textContent = location?.name
         ? `${location.name} / ${location.state}`
-        : "Local simulado";
+        : t("Local simulado");
     document.querySelector("#selectedSummary").textContent = analysis
-        ? `Triagem do ponto e raio de ${analysis.radiusKm} km. Quatro pilares independentes, sem nota ou classificação única do local.`
-        : "Defina um ponto e aguarde os dados para avaliar os quatro pilares.";
+        ? t`Triagem do ponto e raio de ${analysis.radiusKm} km. Quatro pilares independentes, sem nota ou classificação única do local.`
+        : t("Defina um ponto e aguarde os dados para avaliar os quatro pilares.");
     document.querySelector("#selectedCoverage").textContent = analysis
         ? (analysis.territorial.complete
-            ? "Consulta territorial concluída; consulte limites e diligências na aba Local."
-            : "Consulta territorial incompleta ou em andamento; verifique cobertura e valores de reserva na aba Local.")
-        : "Sem avaliação local disponível.";
+            ? t("Consulta territorial concluída; consulte limites e diligências na aba Local.")
+            : t("Consulta territorial incompleta ou em andamento; verifique cobertura e valores de reserva na aba Local."))
+        : t("Sem avaliação local disponível.");
     const groupScores = analysis?.groupScores || Object.fromEntries(criteriaGroups.map(group => [group.id, null]));
     document.querySelector("#selectedScoreGroups").innerHTML = renderScoreGroupSummary(groupScores);
     document.querySelector("#selectedFiber").innerHTML = analysis ? renderRegionFiberProximity(analysis.fiber) : "";
@@ -1354,19 +1381,19 @@ function renderLocalScoreSummary(analysis) {
         return;
     }
     document.querySelector("#metrics").innerHTML = renderMetricGroups(analysis.scores, groupScores);
-    document.querySelector("#recommendation").textContent = analysis.territorial.warnings.join(' ');
-    document.querySelector("#conditions").innerHTML = analysis.territorial.rules.map(rule => `<span class="condition">${escapeText(rule.title)}</span>`).join('');
+    document.querySelector("#recommendation").textContent = analysis.territorial.warnings.map(warning => t(warning)).join(' ');
+    document.querySelector("#conditions").innerHTML = analysis.territorial.rules.map(rule => html`<span class="condition">${escapeText(t(rule.title))}</span>`).join('');
     renderWuiResult(analysis.impact);
-    document.querySelector("#renewableMix").innerHTML = `
+    document.querySelector("#renewableMix").innerHTML = html`
         <div class="renewable-summary">
             <span>Raio de ${analysis.radiusKm} km</span>
             <strong>${formatMw(analysis.energy.totalCapacityMw)}</strong>
-            <small>${analysis.energy.totalPlants} usina(s) na base</small>
+            <small>${t`Usinas na base: ${DataTerraI18n.number(analysis.energy.totalPlants)}`}</small>
         </div>
         <div class="renewable-breakdown-list">${renderEnergyBreakdownRows(analysis.energy.types)}</div>
         <p class="field-note">Capacidade nominal no raio; não representa energia contratada ou conexão garantida.</p>
     `;
-    document.querySelector("#methodology").innerHTML = `
+    document.querySelector("#methodology").innerHTML = html`
         <div class="methodology-block">
             <h3>Base do ponto e raio</h3>
             <p>Os quatro pilares em Resumo e Local usam os recursos no raio, a referência WUI por UF, subestações ONS e as consultas territoriais detalhadas. Consulte o estado de cada fonte na aba Local.</p>
@@ -1439,7 +1466,37 @@ document.querySelectorAll("[data-sub]").forEach(checkbox => {
     });
 });
 
+function updateLandingLink() {
+    const language = DataTerraI18n.getLocale() === 'pt-BR' ? 'pt' : 'en';
+    document.querySelector('.brand-lockup').href = `https://dataterra.vercel.app/?lang=${language}`;
+}
+
+DataTerraI18n.onChange(() => {
+    updateLandingLink();
+    if (!map) return;
+    const search = document.querySelector('#regionSearch');
+    const draft = search.value;
+    map.closePopup();
+    renderTerritorialLayers();
+    renderCables();
+    renderWater();
+    renderEnergy();
+    renderElectricInfrastructure();
+    renderLiveLayers();
+    renderWeights();
+    renderWuiControls();
+    renderStateSelect();
+    renderSelect();
+    search.value = draft;
+    renderSiteAnalysis();
+    renderSiteMarker();
+    renderSiteControls();
+    renderRegions();
+    renderRanking();
+});
+
 // Initialization
+updateLandingLink();
 initMap();
 initPanelTabs();
 initInfoHints();

@@ -1,0 +1,25 @@
+Use case: productivity-visual.
+Asset type: DataTerra pitch deck, solution positioning slide, landscape PNG, exact 16:9, target 1920 x 1080.
+Input image 1 is the EDIT TARGET: the supplied slide with a left screenshot placeholder and right positioning text.
+Input image 2 is BRAND STYLE REFERENCE ONLY: the finished DataTerra cover; match the forest green palette, sage/off-white typography, current logo and visual refinement. Do not use its map or its wording.
+Input image 3 is the ACTUAL PLATFORM SCREENSHOT to insert. It is a real capture of the DataTerra interface. Do not fabricate interface panels, data, buttons or labels. Preserve this screenshot as closely as possible; the original pixels will be inserted in final export.
+Composition: preserve the full-height LEFT image band exactly 37.7083% of the slide width (724 px in a 1920 px canvas), starting at the left canvas edge. The right 62.2917% is the text area. The vertical boundary MUST BE A HARD STRAIGHT LINE, absolutely NO gradient, fading, feathering, blur, translucent overlay or rounded corners between the screenshot and the right section. Do not omit, shrink or replace this left strip. The screenshot fills the complete left strip from top to bottom without decorative frames or a mockup device. Its aspect ratio already matches the allocated area.
+Right section background: uniform very dark forest green #101b17. Restrained sage #b3cf91 and off-white #edf2e8, muted #b5c3b0 for supporting copy. Montserrat semibold headline, Poppins body and footer. No purple, no white background, no glow, no gradients.
+Current DataTerra small brand lockup centered over the text at the top of the RIGHT section: three stacked rounded diamond outline layers with lowercase "dataterra.", bold data, regular terra, tiny terracotta terminal period. Do not replace with any old logo.
+Typography: compose the heading and paragraph in a centered, well-balanced block wholly within the right section, with generous margins on both sides. Keep all text at x >= 800 at target scale. Plenty of breathing room. Main heading approximately centered vertically in the upper-middle area; supporting paragraph comfortably below. Make the last headline line sage, other headline lines off-white. Keep all text perfectly crisp, spelled exactly, no clipping.
+
+Main headline, exact words with these line breaks:
+"DataTerra connects"
+"expansion strategy with"
+"location planning."
+
+Supporting paragraph, exact text:
+"It directs feasibility studies toward the most promising alternatives before significant capital is committed, with data-driven support."
+Bold and sage emphasis only on "data-driven support."
+
+Footer, small but legible, centered in right section near bottom, exact text:
+"Source: DataTerra Four-Pillar Methodology Manual (2026)."
+"Data sources include ANA/SNIRH, ANEEL/SIGA, ONS, TeleGeography, and MMA/CNUC."
+Use "data sources include" instead of labeling all sources governmental or official.
+
+Constraints: one finished slide only; exact 16:9 and full original left strip; sharp straight screenshot border; all copy English except text within the real Portuguese application screenshot, which must remain faithful. No watermarks, numbered badges, extra slogans, altered statistics or invented product features. No placeholder text or angle brackets.

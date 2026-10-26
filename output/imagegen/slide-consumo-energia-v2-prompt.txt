@@ -1,0 +1,26 @@
+Use case: style-transfer / productivity-visual.
+Produce one professionally redesigned pitch-deck slide as a PNG, exact landscape 16:9 aspect ratio, preferably 1920x1080 pixels. Input image 1 is the NEW slide to restyle and is the sole layout reference. Input image 2 is ONLY the DataTerra brand/typography reference; do not reproduce its flowchart or text. Input image 3 is an authentic photograph of the Vinhedo datacenter for compositing.
+
+Strict layout:
+The attached NEW slide has a large photo panel covering the left 37.7% of the canvas (724 pixels of a 1920-pixel slide). Preserve this large panel and its full height. The remainder, right 62.3%, is the text/icon area. DO NOT make the photo a narrow stripe, and do not use a 20%-wide photo panel. Use a faithful photographic crop from input 3, preserving recognizable real architecture; do not synthesize another facility. Harmonize lightly with dark green grading. Small caption at the bottom of the photo: "Photo: Ascenty / DCD (illustrative)".
+
+Brand style:
+Dark forest green #101b17 on the right; off-white #edf2e8 primary text, sage green #b3cf91 highlight, muted #b5c3b0 secondary text, #34463a subtle separators. Montserrat for the statistic/headline, Poppins for other text. Match the font shapes and elegant visual language in input 2. Include the current tiny DataTerra logo near the top-left of the dark panel: sage three stacked outlined rounded diamond layers + lowercase "dataterra." with bold data, regular terra, terracotta #e4a080 dot. No other new headline or tagline. No gradients, neon, blue UI accents, heavy shadows, or unrelated ornamentation.
+
+Main content:
+Center the whole composition in the right panel with ample internal margins. The dominant element is "400,000+" on the first line in large bold sage Montserrat, and "HOUSEHOLDS" directly underneath in off-white, smaller Montserrat medium. Keep a large elegant datacenter outline icon to its left and a tidy small grid of house outline icons to its right, as the bracket placeholders in image 1 request. The icon on the left should be modest enough that the number remains dominant. The house icons are symbolic, not an exact quantitative chart. A consistent soft rounded line style in sage, clean vector-like clarity. Balance icon sizes around the centered number. No clipping or cramped layout.
+Place the supporting sentence below the icon/statistic group, optically centered in the available right panel, at a readable size and balanced into 2-3 lines. Place the source near the bottom of the right panel in smaller muted text and generous spacing, fully inside margins.
+
+Preserve these ordinary English texts VERBATIM with no numerical changes or translation:
+"400,000+"
+"HOUSEHOLDS"
+"Equal to the annual electricity consumption of a single AI data center campus."
+"Source: Ascenty ESG Report 2024; Data Center Dynamics."
+
+Remove all angle-bracket placeholders completely and replace them with visuals. No placeholder strings should remain. No additional claims, extra labels, watermarks or figures. Keep the original slide's exact 16:9 ratio as the highest-priority invariant, with the wider 37.7% photograph area. Full-bleed flat slide export, not a photographed screen or presentation mockup.
+
+Method: built-in image_gen editing with local references.
+Final PNG export normalized mechanically to 1920 x 1080 pixels (exact 16:9) with sips. Original generated image retained unchanged.
+Input layout: DataTerra Pitch Deck.jpg, 1920 x 1080 pixels.
+Photo source: https://media.datacenterdynamics.com/media/images/Mega_Campus_Vinhedo_11.20.original.jpg
+Editorial note: ordinary copy and source attribution preserved from the supplied slide; no independent validation of the numerical claim is asserted.

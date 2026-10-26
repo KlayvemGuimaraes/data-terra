@@ -1,0 +1,55 @@
+Use case: style-transfer.
+Task: CORRECT THE LAYOUT of a DataTerra pitch-deck slide. Deliver ONE PNG, exactly 1920 x 1080 pixels, exact 16:9 landscape.
+
+INPUTS
+Image 1 is the authoritative composition and text source. Its LEFT SIDEBAR IS MANDATORY and must be preserved at its original width.
+Image 2 is the previous styled version. Use it ONLY for DataTerra brand colors, typography, logo and the three illustrative image subjects. Its full-width text/cards layout was WRONG: do not preserve or repeat that layout.
+
+CRITICAL GEOMETRY, DO NOT VIOLATE
+The canvas has TWO distinct areas:
+A. LEFT FULL-HEIGHT IMAGE SIDEBAR: from x=0 to x=724, y=0 to y=1080. This is 37.7% of the slide width. Preserve this substantial width; do not shrink it to a narrow margin, remove it, or place the text/cards over it.
+B. RIGHT CONTENT REGION: x=724 to x=1920, a width of 1196px. ALL text, the small logo, the three cards and labels must be centered and aligned ONLY within this right region. The content must not be centered across the whole canvas.
+There are FOUR visual areas total: ONE large vertical image on the left PLUS THREE separate portrait images across the right. Do not merge any of them.
+
+LEFT SIDEBAR
+Replace the bracketed placeholder "<picture of datacenters in barueri>" with a beautiful photographic-style editorial illustration of a contemporary Brazilian data center campus inspired by the architecture of Barueri / Greater São Paulo: white and dark gray industrial buildings, cooling infrastructure, landscaped edges and trees, natural daylight. Use a sophisticated vertical architectural/aerial composition suited to a full-height 724x1080 crop.
+This is an illustrative scene, not a claimed documentary photo of a particular named operator. No corporate logos, names, invented site addresses, labels or watermarks.
+Fill the whole sidebar, edge to edge, all the way from top to bottom. Apply a subtle deep-forest-green color treatment that complements the right area while keeping the architecture legible. A narrow soft dark fade at the right edge can integrate the photo into the design; it must not erase or disguise the sidebar's width. No rounded corners on this outer sidebar.
+
+RIGHT CONTENT REGION
+Deep forest #101b17 background, subtle #182720 tonal variation. Warm off-white #edf2e8, secondary muted sage #b5c3b0, accent sage #b3cf91; thin borders #34463a. Avoid purple and white backgrounds. Typography matches the existing DataTerra website: Montserrat bold for emphasis, Poppins for readable supporting text.
+Small current DataTerra logo at the upper left of the RIGHT region, approximately x=775 y=48: three stacked thin outlined rounded diamonds in sage, lowercase "dataterra." wordmark, bold data + regular terra with a tiny terracotta terminal dot. Keep it comfortably away from the title.
+
+Title, centered around x=1310 in the upper right region, over two balanced lines:
+"Are we making the right decisions about"
+"where it should grow?"
+First line off-white, second line bold pale sage. Fit the first line within right-region side margins; do not let it enter the sidebar or clip on the right.
+
+Smaller uppercase subtitle centered entirely within the right region below the title:
+"THE MILLION-DOLLAR COST OF BLIND SITE SELECTION"
+Use refined typography and line breaks if needed; preserve every word.
+
+THREE RIGHT-SIDE CARDS
+Follow Image 1's portrait card composition. Each approximately 324px wide by 405px high, rounded corners about 26px, equal sizes and aligned top/bottom edges. Suggested coordinates: first x=769, second x=1128, third x=1488; y=441 through y=846. Maintain clean gutters and right safe margin. These cards must stay completely to the right of x=724.
+Use the same image subjects and photographic editorial illustration quality as Image 2, with careful portrait crops:
+1. Chrome faucet pouring visibly murky brownish water into a clear glass above a sink. Close-up, simple and legible; no Meta logo and no additional factual attribution.
+2. Modern Brazilian data center campus, naturally lit, industrial facades and cooling infrastructure, no readable corporate logo or site name. Use a different viewpoint from the big sidebar photo.
+3. A peaceful community demonstration evoking northeastern Brazil, people seen mostly from behind, ordinary contemporary clothing, holding placards with water-drop and leaf symbols near an industrial construction site. No recognizable individuals, no fabricated documentary or news text, no violence.
+The four scenes are illustrations, not authenticated photographs of particular real events.
+
+Under the three cards, centered exact labels at matching baselines, warm off-white, approximately 30px, consistent spacing:
+"Environmental" / "injunctions"
+"Loss of tax" / "incentives"
+"Costly Legal" / "Operations"
+Maintain the corrected spelling "Operations", not the original typo "Operaions".
+
+Small muted, clearly readable footer centered only in the right region near y=1010:
+"Illustrative images"
+
+PRESERVE AND VERIFY
+All ordinary English copy as quoted. No angle-bracket instructions remain. No new claims, figures or slogans. Keep the design harmonious, legible, unclipped and well-spaced. Most importantly: retain the wide FULL-HEIGHT LEFT IMAGE SIDEBAR covering 37.7% of the full 16:9 canvas, with ALL typography and the THREE portrait cards solely in the remaining 62.3% right region.
+Produce one finished slide only.
+
+Method: built-in image_gen editing; final export checked and normalized to 1920 x 1080 pixels as needed.
+Correction: retain the full-height left image sidebar at approximately 37.7% of total width. Keep all text and three cards in the right region.
+All scenes are explicitly illustrative and are identified in the slide footer. They are not verified photographs of named facilities or real events.

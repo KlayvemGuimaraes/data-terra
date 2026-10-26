@@ -11,10 +11,12 @@
         if (!button) return;
         const dark = theme === 'dark';
         button.setAttribute('aria-pressed', String(dark));
-        button.setAttribute('aria-label', dark ? 'Ativar modo claro' : 'Ativar modo escuro');
-        button.title = dark ? 'Ativar modo claro' : 'Ativar modo escuro';
+        const label = DataTerraI18n.t(dark ? 'Ativar modo claro' : 'Ativar modo escuro');
+        button.setAttribute('aria-label', label);
+        button.title = label;
     };
     apply(preference || (system.matches ? 'dark' : 'light'));
+    DataTerraI18n.onChange(() => apply(document.documentElement.dataset.theme));
     system.addEventListener('change', event => {
         if (!preference) apply(event.matches ? 'dark' : 'light');
     });

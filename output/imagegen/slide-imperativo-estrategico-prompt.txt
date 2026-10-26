@@ -1,0 +1,27 @@
+Use case: style-transfer.
+Asset: one polished DataTerra pitch-deck slide, PNG, exactly 1920 x 1080, 16:9 landscape, full bleed.
+Image 1 is the slide to restyle and its English text source. Image 2 is ONLY a DataTerra branding reference: use its colors, typography, logo and quality; do not copy its map, numbers, layout or content.
+
+Keep the new slide calm, spacious and typographic, preserving the message of image 1 while improving alignment and hierarchy. Deep forest green #101b17 background, very subtle #182720 central lift fading gently to darker edges, as requested by the placeholder. No visible texture, patterns, photos, map, panels, cards or dramatic glow. The placeholder is a background instruction and must not appear as text.
+
+Use Montserrat bold for main headings and Poppins for body text, matching reference 2. Colors: warm off-white #edf2e8, secondary muted #b5c3b0, sage accent #b3cf91. Place the small current DataTerra logo unobtrusively at top left with the same three stacked outlined rounded diamonds, lowercase dataterra. wordmark and tiny terracotta dot as reference 2.
+
+Center the whole composition horizontally with a comfortable safe margin of at least 130px. Upper centered section title, smaller than the key words:
+"THE NEW STRATEGIC IMPERATIVE"
+
+Mid-upper hero row: a large bold "HOW MUCH" on the left in soft off-white, a graceful thin sage rightward arrow centered between the phrases, and an equally sized bold "WHERE" on the right in pale sage. Use clean horizontal alignment and ample room. The arrow should be elegant and restrained, not a thick block arrow.
+Under HOW MUCH, neatly center this exact sentence fragment over two balanced lines:
+"The key question is no longer how much we build,"
+Under WHERE, neatly center this exact sentence fragment over two balanced lines:
+"but where we install each megawatt."
+
+Leave generous vertical breathing room, then center the main question in the lower half with clean line breaks and a line length suitable for a presentation. Its exact complete text is:
+"How can we identify Brazil’s best-suited regions for AI data centers in early territorial planning, balancing cost, regulation, and sustainability?"
+Render the question in warm off-white, with the final key words "cost", "regulation", and "sustainability" bold in sage. Suggested balanced lines:
+How can we identify Brazil’s best-suited regions for AI
+data centers in early territorial planning, balancing
+cost, regulation, and sustainability?
+Make this question prominent and very readable, but comfortably within the canvas. All words, hyphens, punctuation and apostrophes must be correct. Keep the final punctuation.
+No extra copy or source line, no brackets, no original purple or white background. All copy must remain English. Deliver a single harmonious slide, not multiple slides. Exact landscape 16:9 proportion is essential.
+
+Method: built-in image_gen edit, followed by size verification and export normalization to 1920 x 1080 PNG if needed.
