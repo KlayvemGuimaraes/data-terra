@@ -282,6 +282,23 @@ Os materiais de apresentação e vídeo em `output/` ficam disponíveis no GitHu
 locais dos novos materiais são ignorados pelo Git. Depois de publicar, confira o
 status `Ready` na Vercel e valide idioma, link da logo, manual e API no domínio público.
 
+## Página de links do projeto
+
+A página estática `links/index.html`, servida em `/links`, reúne a apresentação
+do DataTerra e os acessos ao simulador, site institucional, manual em PDF e
+[Instagram @dataterra929](https://www.instagram.com/dataterra929/).
+
+O conteúdo começa em inglês e oferece português pelo seletor EN/PT. A escolha
+fica no parâmetro `lang` da URL e acompanha os links para o site e o simulador.
+O simulador aceita `?lang=en`, `?lang=pt` e `?lang=pt-BR`; uma escolha explícita
+na URL tem prioridade sobre a preferência salva. Os links principais continuam
+funcionando sem JavaScript. O manual está em inglês nos dois idiomas da página.
+
+A página reutiliza as fontes e a marca do projeto, com uma ilustração conceitual
+de apoio. Não apresenta essa imagem como mapa de dados ou instalação existente.
+Os destinos estão em `links/index.html`; os textos em inglês e português estão
+em `links/script.js`. O CSS é independente da interface do simulador.
+
 ## Materiais de apresentação
 
 - [Vídeos: demonstração de uso e animação da marca](output/video/README.txt), com MP4s em Full HD e scripts de produção.
